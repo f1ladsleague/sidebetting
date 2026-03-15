@@ -6,31 +6,42 @@
     <title>F1 Lads League | Side Bets</title>
     <link href="https://fonts.googleapis.com/css2?family=Titillium+Web:wght@400;600;700&display=swap" rel="stylesheet">
     <style>
-        :root { --f1-red: #e10600; --f1-dark: #15151e; --f1-card: #1f1f27; --f1-hover: #2a2a35; }
+        :root { --theme-color: #e10600; --f1-dark: #15151e; --f1-card: #1f1f27; --f1-hover: #2a2a35; }
+        
         body { font-family: 'Titillium Web', sans-serif; background-color: var(--f1-dark); color: #fff; margin: 0; padding: 20px; display: flex; justify-content: center; }
         .container { background: var(--f1-card); width: 100%; max-width: 600px; padding: 30px; border-radius: 12px; box-shadow: 0 10px 30px rgba(0,0,0,0.5); }
-        h1 { text-align: center; border-bottom: 2px solid var(--f1-red); padding-bottom: 10px; text-transform: uppercase; font-weight: 700; margin-bottom: 5px; }
+        
+        h1 { text-align: center; border-bottom: 2px solid var(--theme-color); padding-bottom: 10px; text-transform: uppercase; font-weight: 700; margin-bottom: 5px; transition: border-color 0.3s ease; }
         .round-info { text-align: center; color: #aaa; font-size: 18px; margin-top: 0; margin-bottom: 20px; font-weight: 600; }
         h2 { color: #ccc; font-weight: 600; font-size: 20px; text-align: center; }
         
         select, input[type="password"] { width: 100%; padding: 12px; margin: 10px 0 20px 0; background: var(--f1-hover); border: 1px solid #444; color: white; border-radius: 6px; font-size: 16px; box-sizing: border-box; }
-        select:focus, input:focus { outline: none; border-color: var(--f1-red); }
+        select:focus, input:focus { outline: none; border-color: var(--theme-color); }
         
-        button.btn-primary { width: 100%; background: var(--f1-red); color: white; border: none; padding: 15px; font-size: 18px; font-weight: 700; border-radius: 6px; cursor: pointer; text-transform: uppercase; transition: 0.2s; }
-        button.btn-primary:hover { background: #ff1a1a; transform: translateY(-2px); }
-        button:disabled { background: #555 !important; cursor: not-allowed; transform: none; color: #aaa; }
+        button.btn-primary { width: 100%; background: var(--theme-color); color: white; border: none; padding: 15px; font-size: 18px; font-weight: 700; border-radius: 6px; cursor: pointer; text-transform: uppercase; transition: 0.3s ease; }
+        button.btn-primary:hover { filter: brightness(1.2); transform: translateY(-2px); }
+        button:disabled { background: #555 !important; cursor: not-allowed; transform: none; color: #aaa; filter: none; }
         
         .hidden { display: none !important; }
         .race-section { background: #1a1a21; padding: 20px; border-radius: 8px; margin-bottom: 25px; border: 1px solid #333; }
         
         .driver-option { display: flex; justify-content: space-between; align-items: center; padding: 15px 20px; background: var(--f1-hover); border: 2px solid transparent; border-radius: 8px; margin-bottom: 10px; cursor: pointer; transition: 0.2s; font-size: 18px; font-weight: 600; }
         .driver-option:hover { border-color: #555; }
-        .driver-option:has(input:checked) { border-color: var(--f1-red); background: rgba(225, 6, 0, 0.1); }
+        .driver-option:has(input:checked) { border-color: var(--theme-color); background: color-mix(in srgb, var(--theme-color) 15%, transparent); }
         .driver-option input { display: none; } 
-        .price-tag { background: #000; padding: 4px 10px; border-radius: 4px; color: #00ff00; font-weight: 700; }
         
+        .price-tag { background: #000; padding: 4px 10px; border-radius: 4px; color: #00ff00; font-weight: 700; margin-left: auto; }
+        .bet-badge { background: #444; color: #fff; padding: 3px 8px; border-radius: 12px; font-size: 13px; font-weight: 600; margin-left: 10px; display: inline-flex; align-items: center; }
+        
+        .pot-display { background: rgba(255,255,255,0.05); border: 1px solid var(--theme-color); border-radius: 6px; padding: 10px; text-align: center; font-size: 20px; font-weight: bold; margin-bottom: 15px; color: #fff; transition: border-color 0.3s ease; }
+        .pot-display span { color: #00ff00; }
+
         .clear-btn { background: transparent; color: #aaa; border: 1px solid #aaa; padding: 8px 15px; border-radius: 4px; cursor: pointer; display: block; margin: 15px auto 0 auto; transition: 0.2s; }
         .clear-btn:hover { background: #aaa; color: #000; }
+
+        .dashboard-metrics { background: #1a1a21; border: 1px solid #333; padding: 15px; border-radius: 8px; margin-bottom: 25px; text-align: center; }
+        .metric-title { color: #aaa; font-size: 14px; text-transform: uppercase; letter-spacing: 1px; margin-bottom: 5px; }
+        .metric-value { font-size: 24px; font-weight: bold; margin: 0; }
     </style>
 </head>
 <body>
@@ -47,22 +58,38 @@
 <div class="container hidden" id="betting-section">
     <h1>Manage Your Bets</h1>
     <p class="round-info" id="betting-round-text"></p>
-    <h2 id="welcome-message" style="color: var(--f1-red);"></h2>
+    
+    <h2 id="welcome-message" style="color: var(--theme-color); margin-bottom: 20px;"></h2>
+
+    <div class="dashboard-metrics">
+        <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 10px;">
+            <div>
+                <div class="metric-title">Current Budget Cap</div>
+                <div class="metric-value" id="budget-cap-display">$0</div>
+            </div>
+            <div>
+                <div class="metric-title">Season Side Bets</div>
+                <div class="metric-value" id="net-win-loss-display">$0</div>
+            </div>
+        </div>
+    </div>
 
     <form id="bet-form">
-        <p style="text-align: center; color: #aaa; margin-bottom: 30px;">Your active bets are highlighted below. You may change them until the day before the race.</p>
+        <p style="text-align: center; color: #aaa; margin-bottom: 30px;">Select ONE driver for the Sprint and/or ONE for the Feature. You may change them until the day before the race.</p>
         
         <div class="race-section">
             <h2 style="color: white; margin-top: 0;">Sprint Race</h2>
+            <div class="pot-display">Live Pot: <span id="sprint-pot-total">$0</span></div>
             <div id="sprint-drivers"></div>
         </div>
 
         <div class="race-section">
             <h2 style="color: white; margin-top: 0;">Feature Race</h2>
+            <div class="pot-display">Live Pot: <span id="feature-pot-total">$0</span></div>
             <div id="feature-drivers"></div>
         </div>
 
-        <button type="submit" class="btn-primary" id="submit-btn">Update & Lock in Bets</button>
+        <button type="submit" class="btn-primary" id="submit-btn">Submit Bets</button>
         <button type="button" class="clear-btn" style="margin-top:20px; width:100%" onclick="returnHome()">Cancel / Return Home</button>
     </form>
 </div>
@@ -78,6 +105,13 @@
     let currentConstructor = "";
     let currentRound = "";
     let nextRaceDate = "";
+    let sprintRollover = 0;
+    let featureRollover = 0;
+    let hasExistingBets = false;
+
+    // Stores how many bets each driver has
+    let sprintBetCounts = {};
+    let featureBetCounts = {};
 
     async function fetchCSV(url) {
         const response = await fetch(url);
@@ -85,51 +119,77 @@
         return text.split('\n').map(row => row.split(',').map(item => item.trim())).slice(1);
     }
 
-    // --- BULLETPROOF DATE PARSER ---
     function parseDateString(dateStr) {
-        let cleanDate = dateStr.trim().replace(/-/g, '/'); // Convert dashes to slashes
+        let cleanDate = dateStr.trim().replace(/-/g, '/');
         if (cleanDate.includes('/')) {
             const parts = cleanDate.split('/');
             const day = parseInt(parts[0], 10);
-            const month = parseInt(parts[1], 10) - 1; // JavaScript months are 0-indexed
+            const month = parseInt(parts[1], 10) - 1; 
             let year = parseInt(parts[2], 10);
-            if (year < 100) year += 2000; // Handle 2-digit years like '26
+            if (year < 100) year += 2000; 
             return new Date(year, month, day);
         } else {
-            return new Date(dateStr); // Fallback for standard formats
+            return new Date(dateStr);
         }
     }
 
     window.onload = async () => {
         try {
-            // Load Settings (Round & Date)
+            // 1. Load Settings & Rollovers
             const settingsData = await fetchCSV(SETTINGS_CSV_URL);
             if(settingsData.length > 0) {
                 currentRound = settingsData[0][0];
                 nextRaceDate = settingsData[0][1];
+                sprintRollover = parseFloat(settingsData[0][2] || 0);
+                featureRollover = parseFloat(settingsData[0][3] || 0);
 
                 let displayDate = nextRaceDate;
                 try {
                     const raceDateObj = parseDateString(nextRaceDate);
                     const monthNames = ["January", "February", "March", "April", "May", "June", "July", "August", "September", "October", "November", "December"];
                     displayDate = `${raceDateObj.getDate()} ${monthNames[raceDateObj.getMonth()]} ${raceDateObj.getFullYear()}`;
-                } catch(e) {
-                    console.error("Could not parse date format");
-                }
+                } catch(e) {}
 
                 const headerText = `Round ${currentRound} | Next Race: ${displayDate}`;
                 document.getElementById('login-round-text').innerText = headerText;
                 document.getElementById('betting-round-text').innerText = headerText;
             }
 
-            // Load Constructors
+            // 2. Load Constructors
             constructorsData = await fetchCSV(CONSTRUCTORS_CSV_URL);
             const constructorSelect = document.getElementById('constructor-select');
             constructorsData.forEach(c => {
                 if(c[0]) constructorSelect.innerHTML += `<option value="${c[0]}">${c[0]}</option>`;
             });
 
-            // Load and Sort Drivers
+            // 3. Load Bets to Calculate Live Pots & Driver Counters
+            let liveSprintPot = sprintRollover;
+            let liveFeaturePot = featureRollover;
+            
+            try {
+                const allBetsData = await fetchCSV(BETS_CSV_URL);
+                const currentBets = allBetsData.filter(b => b[1] === currentRound);
+                
+                currentBets.forEach(bet => {
+                    const raceType = bet[3];
+                    const driver = bet[4];
+                    const amount = parseFloat(bet[5] || 0);
+                    
+                    if(raceType === 'Sprint') {
+                        liveSprintPot += amount;
+                        sprintBetCounts[driver] = (sprintBetCounts[driver] || 0) + 1;
+                    } else if(raceType === 'Feature') {
+                        liveFeaturePot += amount;
+                        featureBetCounts[driver] = (featureBetCounts[driver] || 0) + 1;
+                    }
+                });
+            } catch(e) { console.error("Could not load bets for live pot calculation."); }
+
+            // Update Live Pot Displays
+            document.getElementById('sprint-pot-total').innerText = `$${liveSprintPot}`;
+            document.getElementById('feature-pot-total').innerText = `$${liveFeaturePot}`;
+
+            // 4. Load Drivers & Build UI with Badges
             let driversData = await fetchCSV(DRIVERS_CSV_URL);
             driversData = driversData.filter(d => d[0]); 
             
@@ -138,25 +198,48 @@
 
             const sprintDiv = document.getElementById('sprint-drivers');
             sprintSorted.forEach(d => {
+                const driverName = d[0];
+                const count = sprintBetCounts[driverName] || 0;
+                const badge = count > 0 ? `<span class="bet-badge">👤 ${count}</span>` : "";
+                
                 sprintDiv.innerHTML += `
                     <label class="driver-option">
-                        <span>${d[0]}</span><span class="price-tag">$${d[1]}</span>
-                        <input type="radio" name="sprint-driver" value="${d[0]}" data-amount="${d[1]}">
+                        <span>${driverName} ${badge}</span>
+                        <span class="price-tag">$${d[1]}</span>
+                        <input type="radio" name="sprint-driver" value="${driverName}" data-amount="${d[1]}">
                     </label>`;
             });
 
             const featureDiv = document.getElementById('feature-drivers');
             featureSorted.forEach(d => {
+                const driverName = d[0];
+                const count = featureBetCounts[driverName] || 0;
+                const badge = count > 0 ? `<span class="bet-badge">👤 ${count}</span>` : "";
+
                 featureDiv.innerHTML += `
                     <label class="driver-option">
-                        <span>${d[0]}</span><span class="price-tag">$${d[2]}</span>
-                        <input type="radio" name="feature-driver" value="${d[0]}" data-amount="${d[2]}">
+                        <span>${driverName} ${badge}</span>
+                        <span class="price-tag">$${d[2]}</span>
+                        <input type="radio" name="feature-driver" value="${driverName}" data-amount="${d[2]}">
                     </label>`;
             });
         } catch (error) {
             document.getElementById('login-round-text').innerText = "System Offline - Could not fetch data";
         }
     };
+
+    function applyTeamTheme(teamName) {
+        let themeColor = "#e10600"; 
+        const nameLower = teamName.toLowerCase();
+        
+        if (nameLower.includes("mercedes")) themeColor = "#00D7B6";
+        else if (nameLower.includes("red bull") || nameLower.includes("redbull")) themeColor = "#4781D7";
+        else if (nameLower.includes("ferrari")) themeColor = "#ED1131";
+        else if (nameLower.includes("mclaren")) themeColor = "#F47600";
+        else if (nameLower.includes("aston martin") || nameLower.includes("astonmartin")) themeColor = "#229971";
+
+        document.documentElement.style.setProperty('--theme-color', themeColor);
+    }
 
     async function login() {
         const selected = document.getElementById('constructor-select').value;
@@ -165,10 +248,27 @@
         
         if (team && team[1] === pass) {
             currentConstructor = selected;
+            applyTeamTheme(selected);
+
             document.getElementById('login-section').classList.add('hidden');
             document.getElementById('betting-section').classList.remove('hidden');
-            document.getElementById('welcome-message').innerText = `${selected} | Cap: $${team[2]}`;
+            document.getElementById('welcome-message').innerText = `${selected}`;
             
+            document.getElementById('budget-cap-display').innerText = `$${team[2] || "0"}`;
+            
+            const netValue = parseFloat((team[3] || "0").replace(/[^0-9.-]+/g,""));
+            const netDisplay = document.getElementById('net-win-loss-display');
+            if (netValue > 0) {
+                netDisplay.innerText = `+$${netValue}`;
+                netDisplay.style.color = "#00ff00";
+            } else if (netValue < 0) {
+                netDisplay.innerText = `-$${Math.abs(netValue)}`;
+                netDisplay.style.color = "#ff3333";
+            } else {
+                netDisplay.innerText = `$0`;
+                netDisplay.style.color = "#fff";
+            }
+
             await populateExistingBets();
         } else {
             alert("Incorrect constructor or password!");
@@ -178,9 +278,12 @@
     async function populateExistingBets() {
         try {
             const betsData = await fetchCSV(BETS_CSV_URL);
-            
             const myBets = betsData.filter(b => b[1] === currentRound && b[2] === currentConstructor);
+            const submitBtn = document.getElementById('submit-btn');
             
+            hasExistingBets = myBets.length > 0;
+            submitBtn.innerText = hasExistingBets ? "Update Bets" : "Submit Bets";
+
             myBets.forEach(bet => {
                 const raceType = bet[3];
                 const driver = bet[4];   
@@ -194,26 +297,19 @@
                 }
             });
 
-            // --- DATE LOCKOUT LOGIC ---
             const raceDate = parseDateString(nextRaceDate);
             const today = new Date();
-            
-            // The deadline is 11:59 PM the day BEFORE the race
             const deadline = new Date(raceDate);
             deadline.setDate(deadline.getDate() - 1);
             deadline.setHours(23, 59, 59);
 
             if (today > deadline) {
-                const submitBtn = document.getElementById('submit-btn');
                 submitBtn.disabled = true;
                 submitBtn.innerText = "Bets Locked (Deadline Passed)";
-                
                 document.querySelectorAll('input[type="radio"]').forEach(r => r.disabled = true);
             }
 
-        } catch(e) {
-            console.error("Could not verify past bets.");
-        }
+        } catch(e) {}
     }
 
     function returnHome() {
@@ -221,6 +317,7 @@
         document.getElementById('login-section').classList.remove('hidden');
         document.getElementById('password-input').value = ""; 
         document.getElementById('constructor-select').value = ""; 
+        document.documentElement.style.setProperty('--theme-color', '#e10600'); 
         document.querySelectorAll('input[type="radio"]').forEach(r => r.checked = false);
     }
 
@@ -250,7 +347,7 @@
 
         if (!sprintSelected && !featureSelected) {
             alert("You must select at least one driver to bet on!");
-            submitBtn.innerText = "Update & Lock in Bets";
+            submitBtn.innerText = hasExistingBets ? "Update Bets" : "Submit Bets";
             submitBtn.disabled = false;
             return;
         }
@@ -263,15 +360,14 @@
             await Promise.all(promises);
             
             setTimeout(() => {
-                alert(`Bets successfully updated for Round ${currentRound}! Good luck.`);
-                returnHome(); 
-                submitBtn.innerText = "Update & Lock in Bets";
-                submitBtn.disabled = false;
+                alert(`Bets successfully logged for Round ${currentRound}! Good luck.`);
+                // Force a hard refresh to instantly update the live pots/badges for the user
+                window.location.reload(); 
             }, 800);
             
         } catch (error) {
             alert("Connection error. Try again.");
-            submitBtn.innerText = "Update & Lock in Bets";
+            submitBtn.innerText = hasExistingBets ? "Update Bets" : "Submit Bets";
             submitBtn.disabled = false;
         }
     });
