@@ -42,7 +42,6 @@
         .dashboard-metrics { background: #1a1a21; border: 1px solid #333; padding: 15px; border-radius: 8px; margin-bottom: 25px; text-align: center; }
         .metric-title { color: #aaa; font-size: 13px; text-transform: uppercase; letter-spacing: 1px; margin-bottom: 5px; }
         .metric-value { font-size: 22px; font-weight: bold; margin: 0; color: #fff; }
-        .metric-value.positive { color: #00ff00; }
     </style>
 </head>
 <body>
@@ -70,11 +69,11 @@
             </div>
             <div>
                 <div class="metric-title">Race Fees</div>
-                <div class="metric-value positive" id="race-fees-display">$0</div>
+                <div class="metric-value" id="race-fees-display" style="color: #00ff00;">$0</div>
             </div>
             <div>
-                <div class="metric-title">Side Bet Wins</div>
-                <div class="metric-value positive" id="net-win-loss-display">$0</div>
+                <div class="metric-title">Net Side Bets</div>
+                <div class="metric-value" id="net-win-loss-display">$0</div>
             </div>
         </div>
     </div>
@@ -102,6 +101,9 @@
 </div>
 
 <script>
+    // ==========================================
+    // GOOGLE LINKS
+    // ==========================================
     const GOOGLE_SCRIPT_WEB_APP_URL = "https://script.google.com/macros/s/AKfycbzl82qkQw4mf_dFbV6ExR0Va3JRLGUQ7bOPN2oy0yPUateuocYtELzgF9HpQ9GnGGB4uw/exec";
     const SETTINGS_CSV_URL = "https://docs.google.com/spreadsheets/d/e/2PACX-1vTZKLukYpw5VzMfRbfXh80lj1B0gbUiVx_CoinOMVb-b2iFEMiWg_nW3KcMp88qKL3UfctvzYgEN_Lg/pub?gid=2057582908&single=true&output=csv";
     const CONSTRUCTORS_CSV_URL = "https://docs.google.com/spreadsheets/d/e/2PACX-1vTZKLukYpw5VzMfRbfXh80lj1B0gbUiVx_CoinOMVb-b2iFEMiWg_nW3KcMp88qKL3UfctvzYgEN_Lg/pub?gid=1589744882&single=true&output=csv";
@@ -119,6 +121,7 @@
     let sprintBetCounts = {};
     let featureBetCounts = {};
 
+    // CACHE-BUSTING FETCH: Ensures live updates are pulled immediately
     async function fetchCSV(url) {
         const cacheBusterUrl = url + "&nocache=" + new Date().getTime();
         const response = await fetch(cacheBusterUrl, { cache: "no-store" });
@@ -143,6 +146,7 @@
 
     window.onload = async () => {
         try {
+            // Load Settings & Rollovers
             const settingsData = await fetchCSV(SETTINGS_CSV_URL);
             if(settingsData.length > 0) {
                 currentRound = String(settingsData[0][0]).trim();
@@ -162,12 +166,14 @@
                 document.getElementById('betting-round-text').innerText = headerText;
             }
 
+            // Load Constructors
             constructorsData = await fetchCSV(CONSTRUCTORS_CSV_URL);
             const constructorSelect = document.getElementById('constructor-select');
             constructorsData.forEach(c => {
                 if(c[0]) constructorSelect.innerHTML += `<option value="${c[0]}">${c[0]}</option>`;
             });
 
+            // Calculate Live Pots & Driver Counters
             let liveSprintPot = sprintRollover;
             let liveFeaturePot = featureRollover;
             
@@ -193,6 +199,7 @@
             document.getElementById('sprint-pot-total').innerText = `$${liveSprintPot.toFixed(2)}`;
             document.getElementById('feature-pot-total').innerText = `$${liveFeaturePot.toFixed(2)}`;
 
+            // Load Drivers & Build Betting Interface
             let driversData = await fetchCSV(DRIVERS_CSV_URL);
             driversData = driversData.filter(d => d[0]); 
             
@@ -257,16 +264,31 @@
             document.getElementById('betting-section').classList.remove('hidden');
             document.getElementById('welcome-message').innerText = `${selected}`;
             
-            // Map the arrays to the new Constructors tab setup (0-indexed):
-            // 4: Side Bet Winnings | 5: Total Race Fees | 6: Current Budget Cap
+            // Map the arrays to the specific 'From Scratch' Constructor Tab setup (0-indexed):
+            // 4: Net Side Bet Win/Loss | 5: Total Race Fees | 6: Current Budget Cap
             
-            const sideBetWins = parseFloat((team[4] || "0").replace(/[^0-9.-]+/g,""));
-            const raceFees = parseFloat((team[5] || "0").replace(/[^0-9.-]+/g,""));
-            const budgetCap = parseFloat((team[6] || "0").replace(/[^0-9.-]+/g,""));
+            const sideBetNet = parseFloat(String(team[4] || "0").replace(/[^0-9.-]+/g,""));
+            const raceFees = parseFloat(String(team[5] || "0").replace(/[^0-9.-]+/g,""));
+            const budgetCap = parseFloat(String(team[6] || "0").replace(/[^0-9.-]+/g,""));
 
+            // Budget Cap
             document.getElementById('budget-cap-display').innerText = `$${budgetCap.toFixed(2)}`;
+            
+            // Race Fees (Always positive or 0)
             document.getElementById('race-fees-display').innerText = `+$${raceFees.toFixed(2)}`;
-            document.getElementById('net-win-loss-display').innerText = `+$${sideBetWins.toFixed(2)}`;
+
+            // Net Side Bet Win/Loss (Dynamic colors)
+            const netDisplay = document.getElementById('net-win-loss-display');
+            if (sideBetNet > 0) {
+                netDisplay.innerText = `+$${sideBetNet.toFixed(2)}`;
+                netDisplay.style.color = "#00ff00"; // Green
+            } else if (sideBetNet < 0) {
+                netDisplay.innerText = `-$${Math.abs(sideBetNet).toFixed(2)}`;
+                netDisplay.style.color = "#ff3333"; // Red
+            } else {
+                netDisplay.innerText = `$0.00`;
+                netDisplay.style.color = "#fff"; // White
+            }
 
             await populateExistingBets();
         } else {
@@ -276,6 +298,7 @@
 
     async function populateExistingBets() {
         try {
+            // Fresh fetch directly inside login loop guarantees updated checkboxes
             const betsData = await fetchCSV(BETS_CSV_URL);
             
             const myBets = betsData.filter(b => 
@@ -301,6 +324,7 @@
                 }
             });
 
+            // Date Lockout Logic
             const raceDate = parseDateString(nextRaceDate);
             const today = new Date();
             const deadline = new Date(raceDate);
