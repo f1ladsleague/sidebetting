@@ -9,16 +9,16 @@
         :root { --f1-red: #e10600; --f1-dark: #15151e; --f1-card: #1f1f27; --f1-hover: #2a2a35; }
         body { font-family: 'Titillium Web', sans-serif; background-color: var(--f1-dark); color: #fff; margin: 0; padding: 20px; display: flex; justify-content: center; }
         .container { background: var(--f1-card); width: 100%; max-width: 600px; padding: 30px; border-radius: 12px; box-shadow: 0 10px 30px rgba(0,0,0,0.5); }
-        h1 { text-align: center; border-bottom: 2px solid var(--f1-red); padding-bottom: 10px; text-transform: uppercase; font-weight: 700; letter-spacing: 1px; margin-bottom: 5px; }
+        h1 { text-align: center; border-bottom: 2px solid var(--f1-red); padding-bottom: 10px; text-transform: uppercase; font-weight: 700; margin-bottom: 5px; }
         .round-info { text-align: center; color: #aaa; font-size: 18px; margin-top: 0; margin-bottom: 20px; font-weight: 600; }
         h2 { color: #ccc; font-weight: 600; font-size: 20px; text-align: center; }
         
-        select, input[type="password"] { width: 100%; padding: 12px; margin: 10px 0 20px 0; background: var(--f1-hover); border: 1px solid #444; color: white; border-radius: 6px; font-family: inherit; font-size: 16px; box-sizing: border-box; }
+        select, input[type="password"] { width: 100%; padding: 12px; margin: 10px 0 20px 0; background: var(--f1-hover); border: 1px solid #444; color: white; border-radius: 6px; font-size: 16px; box-sizing: border-box; }
         select:focus, input:focus { outline: none; border-color: var(--f1-red); }
         
         button.btn-primary { width: 100%; background: var(--f1-red); color: white; border: none; padding: 15px; font-size: 18px; font-weight: 700; border-radius: 6px; cursor: pointer; text-transform: uppercase; transition: 0.2s; }
         button.btn-primary:hover { background: #ff1a1a; transform: translateY(-2px); }
-        button:disabled { background: #555; cursor: not-allowed; transform: none; }
+        button:disabled { background: #555 !important; cursor: not-allowed; transform: none; color: #aaa; }
         
         .hidden { display: none !important; }
         .race-section { background: #1a1a21; padding: 20px; border-radius: 8px; margin-bottom: 25px; border: 1px solid #333; }
@@ -31,8 +31,6 @@
         
         .clear-btn { background: transparent; color: #aaa; border: 1px solid #aaa; padding: 8px 15px; border-radius: 4px; cursor: pointer; display: block; margin: 15px auto 0 auto; transition: 0.2s; }
         .clear-btn:hover { background: #aaa; color: #000; }
-
-        .locked-msg { background: rgba(225, 6, 0, 0.2); border: 1px solid var(--f1-red); padding: 20px; text-align: center; border-radius: 8px; margin-top: 20px; }
     </style>
 </head>
 <body>
@@ -47,46 +45,34 @@
 </div>
 
 <div class="container hidden" id="betting-section">
-    <h1>Place Your Bets</h1>
+    <h1>Manage Your Bets</h1>
     <p class="round-info" id="betting-round-text"></p>
     <h2 id="welcome-message" style="color: var(--f1-red);"></h2>
-    
-    <div id="already-bet-msg" class="locked-msg hidden">
-        <h3>🔒 Bets Locked</h3>
-        <p>You have already submitted your wagers for this round. Good luck!</p>
-        <button class="btn-primary" style="margin-top: 15px;" onclick="returnHome()">Return Home</button>
-    </div>
 
     <form id="bet-form">
-        <p style="text-align: center; color: #aaa; margin-bottom: 30px;">Select ONE driver for the Sprint and/or ONE for the Feature.</p>
+        <p style="text-align: center; color: #aaa; margin-bottom: 30px;">Your active bets are highlighted below. You may change them until the day before the race.</p>
         
         <div class="race-section">
             <h2 style="color: white; margin-top: 0;">Sprint Race</h2>
             <div id="sprint-drivers"></div>
-            <button type="button" class="clear-btn" onclick="clearSelection('sprint-driver')">Clear Sprint Selection</button>
         </div>
 
         <div class="race-section">
             <h2 style="color: white; margin-top: 0;">Feature Race</h2>
             <div id="feature-drivers"></div>
-            <button type="button" class="clear-btn" onclick="clearSelection('feature-driver')">Clear Feature Selection</button>
         </div>
 
-        <button type="submit" class="btn-primary" id="submit-btn">Lock in Bets</button>
+        <button type="submit" class="btn-primary" id="submit-btn">Update & Lock in Bets</button>
         <button type="button" class="clear-btn" style="margin-top:20px; width:100%" onclick="returnHome()">Cancel / Return Home</button>
     </form>
 </div>
 
 <script>
-    // ==========================================
-    // GOOGLE LINKS
-    // ==========================================
-    const GOOGLE_SCRIPT_WEB_APP_URL = "https://script.google.com/macros/s/AKfycbzl82qkQw4mf_dFbV6ExR0Va3JRLGUQ7bOPN2oy0yPUateuocYtELzgF9HpQ9GnGGB4uw/exec"; // <-- Don't forget to paste this one!
+    const GOOGLE_SCRIPT_WEB_APP_URL = "https://script.google.com/macros/s/AKfycbzl82qkQw4mf_dFbV6ExR0Va3JRLGUQ7bOPN2oy0yPUateuocYtELzgF9HpQ9GnGGB4uw/exec";
     const SETTINGS_CSV_URL = "https://docs.google.com/spreadsheets/d/e/2PACX-1vTZKLukYpw5VzMfRbfXh80lj1B0gbUiVx_CoinOMVb-b2iFEMiWg_nW3KcMp88qKL3UfctvzYgEN_Lg/pub?gid=2057582908&single=true&output=csv";
     const CONSTRUCTORS_CSV_URL = "https://docs.google.com/spreadsheets/d/e/2PACX-1vTZKLukYpw5VzMfRbfXh80lj1B0gbUiVx_CoinOMVb-b2iFEMiWg_nW3KcMp88qKL3UfctvzYgEN_Lg/pub?gid=1589744882&single=true&output=csv";
     const DRIVERS_CSV_URL = "https://docs.google.com/spreadsheets/d/e/2PACX-1vTZKLukYpw5VzMfRbfXh80lj1B0gbUiVx_CoinOMVb-b2iFEMiWg_nW3KcMp88qKL3UfctvzYgEN_Lg/pub?gid=1372542075&single=true&output=csv";
     const BETS_CSV_URL = "https://docs.google.com/spreadsheets/d/e/2PACX-1vTZKLukYpw5VzMfRbfXh80lj1B0gbUiVx_CoinOMVb-b2iFEMiWg_nW3KcMp88qKL3UfctvzYgEN_Lg/pub?gid=80994690&single=true&output=csv";
-    // ==========================================
 
     let constructorsData = [];
     let currentConstructor = "";
@@ -101,28 +87,34 @@
 
     window.onload = async () => {
         try {
-            // 1. Load Settings (Round & Date)
             const settingsData = await fetchCSV(SETTINGS_CSV_URL);
             if(settingsData.length > 0) {
                 currentRound = settingsData[0][0];
-                nextRaceDate = settingsData[0][1];
-                const headerText = `Round ${currentRound} | Next Race: ${nextRaceDate}`;
+                nextRaceDate = settingsData[0][1]; // Expecting "DD/MM/YYYY"
+
+                let displayDate = nextRaceDate;
+                
+                // Parse DD/MM/YYYY into "DD Month YYYY"
+                if (nextRaceDate.includes('/')) {
+                    const [day, month, year] = nextRaceDate.split('/');
+                    const monthNames = ["January", "February", "March", "April", "May", "June", "July", "August", "September", "October", "November", "December"];
+                    displayDate = `${parseInt(day, 10)} ${monthNames[parseInt(month, 10) - 1]} ${year}`;
+                }
+
+                const headerText = `Round ${currentRound} | Next Race: ${displayDate}`;
                 document.getElementById('login-round-text').innerText = headerText;
                 document.getElementById('betting-round-text').innerText = headerText;
             }
 
-            // 2. Load Constructors
             constructorsData = await fetchCSV(CONSTRUCTORS_CSV_URL);
             const constructorSelect = document.getElementById('constructor-select');
             constructorsData.forEach(c => {
                 if(c[0]) constructorSelect.innerHTML += `<option value="${c[0]}">${c[0]}</option>`;
             });
 
-            // 3. Load and SORT Drivers
             let driversData = await fetchCSV(DRIVERS_CSV_URL);
-            driversData = driversData.filter(d => d[0]); // Remove empty rows
+            driversData = driversData.filter(d => d[0]); 
             
-            // Sort arrays from highest price to lowest
             const sprintSorted = [...driversData].sort((a, b) => Number(b[1]) - Number(a[1]));
             const featureSorted = [...driversData].sort((a, b) => Number(b[2]) - Number(a[2]));
 
@@ -144,7 +136,6 @@
                     </label>`;
             });
         } catch (error) {
-            console.error("Error loading data from Google Sheets.", error);
             document.getElementById('login-round-text').innerText = "System Offline - Could not fetch data";
         }
     };
@@ -156,32 +147,60 @@
         
         if (team && team[1] === pass) {
             currentConstructor = selected;
-            
-            // Show betting section
             document.getElementById('login-section').classList.add('hidden');
             document.getElementById('betting-section').classList.remove('hidden');
             document.getElementById('welcome-message').innerText = `${selected} | Cap: $${team[2]}`;
             
-            // Check if they already bet this round
-            checkIfAlreadyBet();
+            await populateExistingBets();
         } else {
             alert("Incorrect constructor or password!");
         }
     }
 
-    async function checkIfAlreadyBet() {
+    async function populateExistingBets() {
         try {
             const betsData = await fetchCSV(BETS_CSV_URL);
-            // betsData columns: Timestamp (0), Round (1), Constructor (2)...
-            const hasBet = betsData.some(b => b[1] === currentRound && b[2] === currentConstructor);
             
-            if (hasBet) {
-                document.getElementById('bet-form').classList.add('hidden');
-                document.getElementById('already-bet-msg').classList.remove('hidden');
+            const myBets = betsData.filter(b => b[1] === currentRound && b[2] === currentConstructor);
+            
+            myBets.forEach(bet => {
+                const raceType = bet[3];
+                const driver = bet[4];   
+                
+                if (raceType === 'Sprint') {
+                    const radio = document.querySelector(`input[name="sprint-driver"][value="${driver}"]`);
+                    if (radio) radio.checked = true;
+                } else if (raceType === 'Feature') {
+                    const radio = document.querySelector(`input[name="feature-driver"][value="${driver}"]`);
+                    if (radio) radio.checked = true;
+                }
+            });
+
+            // --- DATE LOCKOUT LOGIC ---
+            let raceDate;
+            if (nextRaceDate.includes('/')) {
+                const [day, month, year] = nextRaceDate.split('/');
+                // JavaScript months are 0-indexed (0 = Jan, 11 = Dec)
+                raceDate = new Date(year, parseInt(month, 10) - 1, day);
             } else {
-                document.getElementById('bet-form').classList.remove('hidden');
-                document.getElementById('already-bet-msg').classList.add('hidden');
+                raceDate = new Date(nextRaceDate);
             }
+
+            const today = new Date();
+            
+            // The deadline is 11:59 PM the day BEFORE the race
+            const deadline = new Date(raceDate);
+            deadline.setDate(deadline.getDate() - 1);
+            deadline.setHours(23, 59, 59);
+
+            if (today > deadline) {
+                const submitBtn = document.getElementById('submit-btn');
+                submitBtn.disabled = true;
+                submitBtn.innerText = "Bets Locked (Deadline Passed)";
+                
+                document.querySelectorAll('input[type="radio"]').forEach(r => r.disabled = true);
+            }
+
         } catch(e) {
             console.error("Could not verify past bets.");
         }
@@ -190,14 +209,25 @@
     function returnHome() {
         document.getElementById('betting-section').classList.add('hidden');
         document.getElementById('login-section').classList.remove('hidden');
-        document.getElementById('password-input').value = ""; // Clear password
-        document.getElementById('constructor-select').value = ""; // Clear dropdown
+        document.getElementById('password-input').value = ""; 
+        document.getElementById('constructor-select').value = ""; 
+        document.querySelectorAll('input[type="radio"]').forEach(r => r.checked = false);
     }
 
-    function clearSelection(radioName) {
-        const radios = document.getElementsByName(radioName);
-        radios.forEach(r => r.checked = false);
-    }
+    const sendBet = async (raceType, selectedElement) => {
+        const formData = new URLSearchParams();
+        formData.append('round', currentRound);
+        formData.append('constructor', currentConstructor);
+        formData.append('raceType', raceType);
+        formData.append('driver', selectedElement.value);
+        formData.append('amount', selectedElement.getAttribute('data-amount'));
+
+        return fetch(GOOGLE_SCRIPT_WEB_APP_URL, { 
+            method: 'POST', 
+            body: formData,
+            mode: 'no-cors'
+        });
+    };
 
     document.getElementById('bet-form').addEventListener('submit', async function(e) {
         e.preventDefault();
@@ -210,33 +240,29 @@
 
         if (!sprintSelected && !featureSelected) {
             alert("You must select at least one driver to bet on!");
-            submitBtn.innerText = "Lock in Bets";
+            submitBtn.innerText = "Update & Lock in Bets";
             submitBtn.disabled = false;
             return;
         }
 
-        const sendBet = async (raceType, selectedElement) => {
-            const formData = new URLSearchParams();
-            formData.append('round', currentRound);
-            formData.append('constructor', currentConstructor);
-            formData.append('raceType', raceType);
-            formData.append('driver', selectedElement.value);
-            formData.append('amount', selectedElement.getAttribute('data-amount'));
-
-            await fetch(GOOGLE_SCRIPT_WEB_APP_URL, { method: 'POST', body: formData });
-        };
-
         try {
-            if (sprintSelected) await sendBet('Sprint', sprintSelected);
-            if (featureSelected) await sendBet('Feature', featureSelected);
+            const promises = [];
+            if (sprintSelected) promises.push(sendBet('Sprint', sprintSelected));
+            if (featureSelected) promises.push(sendBet('Feature', featureSelected));
             
-            alert(`Bets successfully locked in for Round ${currentRound}! Good luck.`);
-            clearSelection('sprint-driver');
-            clearSelection('feature-driver');
-            returnHome(); // Immediately send them back to the login screen
+            await Promise.all(promises);
+            
+            // Short timeout to allow Google to write before we leave
+            setTimeout(() => {
+                alert(`Bets successfully updated for Round ${currentRound}! Good luck.`);
+                returnHome(); 
+                submitBtn.innerText = "Update & Lock in Bets";
+                submitBtn.disabled = false;
+            }, 800);
+            
         } catch (error) {
             alert("Connection error. Try again.");
-            submitBtn.innerText = "Lock in Bets";
+            submitBtn.innerText = "Update & Lock in Bets";
             submitBtn.disabled = false;
         }
     });
