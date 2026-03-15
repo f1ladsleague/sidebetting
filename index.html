@@ -85,20 +85,36 @@
         return text.split('\n').map(row => row.split(',').map(item => item.trim())).slice(1);
     }
 
+    // --- BULLETPROOF DATE PARSER ---
+    function parseDateString(dateStr) {
+        let cleanDate = dateStr.trim().replace(/-/g, '/'); // Convert dashes to slashes
+        if (cleanDate.includes('/')) {
+            const parts = cleanDate.split('/');
+            const day = parseInt(parts[0], 10);
+            const month = parseInt(parts[1], 10) - 1; // JavaScript months are 0-indexed
+            let year = parseInt(parts[2], 10);
+            if (year < 100) year += 2000; // Handle 2-digit years like '26
+            return new Date(year, month, day);
+        } else {
+            return new Date(dateStr); // Fallback for standard formats
+        }
+    }
+
     window.onload = async () => {
         try {
+            // Load Settings (Round & Date)
             const settingsData = await fetchCSV(SETTINGS_CSV_URL);
             if(settingsData.length > 0) {
                 currentRound = settingsData[0][0];
-                nextRaceDate = settingsData[0][1]; // Expecting "DD/MM/YYYY"
+                nextRaceDate = settingsData[0][1];
 
                 let displayDate = nextRaceDate;
-                
-                // Parse DD/MM/YYYY into "DD Month YYYY"
-                if (nextRaceDate.includes('/')) {
-                    const [day, month, year] = nextRaceDate.split('/');
+                try {
+                    const raceDateObj = parseDateString(nextRaceDate);
                     const monthNames = ["January", "February", "March", "April", "May", "June", "July", "August", "September", "October", "November", "December"];
-                    displayDate = `${parseInt(day, 10)} ${monthNames[parseInt(month, 10) - 1]} ${year}`;
+                    displayDate = `${raceDateObj.getDate()} ${monthNames[raceDateObj.getMonth()]} ${raceDateObj.getFullYear()}`;
+                } catch(e) {
+                    console.error("Could not parse date format");
                 }
 
                 const headerText = `Round ${currentRound} | Next Race: ${displayDate}`;
@@ -106,12 +122,14 @@
                 document.getElementById('betting-round-text').innerText = headerText;
             }
 
+            // Load Constructors
             constructorsData = await fetchCSV(CONSTRUCTORS_CSV_URL);
             const constructorSelect = document.getElementById('constructor-select');
             constructorsData.forEach(c => {
                 if(c[0]) constructorSelect.innerHTML += `<option value="${c[0]}">${c[0]}</option>`;
             });
 
+            // Load and Sort Drivers
             let driversData = await fetchCSV(DRIVERS_CSV_URL);
             driversData = driversData.filter(d => d[0]); 
             
@@ -177,15 +195,7 @@
             });
 
             // --- DATE LOCKOUT LOGIC ---
-            let raceDate;
-            if (nextRaceDate.includes('/')) {
-                const [day, month, year] = nextRaceDate.split('/');
-                // JavaScript months are 0-indexed (0 = Jan, 11 = Dec)
-                raceDate = new Date(year, parseInt(month, 10) - 1, day);
-            } else {
-                raceDate = new Date(nextRaceDate);
-            }
-
+            const raceDate = parseDateString(nextRaceDate);
             const today = new Date();
             
             // The deadline is 11:59 PM the day BEFORE the race
@@ -252,7 +262,6 @@
             
             await Promise.all(promises);
             
-            // Short timeout to allow Google to write before we leave
             setTimeout(() => {
                 alert(`Bets successfully updated for Round ${currentRound}! Good luck.`);
                 returnHome(); 
