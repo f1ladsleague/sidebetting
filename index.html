@@ -81,12 +81,14 @@
             <h2 style="color: white; margin-top: 0;">Sprint Race</h2>
             <div class="pot-display">Live Pot: <span id="sprint-pot-total">$0</span></div>
             <div id="sprint-drivers"></div>
+            <button type="button" class="clear-btn" onclick="clearSelection('sprint-driver')">Clear Sprint</button>
         </div>
 
         <div class="race-section">
             <h2 style="color: white; margin-top: 0;">Feature Race</h2>
             <div class="pot-display">Live Pot: <span id="feature-pot-total">$0</span></div>
             <div id="feature-drivers"></div>
+            <button type="button" class="clear-btn" onclick="clearSelection('feature-driver')">Clear Feature</button>
         </div>
 
         <button type="submit" class="btn-primary" id="submit-btn">Submit Bets</button>
@@ -109,14 +111,15 @@
     let featureRollover = 0;
     let hasExistingBets = false;
 
-    // Stores how many bets each driver has
     let sprintBetCounts = {};
     let featureBetCounts = {};
 
+    // BULLETPROOF CSV PARSER: Strips hidden \r characters that break logic
     async function fetchCSV(url) {
         const response = await fetch(url);
         const text = await response.text();
-        return text.split('\n').map(row => row.split(',').map(item => item.trim())).slice(1);
+        const cleanText = text.replace(/\r/g, ''); 
+        return cleanText.split('\n').map(row => row.split(',').map(item => item.trim())).slice(1);
     }
 
     function parseDateString(dateStr) {
@@ -135,11 +138,10 @@
 
     window.onload = async () => {
         try {
-            // 1. Load Settings & Rollovers
             const settingsData = await fetchCSV(SETTINGS_CSV_URL);
             if(settingsData.length > 0) {
-                currentRound = settingsData[0][0];
-                nextRaceDate = settingsData[0][1];
+                currentRound = String(settingsData[0][0]).trim();
+                nextRaceDate = String(settingsData[0][1]).trim();
                 sprintRollover = parseFloat(settingsData[0][2] || 0);
                 featureRollover = parseFloat(settingsData[0][3] || 0);
 
@@ -155,41 +157,38 @@
                 document.getElementById('betting-round-text').innerText = headerText;
             }
 
-            // 2. Load Constructors
             constructorsData = await fetchCSV(CONSTRUCTORS_CSV_URL);
             const constructorSelect = document.getElementById('constructor-select');
             constructorsData.forEach(c => {
                 if(c[0]) constructorSelect.innerHTML += `<option value="${c[0]}">${c[0]}</option>`;
             });
 
-            // 3. Load Bets to Calculate Live Pots & Driver Counters
+            // LIVE POTS & BET COUNTERS
             let liveSprintPot = sprintRollover;
             let liveFeaturePot = featureRollover;
             
             try {
                 const allBetsData = await fetchCSV(BETS_CSV_URL);
-                const currentBets = allBetsData.filter(b => b[1] === currentRound);
+                const currentBets = allBetsData.filter(b => b[1] && String(b[1]).trim() === currentRound);
                 
                 currentBets.forEach(bet => {
-                    const raceType = bet[3];
-                    const driver = bet[4];
+                    const raceType = String(bet[3]).trim().toLowerCase();
+                    const driver = String(bet[4]).trim();
                     const amount = parseFloat(bet[5] || 0);
                     
-                    if(raceType === 'Sprint') {
+                    if(raceType === 'sprint') {
                         liveSprintPot += amount;
                         sprintBetCounts[driver] = (sprintBetCounts[driver] || 0) + 1;
-                    } else if(raceType === 'Feature') {
+                    } else if(raceType === 'feature') {
                         liveFeaturePot += amount;
                         featureBetCounts[driver] = (featureBetCounts[driver] || 0) + 1;
                     }
                 });
-            } catch(e) { console.error("Could not load bets for live pot calculation."); }
+            } catch(e) { console.error("Could not load bets.", e); }
 
-            // Update Live Pot Displays
-            document.getElementById('sprint-pot-total').innerText = `$${liveSprintPot}`;
-            document.getElementById('feature-pot-total').innerText = `$${liveFeaturePot}`;
+            document.getElementById('sprint-pot-total').innerText = `$${liveSprintPot.toFixed(2)}`;
+            document.getElementById('feature-pot-total').innerText = `$${liveFeaturePot.toFixed(2)}`;
 
-            // 4. Load Drivers & Build UI with Badges
             let driversData = await fetchCSV(DRIVERS_CSV_URL);
             driversData = driversData.filter(d => d[0]); 
             
@@ -198,7 +197,7 @@
 
             const sprintDiv = document.getElementById('sprint-drivers');
             sprintSorted.forEach(d => {
-                const driverName = d[0];
+                const driverName = String(d[0]).trim();
                 const count = sprintBetCounts[driverName] || 0;
                 const badge = count > 0 ? `<span class="bet-badge">👤 ${count}</span>` : "";
                 
@@ -212,7 +211,7 @@
 
             const featureDiv = document.getElementById('feature-drivers');
             featureSorted.forEach(d => {
-                const driverName = d[0];
+                const driverName = String(d[0]).trim();
                 const count = featureBetCounts[driverName] || 0;
                 const badge = count > 0 ? `<span class="bet-badge">👤 ${count}</span>` : "";
 
@@ -244,9 +243,9 @@
     async function login() {
         const selected = document.getElementById('constructor-select').value;
         const pass = document.getElementById('password-input').value;
-        const team = constructorsData.find(c => c[0] === selected);
+        const team = constructorsData.find(c => String(c[0]).trim() === selected);
         
-        if (team && team[1] === pass) {
+        if (team && String(team[1]).trim() === pass) {
             currentConstructor = selected;
             applyTeamTheme(selected);
 
@@ -254,9 +253,11 @@
             document.getElementById('betting-section').classList.remove('hidden');
             document.getElementById('welcome-message').innerText = `${selected}`;
             
-            document.getElementById('budget-cap-display').innerText = `$${team[2] || "0"}`;
+            // Reads from Column F (Index 5) for Budget Cap
+            document.getElementById('budget-cap-display').innerText = `$${team[5] || "0"}`;
             
-            const netValue = parseFloat((team[3] || "0").replace(/[^0-9.-]+/g,""));
+            // Reads from Column G (Index 6) for Net Win/Loss
+            const netValue = parseFloat((team[6] || "0").replace(/[^0-9.-]+/g,""));
             const netDisplay = document.getElementById('net-win-loss-display');
             if (netValue > 0) {
                 netDisplay.innerText = `+$${netValue}`;
@@ -278,20 +279,26 @@
     async function populateExistingBets() {
         try {
             const betsData = await fetchCSV(BETS_CSV_URL);
-            const myBets = betsData.filter(b => b[1] === currentRound && b[2] === currentConstructor);
+            
+            // Bulletproof matching filter
+            const myBets = betsData.filter(b => 
+                b[1] && String(b[1]).trim() === currentRound && 
+                b[2] && String(b[2]).trim() === currentConstructor
+            );
+            
             const submitBtn = document.getElementById('submit-btn');
             
             hasExistingBets = myBets.length > 0;
             submitBtn.innerText = hasExistingBets ? "Update Bets" : "Submit Bets";
 
             myBets.forEach(bet => {
-                const raceType = bet[3];
-                const driver = bet[4];   
+                const raceType = String(bet[3]).trim().toLowerCase();
+                const driver = String(bet[4]).trim();   
                 
-                if (raceType === 'Sprint') {
+                if (raceType === 'sprint') {
                     const radio = document.querySelector(`input[name="sprint-driver"][value="${driver}"]`);
                     if (radio) radio.checked = true;
-                } else if (raceType === 'Feature') {
+                } else if (raceType === 'feature') {
                     const radio = document.querySelector(`input[name="feature-driver"][value="${driver}"]`);
                     if (radio) radio.checked = true;
                 }
@@ -309,7 +316,7 @@
                 document.querySelectorAll('input[type="radio"]').forEach(r => r.disabled = true);
             }
 
-        } catch(e) {}
+        } catch(e) { console.error("Error highlighting existing bets.", e); }
     }
 
     function returnHome() {
@@ -319,6 +326,10 @@
         document.getElementById('constructor-select').value = ""; 
         document.documentElement.style.setProperty('--theme-color', '#e10600'); 
         document.querySelectorAll('input[type="radio"]').forEach(r => r.checked = false);
+    }
+
+    function clearSelection(radioName) {
+        document.querySelectorAll(`input[name="${radioName}"]`).forEach(r => r.checked = false);
     }
 
     const sendBet = async (raceType, selectedElement) => {
@@ -361,7 +372,6 @@
             
             setTimeout(() => {
                 alert(`Bets successfully logged for Round ${currentRound}! Good luck.`);
-                // Force a hard refresh to instantly update the live pots/badges for the user
                 window.location.reload(); 
             }, 800);
             
