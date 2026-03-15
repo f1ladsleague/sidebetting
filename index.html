@@ -69,7 +69,7 @@
             </div>
             <div>
                 <div class="metric-title">Race Fees</div>
-                <div class="metric-value" id="race-fees-display" style="color: #00ff00;">$0</div>
+                <div class="metric-value" id="race-fees-display">$0</div>
             </div>
             <div>
                 <div class="metric-title">Net Side Bets</div>
@@ -121,7 +121,6 @@
     let sprintBetCounts = {};
     let featureBetCounts = {};
 
-    // CACHE-BUSTING FETCH: Ensures live updates are pulled immediately
     async function fetchCSV(url) {
         const cacheBusterUrl = url + "&nocache=" + new Date().getTime();
         const response = await fetch(cacheBusterUrl, { cache: "no-store" });
@@ -144,9 +143,42 @@
         }
     }
 
+    // BULLETPROOF NUMBER PARSER: Correctly reads both -$140.00 and ($140.00)
+    function parseSheetNumber(val) {
+        let str = String(val || "0").trim();
+        // If it contains a minus sign, or is wrapped in accounting parentheses like (140)
+        let isNegative = str.includes('-') || (str.includes('(') && str.includes(')'));
+        // Strip everything except numbers and decimals
+        let num = parseFloat(str.replace(/[^0-9.]/g, ""));
+        if (isNaN(num)) return 0;
+        return isNegative ? -num : num;
+    }
+
+    // UNIVERSAL METRIC FORMATTER: Automatically controls +, -, green, red, and white
+    function displayMetric(elementId, value, isBudgetCap) {
+        const el = document.getElementById(elementId);
+        
+        if (isBudgetCap) {
+            // Budget Cap stays white, no plus/minus signs
+            el.innerText = `$${value.toFixed(2)}`;
+            el.style.color = "#fff";
+        } else {
+            // Gains and Losses dynamically change color and signs
+            if (value > 0) {
+                el.innerText = `+$${value.toFixed(2)}`;
+                el.style.color = "#00ff00"; // Green
+            } else if (value < 0) {
+                el.innerText = `-$${Math.abs(value).toFixed(2)}`;
+                el.style.color = "#ff3333"; // Red
+            } else {
+                el.innerText = `$0.00`;
+                el.style.color = "#fff"; // White
+            }
+        }
+    }
+
     window.onload = async () => {
         try {
-            // Load Settings & Rollovers
             const settingsData = await fetchCSV(SETTINGS_CSV_URL);
             if(settingsData.length > 0) {
                 currentRound = String(settingsData[0][0]).trim();
@@ -166,14 +198,12 @@
                 document.getElementById('betting-round-text').innerText = headerText;
             }
 
-            // Load Constructors
             constructorsData = await fetchCSV(CONSTRUCTORS_CSV_URL);
             const constructorSelect = document.getElementById('constructor-select');
             constructorsData.forEach(c => {
                 if(c[0]) constructorSelect.innerHTML += `<option value="${c[0]}">${c[0]}</option>`;
             });
 
-            // Calculate Live Pots & Driver Counters
             let liveSprintPot = sprintRollover;
             let liveFeaturePot = featureRollover;
             
@@ -199,7 +229,6 @@
             document.getElementById('sprint-pot-total').innerText = `$${liveSprintPot.toFixed(2)}`;
             document.getElementById('feature-pot-total').innerText = `$${liveFeaturePot.toFixed(2)}`;
 
-            // Load Drivers & Build Betting Interface
             let driversData = await fetchCSV(DRIVERS_CSV_URL);
             driversData = driversData.filter(d => d[0]); 
             
@@ -264,31 +293,16 @@
             document.getElementById('betting-section').classList.remove('hidden');
             document.getElementById('welcome-message').innerText = `${selected}`;
             
-            // Map the arrays to the specific 'From Scratch' Constructor Tab setup (0-indexed):
-            // 4: Net Side Bet Win/Loss | 5: Total Race Fees | 6: Current Budget Cap
-            
-            const sideBetNet = parseFloat(String(team[4] || "0").replace(/[^0-9.-]+/g,""));
-            const raceFees = parseFloat(String(team[5] || "0").replace(/[^0-9.-]+/g,""));
-            const budgetCap = parseFloat(String(team[6] || "0").replace(/[^0-9.-]+/g,""));
+            // Extract the numbers using the bulletproof parser
+            // Based on Google Sheet Setup -> Col E (Idx 4): Net Side Bets | Col F (Idx 5): Race Fees | Col G (Idx 6): Budget Cap
+            const sideBetNet = parseSheetNumber(team[4]);
+            const raceFees = parseSheetNumber(team[5]);
+            const budgetCap = parseSheetNumber(team[6]);
 
-            // Budget Cap
-            document.getElementById('budget-cap-display').innerText = `$${budgetCap.toFixed(2)}`;
-            
-            // Race Fees (Always positive or 0)
-            document.getElementById('race-fees-display').innerText = `+$${raceFees.toFixed(2)}`;
-
-            // Net Side Bet Win/Loss (Dynamic colors)
-            const netDisplay = document.getElementById('net-win-loss-display');
-            if (sideBetNet > 0) {
-                netDisplay.innerText = `+$${sideBetNet.toFixed(2)}`;
-                netDisplay.style.color = "#00ff00"; // Green
-            } else if (sideBetNet < 0) {
-                netDisplay.innerText = `-$${Math.abs(sideBetNet).toFixed(2)}`;
-                netDisplay.style.color = "#ff3333"; // Red
-            } else {
-                netDisplay.innerText = `$0.00`;
-                netDisplay.style.color = "#fff"; // White
-            }
+            // Feed them into the universal formatter
+            displayMetric('budget-cap-display', budgetCap, true); // true = keeps it white, no +/- signs
+            displayMetric('race-fees-display', raceFees, false);
+            displayMetric('net-win-loss-display', sideBetNet, false);
 
             await populateExistingBets();
         } else {
@@ -298,7 +312,6 @@
 
     async function populateExistingBets() {
         try {
-            // Fresh fetch directly inside login loop guarantees updated checkboxes
             const betsData = await fetchCSV(BETS_CSV_URL);
             
             const myBets = betsData.filter(b => 
@@ -324,7 +337,6 @@
                 }
             });
 
-            // Date Lockout Logic
             const raceDate = parseDateString(nextRaceDate);
             const today = new Date();
             const deadline = new Date(raceDate);
