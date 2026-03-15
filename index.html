@@ -40,8 +40,9 @@
         .clear-btn:hover { background: #aaa; color: #000; }
 
         .dashboard-metrics { background: #1a1a21; border: 1px solid #333; padding: 15px; border-radius: 8px; margin-bottom: 25px; text-align: center; }
-        .metric-title { color: #aaa; font-size: 14px; text-transform: uppercase; letter-spacing: 1px; margin-bottom: 5px; }
-        .metric-value { font-size: 24px; font-weight: bold; margin: 0; }
+        .metric-title { color: #aaa; font-size: 13px; text-transform: uppercase; letter-spacing: 1px; margin-bottom: 5px; }
+        .metric-value { font-size: 22px; font-weight: bold; margin: 0; color: #fff; }
+        .metric-value.positive { color: #00ff00; }
     </style>
 </head>
 <body>
@@ -62,14 +63,18 @@
     <h2 id="welcome-message" style="color: var(--theme-color); margin-bottom: 20px;"></h2>
 
     <div class="dashboard-metrics">
-        <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 10px;">
+        <div style="display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 10px;">
             <div>
-                <div class="metric-title">Current Budget Cap</div>
+                <div class="metric-title">Budget Cap</div>
                 <div class="metric-value" id="budget-cap-display">$0</div>
             </div>
             <div>
-                <div class="metric-title">Season Side Bets</div>
-                <div class="metric-value" id="net-win-loss-display">$0</div>
+                <div class="metric-title">Race Fees</div>
+                <div class="metric-value positive" id="race-fees-display">$0</div>
+            </div>
+            <div>
+                <div class="metric-title">Side Bet Wins</div>
+                <div class="metric-value positive" id="net-win-loss-display">$0</div>
             </div>
         </div>
     </div>
@@ -114,9 +119,9 @@
     let sprintBetCounts = {};
     let featureBetCounts = {};
 
-    // BULLETPROOF CSV PARSER: Strips hidden \r characters that break logic
     async function fetchCSV(url) {
-        const response = await fetch(url);
+        const cacheBusterUrl = url + "&nocache=" + new Date().getTime();
+        const response = await fetch(cacheBusterUrl, { cache: "no-store" });
         const text = await response.text();
         const cleanText = text.replace(/\r/g, ''); 
         return cleanText.split('\n').map(row => row.split(',').map(item => item.trim())).slice(1);
@@ -163,7 +168,6 @@
                 if(c[0]) constructorSelect.innerHTML += `<option value="${c[0]}">${c[0]}</option>`;
             });
 
-            // LIVE POTS & BET COUNTERS
             let liveSprintPot = sprintRollover;
             let liveFeaturePot = featureRollover;
             
@@ -184,7 +188,7 @@
                         featureBetCounts[driver] = (featureBetCounts[driver] || 0) + 1;
                     }
                 });
-            } catch(e) { console.error("Could not load bets.", e); }
+            } catch(e) {}
 
             document.getElementById('sprint-pot-total').innerText = `$${liveSprintPot.toFixed(2)}`;
             document.getElementById('feature-pot-total').innerText = `$${liveFeaturePot.toFixed(2)}`;
@@ -253,22 +257,16 @@
             document.getElementById('betting-section').classList.remove('hidden');
             document.getElementById('welcome-message').innerText = `${selected}`;
             
-            // Reads from Column F (Index 5) for Budget Cap
-            document.getElementById('budget-cap-display').innerText = `$${team[5] || "0"}`;
+            // Map the arrays to the new Constructors tab setup (0-indexed):
+            // 4: Side Bet Winnings | 5: Total Race Fees | 6: Current Budget Cap
             
-            // Reads from Column G (Index 6) for Net Win/Loss
-            const netValue = parseFloat((team[6] || "0").replace(/[^0-9.-]+/g,""));
-            const netDisplay = document.getElementById('net-win-loss-display');
-            if (netValue > 0) {
-                netDisplay.innerText = `+$${netValue}`;
-                netDisplay.style.color = "#00ff00";
-            } else if (netValue < 0) {
-                netDisplay.innerText = `-$${Math.abs(netValue)}`;
-                netDisplay.style.color = "#ff3333";
-            } else {
-                netDisplay.innerText = `$0`;
-                netDisplay.style.color = "#fff";
-            }
+            const sideBetWins = parseFloat((team[4] || "0").replace(/[^0-9.-]+/g,""));
+            const raceFees = parseFloat((team[5] || "0").replace(/[^0-9.-]+/g,""));
+            const budgetCap = parseFloat((team[6] || "0").replace(/[^0-9.-]+/g,""));
+
+            document.getElementById('budget-cap-display').innerText = `$${budgetCap.toFixed(2)}`;
+            document.getElementById('race-fees-display').innerText = `+$${raceFees.toFixed(2)}`;
+            document.getElementById('net-win-loss-display').innerText = `+$${sideBetWins.toFixed(2)}`;
 
             await populateExistingBets();
         } else {
@@ -280,7 +278,6 @@
         try {
             const betsData = await fetchCSV(BETS_CSV_URL);
             
-            // Bulletproof matching filter
             const myBets = betsData.filter(b => 
                 b[1] && String(b[1]).trim() === currentRound && 
                 b[2] && String(b[2]).trim() === currentConstructor
@@ -315,8 +312,7 @@
                 submitBtn.innerText = "Bets Locked (Deadline Passed)";
                 document.querySelectorAll('input[type="radio"]').forEach(r => r.disabled = true);
             }
-
-        } catch(e) { console.error("Error highlighting existing bets.", e); }
+        } catch(e) {}
     }
 
     function returnHome() {
