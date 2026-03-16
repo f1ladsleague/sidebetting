@@ -105,6 +105,19 @@
         .mini-dashboard .cap-row { margin-top: 4px; padding-top: 8px; border-top: 1px solid #333; }
         .mini-dashboard .cap-row .metric-title { font-size: 12px; color: #fff; }
         .mini-dashboard .cap-row .metric-value { font-size: 15px; color: var(--team-color, #fff); }
+        .sync-warning {
+            background: rgba(244, 118, 0, 0.15); /* McLaren Orange for alert */
+            border: 1px solid #F47600;
+            color: #fff;
+            padding: 12px;
+            border-radius: 8px;
+            margin-bottom: 20px;
+            text-align: center;
+            font-size: 14px;
+            font-weight: 600;
+            display: none; /* Hidden by default */
+        }
+.sync-warning span { color: #F47600; font-weight: 900; }
     </style>
 </head>
 <body>
@@ -173,7 +186,11 @@
         <img id="betting-team-logo" src="" alt="Team Logo" style="height: 40px; display: none; object-fit: contain;">
         <h2 id="welcome-message" style="color: var(--theme-color); margin: 0; text-align: center;"></h2>
     </div>
-
+    
+    <div id="sync-warning-banner" class="sync-warning">
+        <span>⚠️ SYNC IN PROGRESS:</span> Your recent bets have been received but may take up to 5 minutes to reflect in your dashboard balances below.
+    </div>
+    
     <div class="dashboard-metrics">
         <div class="metric-row" id="metric-starting-cap">
             <div class="metric-title">Starting Cap</div>
@@ -365,6 +382,21 @@
     }
 
     window.onload = async () => {
+    // --- ADD THIS NEW MEMORY CHECK BLOCK ---
+        const lastBetTime = localStorage.getItem('f1lads_last_bet');
+        if (lastBetTime) {
+            const timePassed = Date.now() - parseInt(lastBetTime);
+            const fiveMinutes = 5 * 60 * 1000;
+            
+            if (timePassed < fiveMinutes) {
+                // If it's been less than 5 minutes, show the banner
+                document.getElementById('sync-warning-banner').style.display = 'block';
+            } else {
+                // If it's been more than 5 minutes, clear the memory
+                localStorage.removeItem('f1lads_last_bet');
+            }
+        }
+        // --- END OF MEMORY CHECK BLOCK ---        
         try {
             const settingsData = await fetchCSV(SETTINGS_CSV_URL);
             if(settingsData.length > 0) {
