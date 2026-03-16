@@ -58,15 +58,18 @@
         .driver-option:has(input:checked) .avatar-wrapper { border-color: var(--theme-color); }
         .driver-option input { display: none; } 
         
-        .avatar-wrapper { width: 50px; height: 50px; border-radius: 50%; overflow: hidden; margin-right: 15px; border: 2px solid #444; flex-shrink: 0; background-color: #1a1a21; transition: 0.2s; }
-        
+        /* NEW AVATAR & BADGE CSS */
+        .avatar-container { position: relative; margin-right: 15px; flex-shrink: 0; }
+        .avatar-wrapper { width: 50px; height: 50px; border-radius: 50%; overflow: hidden; border: 2px solid #444; background-color: #1a1a21; transition: 0.2s; }
+        .notification-badge { position: absolute; top: -5px; right: -5px; background: #e10600; color: white; font-size: 11px; font-weight: 800; min-width: 14px; text-align: center; padding: 3px 5px; border-radius: 12px; border: 2px solid var(--f1-hover); z-index: 2; box-shadow: 0 2px 4px rgba(0,0,0,0.5); line-height: 1; }
+        /* ---------------------- */
+
         .driver-avatar { width: 100%; height: 100%; object-fit: cover; transform: scale(1.7); transform-origin: center 15%; }
         
         .driver-name-block { display: flex; flex-direction: column; flex-grow: 1; }
         .driver-name-text { display: flex; align-items: center; }
         
         .price-tag { background: #000; padding: 4px 10px; border-radius: 4px; color: #ffffff; font-weight: 700; margin-left: auto; font-size: 16px; }
-        .bet-badge { background: #444; color: #fff; padding: 2px 6px; border-radius: 12px; font-size: 12px; font-weight: 600; margin-left: 8px; display: inline-flex; align-items: center; }
         
         .pot-display { background: rgba(255,255,255,0.05); border: 1px solid var(--theme-color); border-radius: 6px; padding: 10px; text-align: center; font-size: 20px; font-weight: bold; margin-bottom: 15px; color: #fff; transition: border-color 0.3s ease; }
         .pot-display span { color: #00ff00; transition: 0.3s; }
@@ -314,7 +317,6 @@
     function updateCountdown() {
         if (!globalDeadlineDate) return;
         
-        // Forces current time check specifically in Australian Eastern Time
         let currentSydney = new Date(new Date().toLocaleString("en-US", {timeZone: "Australia/Sydney"}));
         let diff = globalDeadlineDate.getTime() - currentSydney.getTime();
         
@@ -426,21 +428,18 @@
     }
 
     window.onload = async () => {
-    // --- ADD THIS NEW MEMORY CHECK BLOCK ---
         const lastBetTime = localStorage.getItem('f1lads_last_bet');
         if (lastBetTime) {
             const timePassed = Date.now() - parseInt(lastBetTime);
             const fiveMinutes = 5 * 60 * 1000;
             
             if (timePassed < fiveMinutes) {
-                // If it's been less than 5 minutes, show the banner
                 document.getElementById('sync-warning-banner').style.display = 'block';
             } else {
-                // If it's been more than 5 minutes, clear the memory
                 localStorage.removeItem('f1lads_last_bet');
             }
         }
-        // --- END OF MEMORY CHECK BLOCK ---        
+        
         try {
             const settingsData = await fetchCSV(SETTINGS_CSV_URL);
             if(settingsData.length > 0) {
@@ -460,7 +459,6 @@
                 document.getElementById('login-round-text').innerText = headerText;
                 document.getElementById('betting-round-text').innerText = headerText; 
                 
-                // --- START COUNTDOWN LOGIC ---
                 const raceDateObj = parseDateString(nextRaceDate);
                 globalDeadlineDate = new Date(raceDateObj);
                 globalDeadlineDate.setDate(globalDeadlineDate.getDate() - 1);
@@ -468,8 +466,7 @@
 
                 document.getElementById('countdown-wrapper').style.display = 'block';
                 updateCountdown();
-                setInterval(updateCountdown, 1000); // Ticks every 1 second
-                // --- END COUNTDOWN LOGIC ---
+                setInterval(updateCountdown, 1000); 
             }
 
             constructorsData = await fetchCSV(CONSTRUCTORS_CSV_URL);
@@ -545,17 +542,20 @@
             sprintSorted.forEach(d => {
                 const driverName = String(d[0]).trim();
                 const count = sprintBetCounts[driverName] || 0;
-                const badge = count > 0 ? `<span class="bet-badge">👤 ${count}</span>` : "";
+                const badge = count > 0 ? `<div class="notification-badge">${count}</div>` : "";
                 const avatarUrl = driverImages[driverName] || "data:image/gif;base64,R0lGODlhAQABAIAAAAAAAP///yH5BAEAAAAALAAAAAABAAEAAAIBRAA7";
                 
                 sprintDiv.innerHTML += `
                     <label class="driver-option">
-                        <div class="avatar-wrapper">
-                            <img src="${avatarUrl}" class="driver-avatar" alt="${driverName}">
+                        <div class="avatar-container">
+                            <div class="avatar-wrapper">
+                                <img src="${avatarUrl}" class="driver-avatar" alt="${driverName}">
+                            </div>
+                            ${badge}
                         </div>
                         <div class="driver-name-block">
                             <div class="driver-name-text">
-                                <span>${driverName}</span> ${badge}
+                                <span>${driverName}</span>
                             </div>
                         </div>
                         <span class="price-tag">$${d[1]}</span>
@@ -567,17 +567,20 @@
             featureSorted.forEach(d => {
                 const driverName = String(d[0]).trim();
                 const count = featureBetCounts[driverName] || 0;
-                const badge = count > 0 ? `<span class="bet-badge">👤 ${count}</span>` : "";
+                const badge = count > 0 ? `<div class="notification-badge">${count}</div>` : "";
                 const avatarUrl = driverImages[driverName] || "data:image/gif;base64,R0lGODlhAQABAIAAAAAAAP///yH5BAEAAAAALAAAAAABAAEAAAIBRAA7";
 
                 featureDiv.innerHTML += `
                     <label class="driver-option">
-                        <div class="avatar-wrapper">
-                            <img src="${avatarUrl}" class="driver-avatar" alt="${driverName}">
+                        <div class="avatar-container">
+                            <div class="avatar-wrapper">
+                                <img src="${avatarUrl}" class="driver-avatar" alt="${driverName}">
+                            </div>
+                            ${badge}
                         </div>
                         <div class="driver-name-block">
                             <div class="driver-name-text">
-                                <span>${driverName}</span> ${badge}
+                                <span>${driverName}</span>
                             </div>
                         </div>
                         <span class="price-tag">$${d[2]}</span>
@@ -627,7 +630,6 @@
                 document.getElementById('betting-section').classList.remove('hidden');
                 document.getElementById('welcome-message').innerText = `${selected}`;
                 
-                // SHOW TEAM LOGO FOR CONSTRUCTORS IN FLEX ROW
                 const logoUrl = teamLogos[selected] || "";
                 const logoImg = document.getElementById('betting-team-logo');
                 if (logoUrl) {
@@ -758,7 +760,6 @@
             updateLiveValues();
 
             const raceDate = parseDateString(nextRaceDate);
-            // Modified to lock the time to Australian Eastern Time specifically
             const today = new Date(new Date().toLocaleString("en-US", {timeZone: "Australia/Sydney"}));
             const deadline = new Date(raceDate);
             deadline.setDate(deadline.getDate() - 1);
@@ -842,7 +843,6 @@
             formData.append('amount', selectedElement.getAttribute('data-amount'));
         }
 
-        // Notice we pass the 'signal' here so we can kill this fetch if it takes too long
         return fetch(GOOGLE_SCRIPT_WEB_APP_URL, { 
             method: 'POST', 
             body: formData,
@@ -866,18 +866,15 @@
             return;
         }
 
-        // 1. Create the Abort Controller (The Stopwatch)
         const controller = new AbortController();
         
-        // 2. Set the timeout for 30 seconds (30000 milliseconds)
         const timeoutId = setTimeout(() => {
-            controller.abort(); // Kills the fetch request if 30s passes
+            controller.abort(); 
         }, 30000);
 
         try {
             const promises = [];
             
-            // Pass controller.signal to every sendBet request
             if (sprintSelected) {
                 promises.push(sendBet('Sprint', sprintSelected, false, controller.signal));
             } else if (myExistingSprintBet > 0) {
@@ -890,14 +887,11 @@
                 promises.push(sendBet('Feature', null, true, controller.signal));
             }
             
-            // Wait for Google to respond
             await Promise.all(promises);
             
-            // 3. If we get here, it succeeded! Clear the stopwatch so it doesn't trigger.
             clearTimeout(timeoutId);
             
             setTimeout(() => {
-                // Drop a timestamp in the browser memory for the Sync Banner
                 localStorage.setItem('f1lads_last_bet', Date.now()); 
                 
                 alert(`Bets successfully updated for Round ${currentRound}!`);
@@ -905,17 +899,14 @@
             }, 800);
             
         } catch (error) {
-            // Clear the stopwatch just in case
             clearTimeout(timeoutId);
             
-            // Check if the error was caused by our 30-second timeout
             if (error.name === 'AbortError') {
                 alert("⏱️ Request timed out (30 seconds). The server is busy, please try submitting again.");
             } else {
                 alert("⚠️ Connection error. Please check your internet and try again.");
             }
             
-            // Unlock the button so they can try again
             submitBtn.innerText = hasExistingBets ? "Update Bets" : "Submit Bets";
             submitBtn.disabled = false;
         }
