@@ -12,6 +12,9 @@
         .container { background: var(--f1-card); width: 100%; max-width: 600px; padding: 30px; border-radius: 12px; box-shadow: 0 10px 30px rgba(0,0,0,0.5); margin-bottom: 20px;}
         
         .league-logo { max-height: 75px; margin: 0 auto 15px auto; display: block; border-radius: 6px; }
+        
+        /* New Hero Image CSS */
+        .hero-image { width: 100%; max-height: 250px; object-fit: cover; object-position: center 20%; border-radius: 8px; margin-bottom: 20px; border: 1px solid #333; box-shadow: 0 4px 10px rgba(0,0,0,0.3); }
 
         h1 { text-align: center; text-transform: uppercase; font-weight: 700; margin: 0; }
         
@@ -33,8 +36,6 @@
         
         .name-row { display: flex; gap: 10px; width: 100%; }
         .name-row input { margin-bottom: 10px; }
-
-        /* Public Login Warning Text CSS */
         .public-warning { color: #ffd700; font-size: 13px; text-align: center; margin-top: -5px; margin-bottom: 20px; font-weight: 600; line-height: 1.4; }
 
         button.btn-primary { width: 100%; background: var(--theme-color); color: white; border: none; padding: 15px; font-size: 18px; font-weight: 700; border-radius: 6px; cursor: pointer; text-transform: uppercase; transition: 0.3s ease; }
@@ -44,13 +45,19 @@
         .hidden { display: none !important; }
         .race-section { background: #1a1a21; padding: 20px; border-radius: 8px; margin-bottom: 25px; border: 1px solid #333; }
         
-        .driver-option { display: flex; justify-content: space-between; align-items: center; padding: 15px 20px; background: var(--f1-hover); border: 2px solid transparent; border-radius: 8px; margin-bottom: 10px; cursor: pointer; transition: 0.2s; font-size: 18px; font-weight: 600; }
+        /* Updated Driver Option CSS for Avatars */
+        .driver-option { display: flex; justify-content: flex-start; align-items: center; padding: 10px 15px; background: var(--f1-hover); border: 2px solid transparent; border-radius: 8px; margin-bottom: 10px; cursor: pointer; transition: 0.2s; font-size: 18px; font-weight: 600; }
         .driver-option:hover { border-color: #555; }
         .driver-option:has(input:checked) { border-color: var(--theme-color); background: color-mix(in srgb, var(--theme-color) 15%, transparent); }
+        .driver-option:has(input:checked) .driver-avatar { border-color: var(--theme-color); }
         .driver-option input { display: none; } 
         
-        .price-tag { background: #000; padding: 4px 10px; border-radius: 4px; color: #00ff00; font-weight: 700; margin-left: auto; }
-        .bet-badge { background: #444; color: #fff; padding: 3px 8px; border-radius: 12px; font-size: 13px; font-weight: 600; margin-left: 10px; display: inline-flex; align-items: center; }
+        .driver-avatar { width: 45px; height: 45px; border-radius: 50%; object-fit: cover; margin-right: 15px; border: 2px solid #444; background-color: #1a1a21; transition: 0.2s; }
+        .driver-name-block { display: flex; flex-direction: column; flex-grow: 1; }
+        .driver-name-text { display: flex; align-items: center; }
+        
+        .price-tag { background: #000; padding: 4px 10px; border-radius: 4px; color: #00ff00; font-weight: 700; margin-left: auto; font-size: 16px; }
+        .bet-badge { background: #444; color: #fff; padding: 2px 6px; border-radius: 12px; font-size: 12px; font-weight: 600; margin-left: 8px; display: inline-flex; align-items: center; }
         
         .pot-display { background: rgba(255,255,255,0.05); border: 1px solid var(--theme-color); border-radius: 6px; padding: 10px; text-align: center; font-size: 20px; font-weight: bold; margin-bottom: 15px; color: #fff; transition: border-color 0.3s ease; }
         .pot-display span { color: #00ff00; transition: 0.3s; }
@@ -94,6 +101,8 @@
     <h1 class="login-h1-border">SIDE BETS</h1>
     <p class="round-info" id="login-round-text">Loading Session...</p>
     
+    <img src="https://raw.githubusercontent.com/f1ladsleague/sidebetting/362f6f915ee8da5d8a71320b12372157ccaf5f02/Driver_Photos/Drivers.png" class="hero-image" alt="The Grid">
+
     <div class="login-toggle">
         <button id="btn-constructor" onclick="setLoginMode('Constructor')">Constructor</button>
         <button id="btn-public" class="toggle-active" onclick="setLoginMode('Public')">Public / Guest</button>
@@ -205,6 +214,20 @@
     const CONSTRUCTORS_CSV_URL = "https://docs.google.com/spreadsheets/d/e/2PACX-1vTZKLukYpw5VzMfRbfXh80lj1B0gbUiVx_CoinOMVb-b2iFEMiWg_nW3KcMp88qKL3UfctvzYgEN_Lg/pub?gid=1589744882&single=true&output=csv";
     const DRIVERS_CSV_URL = "https://docs.google.com/spreadsheets/d/e/2PACX-1vTZKLukYpw5VzMfRbfXh80lj1B0gbUiVx_CoinOMVb-b2iFEMiWg_nW3KcMp88qKL3UfctvzYgEN_Lg/pub?gid=1372542075&single=true&output=csv";
     const BETS_CSV_URL = "https://docs.google.com/spreadsheets/d/e/2PACX-1vTZKLukYpw5VzMfRbfXh80lj1B0gbUiVx_CoinOMVb-b2iFEMiWg_nW3KcMp88qKL3UfctvzYgEN_Lg/pub?gid=80994690&single=true&output=csv";
+
+    // Driver Image Mapping
+    const driverImages = {
+        "Eranga": "https://raw.githubusercontent.com/f1ladsleague/sidebetting/362f6f915ee8da5d8a71320b12372157ccaf5f02/Driver_Photos/Eranga.png",
+        "Kalpa": "https://raw.githubusercontent.com/f1ladsleague/sidebetting/362f6f915ee8da5d8a71320b12372157ccaf5f02/Driver_Photos/Kalpa.png",
+        "Mapa": "https://raw.githubusercontent.com/f1ladsleague/sidebetting/362f6f915ee8da5d8a71320b12372157ccaf5f02/Driver_Photos/Mapa.png",
+        "Nippa E": "https://raw.githubusercontent.com/f1ladsleague/sidebetting/362f6f915ee8da5d8a71320b12372157ccaf5f02/Driver_Photos/NippaE.png",
+        "Nuwie G": "https://raw.githubusercontent.com/f1ladsleague/sidebetting/362f6f915ee8da5d8a71320b12372157ccaf5f02/Driver_Photos/NuwieG.png",
+        "Rodda": "https://raw.githubusercontent.com/f1ladsleague/sidebetting/362f6f915ee8da5d8a71320b12372157ccaf5f02/Driver_Photos/Rodda.png",
+        "Sahan": "https://raw.githubusercontent.com/f1ladsleague/sidebetting/362f6f915ee8da5d8a71320b12372157ccaf5f02/Driver_Photos/Sahan.png",
+        "Sameera": "https://raw.githubusercontent.com/f1ladsleague/sidebetting/362f6f915ee8da5d8a71320b12372157ccaf5f02/Driver_Photos/Sameera.png",
+        "Shahan": "https://raw.githubusercontent.com/f1ladsleague/sidebetting/362f6f915ee8da5d8a71320b12372157ccaf5f02/Driver_Photos/Shahan.png",
+        "Shiyan": "https://raw.githubusercontent.com/f1ladsleague/sidebetting/362f6f915ee8da5d8a71320b12372157ccaf5f02/Driver_Photos/Shiyan.png"
+    };
 
     let constructorsData = [];
     let currentConstructor = ""; 
@@ -403,10 +426,17 @@
                 const driverName = String(d[0]).trim();
                 const count = sprintBetCounts[driverName] || 0;
                 const badge = count > 0 ? `<span class="bet-badge">👤 ${count}</span>` : "";
+                // Grab avatar URL or use a transparent placeholder
+                const avatarUrl = driverImages[driverName] || "data:image/gif;base64,R0lGODlhAQABAIAAAAAAAP///yH5BAEAAAAALAAAAAABAAEAAAIBRAA7";
                 
                 sprintDiv.innerHTML += `
                     <label class="driver-option">
-                        <span>${driverName} ${badge}</span>
+                        <img src="${avatarUrl}" class="driver-avatar" alt="${driverName}">
+                        <div class="driver-name-block">
+                            <div class="driver-name-text">
+                                <span>${driverName}</span> ${badge}
+                            </div>
+                        </div>
                         <span class="price-tag">$${d[1]}</span>
                         <input type="radio" name="sprint-driver" value="${driverName}" data-amount="${d[1]}" data-was-checked="false">
                     </label>`;
@@ -417,10 +447,16 @@
                 const driverName = String(d[0]).trim();
                 const count = featureBetCounts[driverName] || 0;
                 const badge = count > 0 ? `<span class="bet-badge">👤 ${count}</span>` : "";
+                const avatarUrl = driverImages[driverName] || "data:image/gif;base64,R0lGODlhAQABAIAAAAAAAP///yH5BAEAAAAALAAAAAABAAEAAAIBRAA7";
 
                 featureDiv.innerHTML += `
                     <label class="driver-option">
-                        <span>${driverName} ${badge}</span>
+                        <img src="${avatarUrl}" class="driver-avatar" alt="${driverName}">
+                        <div class="driver-name-block">
+                            <div class="driver-name-text">
+                                <span>${driverName}</span> ${badge}
+                            </div>
+                        </div>
                         <span class="price-tag">$${d[2]}</span>
                         <input type="radio" name="feature-driver" value="${driverName}" data-amount="${d[2]}" data-was-checked="false">
                     </label>`;
