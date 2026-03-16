@@ -738,7 +738,7 @@
         });
     }
 
-    const sendBet = async (raceType, selectedElement, isDelete = false) => {
+    const sendBet = async (raceType, selectedElement, isDelete = false, signal) => {
         const formData = new URLSearchParams();
         formData.append('round', currentRound);
         formData.append('constructor', currentConstructor);
@@ -754,10 +754,11 @@
             formData.append('amount', selectedElement.getAttribute('data-amount'));
         }
 
+        // Notice we pass the 'signal' here so we can kill this fetch if it takes too long
         return fetch(GOOGLE_SCRIPT_WEB_APP_URL, { 
             method: 'POST', 
             body: formData,
-            mode: 'no-cors'
+            signal: signal 
         });
     };
 
@@ -777,30 +778,56 @@
             return;
         }
 
+        // 1. Create the Abort Controller (The Stopwatch)
+        const controller = new AbortController();
+        
+        // 2. Set the timeout for 30 seconds (30000 milliseconds)
+        const timeoutId = setTimeout(() => {
+            controller.abort(); // Kills the fetch request if 30s passes
+        }, 30000);
+
         try {
             const promises = [];
             
+            // Pass controller.signal to every sendBet request
             if (sprintSelected) {
-                promises.push(sendBet('Sprint', sprintSelected, false));
+                promises.push(sendBet('Sprint', sprintSelected, false, controller.signal));
             } else if (myExistingSprintBet > 0) {
-                promises.push(sendBet('Sprint', null, true));
+                promises.push(sendBet('Sprint', null, true, controller.signal));
             }
 
             if (featureSelected) {
-                promises.push(sendBet('Feature', featureSelected, false));
+                promises.push(sendBet('Feature', featureSelected, false, controller.signal));
             } else if (myExistingFeatureBet > 0) {
-                promises.push(sendBet('Feature', null, true));
+                promises.push(sendBet('Feature', null, true, controller.signal));
             }
             
+            // Wait for Google to respond
             await Promise.all(promises);
             
+            // 3. If we get here, it succeeded! Clear the stopwatch so it doesn't trigger.
+            clearTimeout(timeoutId);
+            
             setTimeout(() => {
+                // Drop a timestamp in the browser memory for the Sync Banner
+                localStorage.setItem('f1lads_last_bet', Date.now()); 
+                
                 alert(`Bets successfully updated for Round ${currentRound}!`);
                 window.location.reload(); 
             }, 800);
             
         } catch (error) {
-            alert("Connection error. Try again.");
+            // Clear the stopwatch just in case
+            clearTimeout(timeoutId);
+            
+            // Check if the error was caused by our 30-second timeout
+            if (error.name === 'AbortError') {
+                alert("⏱️ Request timed out (30 seconds). The server is busy, please try submitting again.");
+            } else {
+                alert("⚠️ Connection error. Please check your internet and try again.");
+            }
+            
+            // Unlock the button so they can try again
             submitBtn.innerText = hasExistingBets ? "Update Bets" : "Submit Bets";
             submitBtn.disabled = false;
         }
