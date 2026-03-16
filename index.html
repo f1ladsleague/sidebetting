@@ -11,7 +11,15 @@
         body { font-family: 'Titillium Web', sans-serif; background-color: var(--f1-dark); color: #fff; margin: 0; padding: 20px; display: flex; justify-content: center; }
         .container { background: var(--f1-card); width: 100%; max-width: 600px; padding: 30px; border-radius: 12px; box-shadow: 0 10px 30px rgba(0,0,0,0.5); }
         
-        h1 { text-align: center; border-bottom: 2px solid var(--theme-color); padding-bottom: 10px; text-transform: uppercase; font-weight: 700; margin-bottom: 5px; transition: border-color 0.3s ease; }
+        h1 { text-align: center; text-transform: uppercase; font-weight: 700; margin: 0; }
+        
+        /* New Header Wrapper to align back button and title */
+        .header-wrapper { position: relative; display: flex; align-items: center; justify-content: center; border-bottom: 2px solid var(--theme-color); padding-bottom: 10px; margin-bottom: 20px; transition: border-color 0.3s ease; }
+        .back-arrow { position: absolute; left: 0; color: #aaa; font-size: 16px; font-weight: 600; cursor: pointer; transition: 0.2s; text-transform: uppercase; letter-spacing: 1px; }
+        .back-arrow:hover { color: #fff; }
+
+        .login-h1-border { border-bottom: 2px solid var(--theme-color); padding-bottom: 10px; margin-bottom: 5px; transition: border-color 0.3s ease; }
+
         .round-info { text-align: center; color: #aaa; font-size: 18px; margin-top: 0; margin-bottom: 20px; font-weight: 600; }
         .fee-notice { text-align: center; color: #888; font-size: 13px; font-style: italic; margin-top: -10px; margin-bottom: 20px; }
         h2 { color: #ccc; font-weight: 600; font-size: 20px; text-align: center; }
@@ -37,29 +45,23 @@
         .pot-display { background: rgba(255,255,255,0.05); border: 1px solid var(--theme-color); border-radius: 6px; padding: 10px; text-align: center; font-size: 20px; font-weight: bold; margin-bottom: 15px; color: #fff; transition: border-color 0.3s ease; }
         .pot-display span { color: #00ff00; transition: 0.3s; }
 
-        /* --- UPDATED DASHBOARD METRICS CSS (Mobile Friendly) --- */
+        /* Dashboard Metrics CSS */
         .dashboard-metrics { background: #1a1a21; border: 1px solid #333; padding: 15px; border-radius: 8px; margin-bottom: 25px; display: flex; flex-direction: column; gap: 8px; }
         .metric-row { display: flex; justify-content: space-between; align-items: center; white-space: nowrap; padding: 4px 0; }
-        .metric-title { color: #aaa; font-size: 12px; text-transform: uppercase; letter-spacing: 0.5px; overflow: hidden; text-overflow: ellipsis; margin-right: 10px; }
+        .metric-title { color: #aaa; font-size: 13px; text-transform: uppercase; letter-spacing: 0.5px; overflow: hidden; text-overflow: ellipsis; margin-right: 10px; }
         .metric-value { font-size: 16px; font-weight: bold; color: #fff; font-family: monospace; transition: 0.3s; }
         
-        .winnings-highlight { background: rgba(0, 255, 0, 0.08); border: 1px solid rgba(0, 255, 0, 0.2); padding: 8px 10px; border-radius: 6px; margin: 4px -5px; }
-        .winnings-highlight .metric-title { color: #00ff00; font-weight: 600; }
-        .winnings-highlight .metric-value { color: #00ff00; }
-        
         .cap-row { margin-top: 6px; padding-top: 12px; border-top: 1px solid #444; }
-        .cap-row .metric-title { color: var(--theme-color); font-weight: bold; font-size: 14px; }
+        .cap-row .metric-title { color: var(--theme-color); font-weight: bold; font-size: 15px; }
         .cap-row .metric-value { color: var(--theme-color); font-size: 20px; }
-        /* -------------------------------------------------------- */
-
-        .back-arrow { color: #aaa; font-size: 16px; font-weight: 600; cursor: pointer; display: inline-block; margin-bottom: 15px; transition: 0.2s; text-transform: uppercase; letter-spacing: 1px; }
-        .back-arrow:hover { color: #fff; }
+        
+        .divider { border-top: 1px dashed #444; margin: 6px 0; }
     </style>
 </head>
 <body>
 
 <div class="container" id="login-section">
-    <h1>F1 Lads League</h1>
+    <h1 class="login-h1-border">F1 Lads League</h1>
     <p class="round-info" id="login-round-text">Loading Session...</p>
     <h2>Constructor Login</h2>
     <select id="constructor-select"><option value="">Select your Team...</option></select>
@@ -68,32 +70,42 @@
 </div>
 
 <div class="container hidden" id="betting-section">
-    <div class="back-arrow" onclick="returnHome()">&#8592; Back</div>
-    <h1>Manage Your Bets</h1>
-    <br>
+    <div class="header-wrapper">
+        <div class="back-arrow" onclick="returnHome()">&#8592; Back</div>
+        <h1>Manage Your Bets</h1>
+    </div>
+
     <p class="fee-notice">*The League takes a 10% fee on all side bet winnings.</p>
     <h2 id="welcome-message" style="color: var(--theme-color); margin-bottom: 20px;"></h2>
 
     <div class="dashboard-metrics">
         <div class="metric-row">
             <div class="metric-title">Starting Cap</div>
-            <div class="metric-value text-slate-400">$500.00</div>
+            <div class="metric-value" style="color: #ccc;">$500.00</div>
+        </div>
+        <div class="metric-row">
+            <div class="metric-title">Driver SLFs</div>
+            <div class="metric-value" id="driver-slfs-display" style="color: #ff4444;">-$0.00</div>
         </div>
         <div class="metric-row">
             <div class="metric-title">Total Race Fees</div>
             <div class="metric-value" id="race-fees-display">$0.00</div>
         </div>
         <div class="metric-row">
-            <div class="metric-title">Net Side Bets (W/L)</div>
-            <div class="metric-value" id="net-win-loss-display">$0.00</div>
-        </div>
-        <div class="metric-row winnings-highlight">
-            <div class="metric-title">Side Bet Winnings (Cap Addition)</div>
+            <div class="metric-title">Side Bet Winnings</div>
             <div class="metric-value" id="side-bet-winnings-display">+$0.00</div>
         </div>
+        
         <div class="metric-row cap-row">
             <div class="metric-title">Current Budget Cap</div>
             <div class="metric-value" id="budget-cap-display">$0.00</div>
+        </div>
+
+        <div class="divider"></div>
+
+        <div class="metric-row">
+            <div class="metric-title" style="color: #888;">Net Side Bets (W/L)</div>
+            <div class="metric-value" id="net-win-loss-display" style="color: #888;">$0.00</div>
         </div>
     </div>
 
@@ -301,15 +313,27 @@
             document.getElementById('betting-section').classList.remove('hidden');
             document.getElementById('welcome-message').innerText = `${selected}`;
             
-            // Extract from Constructors tab: Idx 4 (Net Side Bets), Idx 5 (Race Fees), Idx 6 (Budget Cap), Idx 7 (Side Bet Winnings)
+            // Extracted from Constructors tab: Idx 3 (SLFs), Idx 4 (Net Side Bets), Idx 5 (Race Fees), Idx 6 (Cap), Idx 7 (Side Bet Winnings)
+            const slfsPaid = parseSheetNumber(team[3]);
             baseSideBetNet = parseSheetNumber(team[4]);
             const raceFees = parseSheetNumber(team[5]);
             const budgetCap = parseSheetNumber(team[6]);
             const sideBetWinnings = parseSheetNumber(team[7]);
 
-            document.getElementById('budget-cap-display').innerText = `$${budgetCap.toFixed(2)}`;
-            document.getElementById('race-fees-display').innerText = `+$${raceFees.toFixed(2)}`;
+            // Populate dashboard metrics
+            document.getElementById('driver-slfs-display').innerText = `-$${slfsPaid.toFixed(2)}`;
             document.getElementById('side-bet-winnings-display').innerText = `+$${sideBetWinnings.toFixed(2)}`;
+            document.getElementById('budget-cap-display').innerText = `$${budgetCap.toFixed(2)}`;
+            
+            // Logic to color code Race Fees based on value
+            const raceFeesElem = document.getElementById('race-fees-display');
+            if (raceFees > 0) {
+                raceFeesElem.innerText = `+$${raceFees.toFixed(2)}`;
+                raceFeesElem.style.color = "#00ff00";
+            } else {
+                raceFeesElem.innerText = `$0.00`;
+                raceFeesElem.style.color = "#fff";
+            }
 
             await populateExistingBets();
         } else {
@@ -406,7 +430,7 @@
             netDisplay.style.color = "#ff3333";
         } else {
             netDisplay.innerText = `$0.00`;
-            netDisplay.style.color = "#fff";
+            netDisplay.style.color = "#888";
         }
     }
 
