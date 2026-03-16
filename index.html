@@ -106,13 +106,13 @@
             margin-top: 8px; 
             padding: 8px 6px; 
             border-top: 1px solid #444; 
-            background: rgba(255, 255, 255, 0.05); /* Adds a subtle highlight box */
+            background: rgba(255, 255, 255, 0.05); 
             border-radius: 4px;
         }
         .mini-dashboard .cap-row .metric-title { font-size: 12px; color: #fff; font-weight: 700; }
         .mini-dashboard .cap-row .metric-value { font-size: 17px; color: var(--team-color, #fff); font-weight: 900; }
         .sync-warning {
-            background: rgba(244, 118, 0, 0.15); /* McLaren Orange for alert */
+            background: rgba(244, 118, 0, 0.15); 
             border: 1px solid #F47600;
             color: #fff;
             padding: 12px;
@@ -121,19 +121,24 @@
             text-align: center;
             font-size: 14px;
             font-weight: 600;
-            display: none; /* Hidden by default */
+            display: none; 
         }
-.sync-warning span { color: #F47600; font-weight: 900; }
+        .sync-warning span { color: #F47600; font-weight: 900; }
     </style>
 </head>
 <body>
 
 <div class="container" id="login-section">
     <a href="https://f1lads.com">
-    <img src="https://raw.githubusercontent.com/f1ladsleague/sidebetting/e78422814abd6cb31f36f99696b471262536d272/Logo.png" alt="F1 Lads Logo" class="league-logo">
+        <img src="https://raw.githubusercontent.com/f1ladsleague/sidebetting/e78422814abd6cb31f36f99696b471262536d272/Logo.png" alt="F1 Lads Logo" class="league-logo">
     </a>
     <h1 class="login-h1-border">SIDE BETS<sup style="color: #ffd700; font-size: 14px; font-weight: 900; margin-left: 6px; letter-spacing: 1px; vertical-align: super;">BETA</sup></h1>
     <p class="round-info" id="login-round-text">Loading Session...</p>
+    
+    <div id="countdown-wrapper" style="background: rgba(0, 215, 182, 0.05); border: 1px solid var(--theme-color); border-radius: 8px; padding: 10px; margin-bottom: 20px; text-align: center; display: none; transition: 0.3s;">
+        <div style="font-size: 13px; color: #aaa; text-transform: uppercase; letter-spacing: 1px; margin-bottom: 5px;">Bets Lock In (AET)</div>
+        <div id="countdown-timer" style="font-size: 24px; font-weight: 700; color: var(--theme-color); font-family: monospace; letter-spacing: 1px; transition: 0.3s;">--d --h --m --s</div>
+    </div>
     
     <img src="https://raw.githubusercontent.com/f1ladsleague/sidebetting/362f6f915ee8da5d8a71320b12372157ccaf5f02/Driver_Photos/Drivers.png" class="hero-image" alt="The Grid">
 
@@ -182,7 +187,9 @@
 </div>
 
 <div class="container hidden" id="betting-section">
-    <img src="https://raw.githubusercontent.com/f1ladsleague/sidebetting/e78422814abd6cb31f36f99696b471262536d272/Logo.png" alt="F1 Lads Logo" class="league-logo">
+    <a href="https://f1lads.com">
+        <img src="https://raw.githubusercontent.com/f1ladsleague/sidebetting/e78422814abd6cb31f36f99696b471262536d272/Logo.png" alt="F1 Lads Logo" class="league-logo">
+    </a>
     
     <div class="header-wrapper">
         <div class="back-arrow" onclick="returnHome()">&#8592; Back</div>
@@ -301,6 +308,34 @@
 
     let sprintBetCounts = {};
     let featureBetCounts = {};
+    
+    let globalDeadlineDate = null; 
+
+    function updateCountdown() {
+        if (!globalDeadlineDate) return;
+        
+        // Forces current time check specifically in Australian Eastern Time
+        let currentSydney = new Date(new Date().toLocaleString("en-US", {timeZone: "Australia/Sydney"}));
+        let diff = globalDeadlineDate.getTime() - currentSydney.getTime();
+        
+        const timerEl = document.getElementById('countdown-timer');
+        const wrapperEl = document.getElementById('countdown-wrapper');
+        
+        if (diff <= 0) {
+            timerEl.innerText = "BETS LOCKED";
+            timerEl.style.color = "#ff4444";
+            wrapperEl.style.borderColor = "#ff4444";
+            wrapperEl.style.background = "rgba(255, 68, 68, 0.05)";
+            return;
+        }
+        
+        let days = Math.floor(diff / (1000 * 60 * 60 * 24));
+        let hours = Math.floor((diff % (1000 * 60 * 60 * 24)) / (1000 * 60 * 60));
+        let mins = Math.floor((diff % (1000 * 60 * 60)) / (1000 * 60));
+        let secs = Math.floor((diff % (1000 * 60)) / 1000);
+        
+        timerEl.innerText = `${days}d ${hours.toString().padStart(2, '0')}h ${mins.toString().padStart(2, '0')}m ${secs.toString().padStart(2, '0')}s`;
+    }
 
     function setLoginMode(mode) {
         currentUserType = mode;
@@ -424,6 +459,17 @@
                 const headerText = `Round ${currentRound} | Next Race: ${displayDate}`;
                 document.getElementById('login-round-text').innerText = headerText;
                 document.getElementById('betting-round-text').innerText = headerText; 
+                
+                // --- START COUNTDOWN LOGIC ---
+                const raceDateObj = parseDateString(nextRaceDate);
+                globalDeadlineDate = new Date(raceDateObj);
+                globalDeadlineDate.setDate(globalDeadlineDate.getDate() - 1);
+                globalDeadlineDate.setHours(23, 59, 59, 0);
+
+                document.getElementById('countdown-wrapper').style.display = 'block';
+                updateCountdown();
+                setInterval(updateCountdown, 1000); // Ticks every 1 second
+                // --- END COUNTDOWN LOGIC ---
             }
 
             constructorsData = await fetchCSV(CONSTRUCTORS_CSV_URL);
@@ -712,7 +758,8 @@
             updateLiveValues();
 
             const raceDate = parseDateString(nextRaceDate);
-            const today = new Date();
+            // Modified to lock the time to Australian Eastern Time specifically
+            const today = new Date(new Date().toLocaleString("en-US", {timeZone: "Australia/Sydney"}));
             const deadline = new Date(raceDate);
             deadline.setDate(deadline.getDate() - 1);
             deadline.setHours(23, 59, 59); 
