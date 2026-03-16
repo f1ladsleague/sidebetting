@@ -14,12 +14,10 @@
         
         .league-logo { max-height: 75px; margin: 0 auto 15px auto; display: block; border-radius: 6px; }
         
-        /* UPDATED HERO IMAGE (No border, natural aspect ratio to stop cropping) */
         .hero-image { width: 100%; height: auto; display: block; border-radius: 8px; margin-bottom: 20px; box-shadow: 0 4px 10px rgba(0,0,0,0.3); }
 
         h1 { text-align: center; text-transform: uppercase; font-weight: 700; margin: 0; }
         
-        /* HEADER FIX FOR MOBILE OVERLAP */
         .header-wrapper { position: relative; display: flex; align-items: center; justify-content: center; border-bottom: 2px solid var(--theme-color); padding-bottom: 10px; margin-bottom: 20px; transition: border-color 0.3s ease; min-height: 35px;}
         .header-wrapper h1 { padding: 0 55px; font-size: 26px; line-height: 1.2; margin: 0; }
         .back-arrow { position: absolute; left: 0; color: #aaa; font-size: 16px; font-weight: 600; cursor: pointer; transition: 0.2s; text-transform: uppercase; letter-spacing: 1px; top: 50%; transform: translateY(-50%);}
@@ -39,7 +37,7 @@
         .login-toggle button { flex: 1; padding: 12px; border: none; background: transparent; color: #888; font-weight: bold; cursor: pointer; text-transform: uppercase; transition: 0.3s; font-size: 14px; }
         .login-toggle button.toggle-active { background: var(--theme-color); color: white; }
 
-        select, input[type="password"], input[type="text"], input[type="tel"] { width: 100%; padding: 12px; margin: 10px 0 20px 0; background: var(--f1-hover); border: 1px solid #444; color: white; border-radius: 6px; font-size: 16px; box-sizing: border-box; }
+        select, input[type="password"], input[type="text"], input[type="email"] { width: 100%; padding: 12px; margin: 10px 0 20px 0; background: var(--f1-hover); border: 1px solid #444; color: white; border-radius: 6px; font-size: 16px; box-sizing: border-box; }
         select:focus, input:focus { outline: none; border-color: var(--theme-color); }
         
         .name-row { display: flex; gap: 10px; width: 100%; }
@@ -57,12 +55,13 @@
         .driver-option:hover { border-color: #555; }
         .driver-option:has(input:checked) { border-color: var(--theme-color); background: color-mix(in srgb, var(--theme-color) 15%, transparent); }
         
-        /* UPDATED AVATAR ZOOM CSS */
         .driver-option:has(input:checked) .avatar-wrapper { border-color: var(--theme-color); }
         .driver-option input { display: none; } 
         
         .avatar-wrapper { width: 50px; height: 50px; border-radius: 50%; overflow: hidden; margin-right: 15px; border: 2px solid #444; flex-shrink: 0; background-color: #1a1a21; transition: 0.2s; }
-        .driver-avatar { width: 100%; height: 100%; object-fit: cover; transform: scale(1.35); transform-origin: center 20%; }
+        
+        /* ZOOMED IN DRIVER CSS (Increased from 1.35 to 1.7) */
+        .driver-avatar { width: 100%; height: 100%; object-fit: cover; transform: scale(1.7); transform-origin: center 15%; }
         
         .driver-name-block { display: flex; flex-direction: column; flex-grow: 1; }
         .driver-name-text { display: flex; align-items: center; }
@@ -129,10 +128,10 @@
             <input type="text" id="public-fname-input" placeholder="First Name">
             <input type="text" id="public-sname-input" placeholder="Surname">
         </div>
-        <input type="tel" id="public-mobile-input" placeholder="Enter Mobile Number">
+        <input type="email" id="public-email-input" placeholder="Enter Email Address">
         
         <p class="public-warning">
-            ⚠️ WARNING: Please ensure you login using the exact spelling of your name and mobile number every time. 
+            ⚠️ WARNING: Please ensure you login using the exact spelling of your name and email address every time. 
             These act as your unique profile details—if you use a different spelling, the system will treat you as a new user.
         </p>
     </div>
@@ -145,7 +144,7 @@
             <li><strong>Selection Limit:</strong> Select ONE driver for the Sprint and/or ONE driver for the Feature race.</li>
             <li><strong>Deadlines:</strong> Bets lock strictly at 11:59 PM the day before the race weekend begins.</li>
             <li><strong>League Cut:</strong> The League takes a flat 10% fee on all side bet winnings.</li>
-            <li><strong>Public Guests:</strong> Welcome to the Paddock! Enter your name and mobile number to place bets and track your Net W/L. Your bets contribute to the communal Constructors pot.</li>
+            <li><strong>Public Guests:</strong> Welcome to the Paddock! Enter your name and email address to place bets and track your Net W/L. Your bets contribute to the communal Constructors pot.</li>
         </ul>
     </div>
 
@@ -242,7 +241,7 @@
     let constructorsData = [];
     let currentConstructor = ""; 
     let currentUserType = "Public"; 
-    let currentMobile = "";
+    let currentEmail = ""; // CHANGED VARIABLE NAME
     
     let currentRound = "";
     let nextRaceDate = "";
@@ -299,7 +298,7 @@
                 <li><strong>Selection Limit:</strong> Select ONE driver for the Sprint and/or ONE driver for the Feature race.</li>
                 <li><strong>Deadlines:</strong> Bets lock strictly at 11:59 PM the day before the race weekend begins.</li>
                 <li><strong>League Cut:</strong> The League takes a flat 10% fee on all side bet winnings.</li>
-                <li><strong>Public Guests:</strong> Welcome to the Paddock! Enter your name and mobile number to place bets and track your Net W/L. Your bets contribute to the communal Constructors pot.</li>
+                <li><strong>Public Guests:</strong> Welcome to the Paddock! Enter your name and email address to place bets and track your Net W/L. Your bets contribute to the communal Constructors pot.</li>
             `;
         }
     }
@@ -438,7 +437,6 @@
                 const badge = count > 0 ? `<span class="bet-badge">👤 ${count}</span>` : "";
                 const avatarUrl = driverImages[driverName] || "data:image/gif;base64,R0lGODlhAQABAIAAAAAAAP///yH5BAEAAAAALAAAAAABAAEAAAIBRAA7";
                 
-                // Add avatar wrapper for zoomed image effect
                 sprintDiv.innerHTML += `
                     <label class="driver-option">
                         <div class="avatar-wrapper">
@@ -461,7 +459,6 @@
                 const badge = count > 0 ? `<span class="bet-badge">👤 ${count}</span>` : "";
                 const avatarUrl = driverImages[driverName] || "data:image/gif;base64,R0lGODlhAQABAIAAAAAAAP///yH5BAEAAAAALAAAAAABAAEAAAIBRAA7";
 
-                // Add avatar wrapper for zoomed image effect
                 featureDiv.innerHTML += `
                     <label class="driver-option">
                         <div class="avatar-wrapper">
@@ -507,7 +504,7 @@
             
             if (team && String(team[1]).trim() === pass) {
                 currentConstructor = selected;
-                currentMobile = ""; 
+                currentEmail = ""; 
                 applyTeamTheme(selected);
 
                 ['metric-starting-cap', 'metric-driver-slfs', 'metric-race-fees', 'metric-winnings', 'metric-budget-cap', 'metric-divider'].forEach(id => {
@@ -545,16 +542,15 @@
         } else {
             const publicFName = document.getElementById('public-fname-input').value.trim();
             const publicSName = document.getElementById('public-sname-input').value.trim();
-            const publicMobile = document.getElementById('public-mobile-input').value.trim();
+            const publicEmailInput = document.getElementById('public-email-input').value.trim();
 
-            if (!publicFName || !publicSName || !publicMobile) {
-                alert("Please enter your First Name, Surname, and Mobile Number to enter.");
+            if (!publicFName || !publicSName || !publicEmailInput) {
+                alert("Please enter your First Name, Surname, and Email Address to enter.");
                 return;
             }
 
-            // Stitch the first and last name together with a space
             currentConstructor = `${publicFName} ${publicSName}`;
-            currentMobile = publicMobile;
+            currentEmail = publicEmailInput;
             
             ['metric-starting-cap', 'metric-driver-slfs', 'metric-race-fees', 'metric-winnings', 'metric-budget-cap', 'metric-divider'].forEach(id => {
                 document.getElementById(id).style.display = 'none';
@@ -578,9 +574,9 @@
                 const bAmount = parseFloat(b[5] || 0);
                 const bWinnings = parseFloat(b[7] || 0);
                 const bUserType = String(b[8]).trim();
-                const bMobile = String(b[9]).trim();
+                const bEmail = String(b[9]).trim();
 
-                if (bUserType === 'Public' && bName === currentConstructor && bMobile === currentMobile) {
+                if (bUserType === 'Public' && bName === currentConstructor && bEmail === currentEmail) {
                     publicNet += (bWinnings - bAmount);
                 }
             });
@@ -598,12 +594,12 @@
                 const isCurrentRound = b[1] && String(b[1]).trim() === currentRound;
                 const matchesName = b[2] && String(b[2]).trim() === currentConstructor;
                 const rowUserType = String(b[8]).trim();
-                const rowMobile = String(b[9]).trim();
+                const rowEmail = String(b[9]).trim();
 
                 if (currentUserType === 'Constructor') {
                     return isCurrentRound && matchesName && rowUserType !== 'Public';
                 } else {
-                    return isCurrentRound && matchesName && rowUserType === 'Public' && rowMobile === currentMobile;
+                    return isCurrentRound && matchesName && rowUserType === 'Public' && rowEmail === currentEmail;
                 }
             });
             
@@ -690,7 +686,7 @@
         document.getElementById('password-input').value = ""; 
         document.getElementById('public-fname-input').value = ""; 
         document.getElementById('public-sname-input').value = ""; 
-        document.getElementById('public-mobile-input').value = ""; 
+        document.getElementById('public-email-input').value = ""; 
         
         if (currentUserType === 'Constructor') {
             document.documentElement.style.setProperty('--theme-color', '#e10600');
@@ -711,7 +707,7 @@
         formData.append('raceType', raceType);
         
         formData.append('userType', currentUserType);
-        formData.append('mobile', currentMobile);
+        formData.append('email', currentEmail); // SENDING AS EMAIL
 
         if (isDelete) {
             formData.append('action', 'delete');
