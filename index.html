@@ -157,10 +157,11 @@
     <div class="rules-card public-theme" id="rules-card">
         <h3>Rules & Regulations</h3>
         <ul id="rules-list">
-            <li><strong>Selection Limit:</strong> Select ONE driver for the Sprint and/or ONE driver for the Feature race.</li>
+            <li><strong>Public Guests:</strong> Welcome to the Paddock! Enter your name and email address to place bets and track your Net W/L.</li>
+            <li><strong>How does it work?:</strong> To participate, select one driver for the Sprint and/or Feature race to enter. The amount next to their name is the buy-in amount you are required to pay to play. If your driver wins, you split the total buy-in pot evenly with any other winning bettors after a flat 10% League Fee is deducted. If you lose, you must pay the buy-in amount to the league. For e.g., You pay $10 to bet that Driver A wins the Sprint Race. The total pot for the Sprint Race is $100 (including your $10). If Driver A wins, and you are one of two people who backed Driver A to win, the $90 remaining after the league's $10 cut is split so you receive a $45 payout (meaning you are up by $35).</li>
+            <li><strong>League Fee:</strong> The League takes a flat 10% fee on all side bet winnings.</li>
+            <li><strong>Selection Limit:</strong> You can only select ONE driver for the Sprint and/or ONE driver for the Feature race.</li>
             <li><strong>Deadlines:</strong> Bets lock strictly at 11:59 PM the day before the race weekend begins.</li>
-            <li><strong>League Cut:</strong> The League takes a flat 10% fee on all side bet winnings.</li>
-            <li><strong>Public Guests:</strong> Welcome to the Paddock! Enter your name and email address to place bets and track your Net W/L. Your bets contribute to the communal Constructors pot.</li>
         </ul>
     </div>
 
@@ -314,10 +315,10 @@
             overviewSection.classList.remove('hidden');
 
             rulesList.innerHTML = `
+                <li><strong>How does it work?:</strong> To participate, select one driver for the Sprint and/or Feature race. If your driver wins, you split the total pot evenly with other winners after a 10% League Fee. If you lose, the buy-in is deducted from your Budget Cap.</li>
+                <li><strong>Budget Cap:</strong> Your starting cap is adjusted by driver SLFs. Net Side Bets (W/L) do not increase your budget—only positive Side Bet Winnings add to your Cap.</li>
                 <li><strong>Selection Limit:</strong> Select ONE driver for the Sprint and/or ONE driver for the Feature race.</li>
                 <li><strong>Deadlines:</strong> Bets lock strictly at 11:59 PM the day before the race weekend begins.</li>
-                <li><strong>League Cut:</strong> The League takes a flat 10% fee on all side bet winnings.</li>
-                <li><strong>Budget Cap:</strong> Your starting cap is adjusted by driver SLFs. Net Side Bets (W/L) do not increase your budget—only positive Side Bet Winnings add to your Cap.</li>
             `;
         } else {
             btnPublic.classList.add('toggle-active');
@@ -330,10 +331,10 @@
             overviewSection.classList.add('hidden');
 
             rulesList.innerHTML = `
-                <li><strong>Selection Limit:</strong> Select ONE driver for the Sprint and/or ONE driver for the Feature race.</li>
+                <li><strong>Public Guests:</strong> Welcome to the Paddock! Enter your name and email address to place bets and track your Net W/L.</li>
+                <li><strong>How does it work?:</strong> To participate, select one driver for the Sprint and/or Feature race to enter. The amount next to their name is the buy-in amount you are required to pay to play. If your driver wins, you split the total buy-in pot evenly with any other winning bettors after a flat 10% League Fee is deducted. If you lose, you must pay the buy-in amount to the league. For e.g., You pay $10 to bet that Driver A wins the Sprint Race. The total pot for the Sprint Race is $100 (including your $10). If Driver A wins, and you are one of two people who backed Driver A to win, the $90 remaining after the league's $10 cut is split so you receive a $45 payout (meaning you are up by $35).</li>
+                <li><strong>Selection Limit:</strong> You can only select ONE driver for the Sprint and/or ONE driver for the Feature race.</li>
                 <li><strong>Deadlines:</strong> Bets lock strictly at 11:59 PM the day before the race weekend begins.</li>
-                <li><strong>League Cut:</strong> The League takes a flat 10% fee on all side bet winnings.</li>
-                <li><strong>Public Guests:</strong> Welcome to the Paddock! Enter your name and email address to place bets and track your Net W/L. Your bets contribute to the communal Constructors pot.</li>
             `;
         }
     }
