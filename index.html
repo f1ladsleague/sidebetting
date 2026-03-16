@@ -11,7 +11,6 @@
         body { font-family: 'Titillium Web', sans-serif; background-color: var(--f1-dark); color: #fff; margin: 0; padding: 20px; display: flex; justify-content: center; }
         .container { background: var(--f1-card); width: 100%; max-width: 600px; padding: 30px; border-radius: 12px; box-shadow: 0 10px 30px rgba(0,0,0,0.5); margin-bottom: 20px;}
         
-        /* Logo Styling */
         .league-logo { max-height: 75px; margin: 0 auto 15px auto; display: block; border-radius: 6px; }
 
         h1 { text-align: center; text-transform: uppercase; font-weight: 700; margin: 0; }
@@ -24,9 +23,13 @@
 
         .round-info { text-align: center; color: #aaa; font-size: 18px; margin-top: 0; margin-bottom: 20px; font-weight: 600; }
         .fee-notice { text-align: center; color: #888; font-size: 13px; font-style: italic; margin-top: -10px; margin-bottom: 20px; }
-        h2 { color: #ccc; font-weight: 600; font-size: 20px; text-align: center; }
         
-        select, input[type="password"] { width: 100%; padding: 12px; margin: 10px 0 20px 0; background: var(--f1-hover); border: 1px solid #444; color: white; border-radius: 6px; font-size: 16px; box-sizing: border-box; }
+        /* Toggle Switch CSS */
+        .login-toggle { display: flex; margin-bottom: 20px; background: #1a1a21; border-radius: 8px; overflow: hidden; border: 1px solid #333; }
+        .login-toggle button { flex: 1; padding: 12px; border: none; background: transparent; color: #888; font-weight: bold; cursor: pointer; text-transform: uppercase; transition: 0.3s; font-size: 14px; }
+        .login-toggle button.toggle-active { background: var(--theme-color); color: white; }
+
+        select, input[type="password"], input[type="text"], input[type="tel"] { width: 100%; padding: 12px; margin: 10px 0 20px 0; background: var(--f1-hover); border: 1px solid #444; color: white; border-radius: 6px; font-size: 16px; box-sizing: border-box; }
         select:focus, input:focus { outline: none; border-color: var(--theme-color); }
         
         button.btn-primary { width: 100%; background: var(--theme-color); color: white; border: none; padding: 15px; font-size: 18px; font-weight: 700; border-radius: 6px; cursor: pointer; text-transform: uppercase; transition: 0.3s ease; }
@@ -47,7 +50,6 @@
         .pot-display { background: rgba(255,255,255,0.05); border: 1px solid var(--theme-color); border-radius: 6px; padding: 10px; text-align: center; font-size: 20px; font-weight: bold; margin-bottom: 15px; color: #fff; transition: border-color 0.3s ease; }
         .pot-display span { color: #00ff00; transition: 0.3s; }
 
-        /* Dashboard Metrics CSS */
         .dashboard-metrics { background: #1a1a21; border: 1px solid #333; padding: 15px; border-radius: 8px; margin-bottom: 25px; display: flex; flex-direction: column; gap: 8px; }
         .metric-row { display: flex; justify-content: space-between; align-items: center; white-space: nowrap; padding: 4px 0; }
         .metric-title { color: #aaa; font-size: 13px; text-transform: uppercase; letter-spacing: 0.5px; overflow: hidden; text-overflow: ellipsis; margin-right: 10px; }
@@ -59,7 +61,6 @@
         
         .divider { border-top: 1px dashed #444; margin: 6px 0; }
 
-        /* --- Landing Page Specific Styles --- */
         .rules-card { background: rgba(225, 6, 0, 0.05); border: 1px solid rgba(225, 6, 0, 0.3); padding: 20px; border-radius: 8px; margin-top: 30px; margin-bottom: 30px; }
         .rules-card h3 { color: var(--theme-color); text-transform: uppercase; margin-top: 0; font-size: 16px; border-bottom: 1px solid rgba(225, 6, 0, 0.2); padding-bottom: 8px; margin-bottom: 12px;}
         .rules-card ul { margin: 0; padding-left: 20px; font-size: 13px; color: #ccc; }
@@ -68,7 +69,6 @@
         .overview-title { text-transform: uppercase; color: #fff; font-size: 18px; border-bottom: 2px solid #333; padding-bottom: 8px; margin-bottom: 15px; text-align: center; }
         .paddock-grid { display: flex; flex-direction: column; gap: 15px; }
         
-        /* Mini Constructor Dashboard */
         .mini-dashboard { background: #1a1a21; border: 1px solid #333; padding: 12px; border-radius: 8px; border-left: 4px solid var(--team-color, #444); }
         .mini-dashboard h4 { margin: 0 0 10px 0; text-transform: uppercase; color: var(--team-color, #fff); font-size: 14px; letter-spacing: 1px;}
         .mini-dashboard .metric-row { padding: 2px 0; }
@@ -86,9 +86,21 @@
     <h1 class="login-h1-border">SIDE BETS</h1>
     <p class="round-info" id="login-round-text">Loading Session...</p>
     
-    <h2>Constructor Login</h2>
-    <select id="constructor-select"><option value="">Select your Team...</option></select>
-    <input type="password" id="password-input" placeholder="Enter Password">
+    <div class="login-toggle">
+        <button id="btn-constructor" class="toggle-active" onclick="setLoginMode('Constructor')">Constructor</button>
+        <button id="btn-public" onclick="setLoginMode('Public')">Public / Guest</button>
+    </div>
+
+    <div id="constructor-fields">
+        <select id="constructor-select"><option value="">Select your Team...</option></select>
+        <input type="password" id="password-input" placeholder="Enter Password">
+    </div>
+
+    <div id="public-fields" class="hidden">
+        <input type="text" id="public-name-input" placeholder="Enter Full Name">
+        <input type="tel" id="public-mobile-input" placeholder="Enter Mobile Number">
+    </div>
+
     <button class="btn-primary" onclick="login()">Enter Paddock</button>
 
     <div class="rules-card">
@@ -97,7 +109,8 @@
             <li><strong>Selection Limit:</strong> Select ONE driver for the Sprint and/or ONE driver for the Feature race.</li>
             <li><strong>Deadlines:</strong> Bets lock strictly at 11:59 PM the day before the race weekend begins.</li>
             <li><strong>League Cut:</strong> The League takes a flat 10% fee on all side bet winnings.</li>
-            <li><strong>Budget Cap:</strong> Your starting cap is adjusted by driver SLFs. Net Side Bets (W/L) do not increase your budget—only positive Side Bet Winnings add to your Cap.</li>
+            <li><strong>Constructors Only:</strong> Your starting cap is adjusted by driver SLFs. Net Side Bets (W/L) do not increase your budget—only positive Side Bet Winnings add to your Cap.</li>
+            <li><strong>Public Guests:</strong> Welcome to the Paddock! Enter your name and mobile number to place bets and track your Net W/L. Your bets contribute to the communal Constructors pot.</li>
         </ul>
     </div>
 
@@ -119,29 +132,29 @@
     <h2 id="welcome-message" style="color: var(--theme-color); margin-bottom: 20px;"></h2>
 
     <div class="dashboard-metrics">
-        <div class="metric-row">
+        <div class="metric-row" id="metric-starting-cap">
             <div class="metric-title">Starting Cap</div>
             <div class="metric-value" style="color: #ccc;">$500.00</div>
         </div>
-        <div class="metric-row">
+        <div class="metric-row" id="metric-driver-slfs">
             <div class="metric-title">Driver SLFs</div>
             <div class="metric-value" id="driver-slfs-display" style="color: #ff4444;">-$0.00</div>
         </div>
-        <div class="metric-row">
+        <div class="metric-row" id="metric-race-fees">
             <div class="metric-title">Total Race Fees</div>
             <div class="metric-value" id="race-fees-display">$0.00</div>
         </div>
-        <div class="metric-row">
+        <div class="metric-row" id="metric-winnings">
             <div class="metric-title">Side Bet Winnings</div>
             <div class="metric-value" id="side-bet-winnings-display">+$0.00</div>
         </div>
         
-        <div class="metric-row cap-row">
+        <div class="metric-row cap-row" id="metric-budget-cap">
             <div class="metric-title">Current Budget Cap</div>
             <div class="metric-value" id="budget-cap-display">$0.00</div>
         </div>
 
-        <div class="divider"></div>
+        <div class="divider" id="metric-divider"></div>
 
         <div class="metric-row">
             <div class="metric-title" style="color: #888;">Net Side Bets (W/L)</div>
@@ -180,12 +193,15 @@
     const BETS_CSV_URL = "https://docs.google.com/spreadsheets/d/e/2PACX-1vTZKLukYpw5VzMfRbfXh80lj1B0gbUiVx_CoinOMVb-b2iFEMiWg_nW3KcMp88qKL3UfctvzYgEN_Lg/pub?gid=80994690&single=true&output=csv";
 
     let constructorsData = [];
-    let currentConstructor = "";
+    let currentConstructor = ""; 
+    let currentUserType = "Constructor"; // Default mode
+    let currentMobile = "";
+    
     let currentRound = "";
     let nextRaceDate = "";
     let hasExistingBets = false;
 
-    // Base Pots (includes all constructors' existing bets)
+    // Base Pots (includes all constructors' AND public's existing bets)
     let baseSprintPot = 0;
     let baseFeaturePot = 0;
     
@@ -193,11 +209,33 @@
     let myExistingSprintBet = 0;
     let myExistingFeatureBet = 0;
     
-    // User's base Net Win/Loss (directly from Google Sheet)
+    // User's base Net Win/Loss (directly from Google Sheet for constructors, dynamically calculated for public)
     let baseSideBetNet = 0;
 
     let sprintBetCounts = {};
     let featureBetCounts = {};
+
+    function setLoginMode(mode) {
+        currentUserType = mode;
+        const btnConstructor = document.getElementById('btn-constructor');
+        const btnPublic = document.getElementById('btn-public');
+        const fieldsConstructor = document.getElementById('constructor-fields');
+        const fieldsPublic = document.getElementById('public-fields');
+
+        if (mode === 'Constructor') {
+            btnConstructor.classList.add('toggle-active');
+            btnPublic.classList.remove('toggle-active');
+            fieldsConstructor.classList.remove('hidden');
+            fieldsPublic.classList.add('hidden');
+            document.documentElement.style.setProperty('--theme-color', '#e10600');
+        } else {
+            btnPublic.classList.add('toggle-active');
+            btnConstructor.classList.remove('toggle-active');
+            fieldsPublic.classList.remove('hidden');
+            fieldsConstructor.classList.add('hidden');
+            document.documentElement.style.setProperty('--theme-color', '#00D7B6'); // Generic blue/green for public
+        }
+    }
 
     function getTeamColor(teamName) {
         let themeColor = "#e10600"; 
@@ -260,23 +298,20 @@
 
                 const headerText = `Round ${currentRound} | Next Race: ${displayDate}`;
                 document.getElementById('login-round-text').innerText = headerText;
-                document.getElementById('betting-round-text').innerText = headerText; // Applies to betting page
+                document.getElementById('betting-round-text').innerText = headerText; 
             }
 
             constructorsData = await fetchCSV(CONSTRUCTORS_CSV_URL);
             const constructorSelect = document.getElementById('constructor-select');
             
-            // Generate Select Dropdown & Landing Page Overview
             const overviewGrid = document.getElementById('paddock-overview-grid');
-            overviewGrid.innerHTML = ''; // Clear loading text
+            overviewGrid.innerHTML = ''; 
 
             constructorsData.forEach(c => {
                 const teamName = c[0];
                 if(teamName) {
-                    // Populate Select Options
                     constructorSelect.innerHTML += `<option value="${teamName}">${teamName}</option>`;
 
-                    // Build Paddock Overview Cards
                     const teamColor = getTeamColor(teamName);
                     const slfsPaid = parseSheetNumber(c[3]);
                     const netBets = parseSheetNumber(c[4]);
@@ -308,6 +343,7 @@
                 const allBetsData = await fetchCSV(BETS_CSV_URL);
                 const currentBets = allBetsData.filter(b => b[1] && String(b[1]).trim() === currentRound);
                 
+                // Base Pots dynamically sum up EVERYONE'S bets for the current round (Public and Constructor)
                 currentBets.forEach(bet => {
                     const raceType = String(bet[3]).trim().toLowerCase();
                     const driver = String(bet[4]).trim();
@@ -357,14 +393,12 @@
                     </label>`;
             });
 
-            // Attach dynamic de-selection logic and live calculation listeners
             document.querySelectorAll('.driver-option input[type="radio"]').forEach(radio => {
                 radio.addEventListener('click', function(e) {
                     if (this.dataset.wasChecked === "true") {
                         this.checked = false;
                         this.dataset.wasChecked = "false";
                     } else {
-                        // Uncheck all other radios in this group
                         document.querySelectorAll(`input[name="${this.name}"]`).forEach(r => r.dataset.wasChecked = "false");
                         this.dataset.wasChecked = "true";
                     }
@@ -382,43 +416,94 @@
     }
 
     async function login() {
-        const selected = document.getElementById('constructor-select').value;
-        const pass = document.getElementById('password-input').value;
-        const team = constructorsData.find(c => String(c[0]).trim() === selected);
-        
-        if (team && String(team[1]).trim() === pass) {
-            currentConstructor = selected;
-            applyTeamTheme(selected);
+        if (currentUserType === 'Constructor') {
+            const selected = document.getElementById('constructor-select').value;
+            const pass = document.getElementById('password-input').value;
+            const team = constructorsData.find(c => String(c[0]).trim() === selected);
+            
+            if (team && String(team[1]).trim() === pass) {
+                currentConstructor = selected;
+                currentMobile = ""; // Reset mobile just in case
+                applyTeamTheme(selected);
+
+                // Unhide constructor-only metrics
+                ['metric-starting-cap', 'metric-driver-slfs', 'metric-race-fees', 'metric-winnings', 'metric-budget-cap', 'metric-divider'].forEach(id => {
+                    document.getElementById(id).style.display = 'flex';
+                });
+                document.getElementById('metric-divider').style.display = 'block';
+
+                document.getElementById('login-section').classList.add('hidden');
+                document.getElementById('betting-section').classList.remove('hidden');
+                document.getElementById('welcome-message').innerText = `${selected}`;
+                
+                const slfsPaid = parseSheetNumber(team[3]);
+                baseSideBetNet = parseSheetNumber(team[4]);
+                const raceFees = parseSheetNumber(team[5]);
+                const budgetCap = parseSheetNumber(team[6]);
+                const sideBetWinnings = parseSheetNumber(team[7]);
+
+                document.getElementById('driver-slfs-display').innerText = `-$${slfsPaid.toFixed(2)}`;
+                document.getElementById('side-bet-winnings-display').innerText = `+$${sideBetWinnings.toFixed(2)}`;
+                document.getElementById('budget-cap-display').innerText = `$${budgetCap.toFixed(2)}`;
+                
+                const raceFeesElem = document.getElementById('race-fees-display');
+                if (raceFees > 0) {
+                    raceFeesElem.innerText = `+$${raceFees.toFixed(2)}`;
+                    raceFeesElem.style.color = "#00ff00";
+                } else {
+                    raceFeesElem.innerText = `$0.00`;
+                    raceFeesElem.style.color = "#fff";
+                }
+
+                await populateExistingBets();
+            } else {
+                alert("Incorrect constructor or password!");
+            }
+        } else {
+            // Public Login Logic
+            const publicName = document.getElementById('public-name-input').value.trim();
+            const publicMobile = document.getElementById('public-mobile-input').value.trim();
+
+            if (!publicName || !publicMobile) {
+                alert("Please enter both your Full Name and Mobile Number to enter.");
+                return;
+            }
+
+            currentConstructor = publicName;
+            currentMobile = publicMobile;
+            
+            // Hide constructor metrics
+            ['metric-starting-cap', 'metric-driver-slfs', 'metric-race-fees', 'metric-winnings', 'metric-budget-cap', 'metric-divider'].forEach(id => {
+                document.getElementById(id).style.display = 'none';
+            });
 
             document.getElementById('login-section').classList.add('hidden');
             document.getElementById('betting-section').classList.remove('hidden');
-            document.getElementById('welcome-message').innerText = `${selected}`;
-            
-            // Extracted from Constructors tab: Idx 3 (SLFs), Idx 4 (Net Side Bets), Idx 5 (Race Fees), Idx 6 (Cap), Idx 7 (Side Bet Winnings)
-            const slfsPaid = parseSheetNumber(team[3]);
-            baseSideBetNet = parseSheetNumber(team[4]);
-            const raceFees = parseSheetNumber(team[5]);
-            const budgetCap = parseSheetNumber(team[6]);
-            const sideBetWinnings = parseSheetNumber(team[7]);
+            document.getElementById('welcome-message').innerText = `Welcome, ${publicName}`;
 
-            // Populate dashboard metrics
-            document.getElementById('driver-slfs-display').innerText = `-$${slfsPaid.toFixed(2)}`;
-            document.getElementById('side-bet-winnings-display').innerText = `+$${sideBetWinnings.toFixed(2)}`;
-            document.getElementById('budget-cap-display').innerText = `$${budgetCap.toFixed(2)}`;
-            
-            // Logic to color code Race Fees based on value
-            const raceFeesElem = document.getElementById('race-fees-display');
-            if (raceFees > 0) {
-                raceFeesElem.innerText = `+$${raceFees.toFixed(2)}`;
-                raceFeesElem.style.color = "#00ff00";
-            } else {
-                raceFeesElem.innerText = `$0.00`;
-                raceFeesElem.style.color = "#fff";
-            }
-
+            await calculatePublicNetBets();
             await populateExistingBets();
-        } else {
-            alert("Incorrect constructor or password!");
+        }
+    }
+
+    async function calculatePublicNetBets() {
+        let publicNet = 0;
+        try {
+            const betsData = await fetchCSV(BETS_CSV_URL);
+            betsData.forEach(b => {
+                const bName = String(b[2]).trim();
+                const bAmount = parseFloat(b[5] || 0);
+                const bWinnings = parseFloat(b[7] || 0);
+                const bUserType = String(b[8]).trim();
+                const bMobile = String(b[9]).trim();
+
+                if (bUserType === 'Public' && bName === currentConstructor && bMobile === currentMobile) {
+                    publicNet += (bWinnings - bAmount);
+                }
+            });
+            baseSideBetNet = publicNet;
+        } catch(e) {
+            console.error("Could not calculate public net bets.");
         }
     }
 
@@ -426,16 +511,23 @@
         try {
             const betsData = await fetchCSV(BETS_CSV_URL);
             
-            const myBets = betsData.filter(b => 
-                b[1] && String(b[1]).trim() === currentRound && 
-                b[2] && String(b[2]).trim() === currentConstructor
-            );
+            const myBets = betsData.filter(b => {
+                const isCurrentRound = b[1] && String(b[1]).trim() === currentRound;
+                const matchesName = b[2] && String(b[2]).trim() === currentConstructor;
+                const rowUserType = String(b[8]).trim();
+                const rowMobile = String(b[9]).trim();
+
+                if (currentUserType === 'Constructor') {
+                    return isCurrentRound && matchesName && rowUserType !== 'Public';
+                } else {
+                    return isCurrentRound && matchesName && rowUserType === 'Public' && rowMobile === currentMobile;
+                }
+            });
             
             const submitBtn = document.getElementById('submit-btn');
             hasExistingBets = myBets.length > 0;
             submitBtn.innerText = hasExistingBets ? "Update Bets" : "Submit Bets";
 
-            // Reset existing bet tracking amounts
             myExistingSprintBet = 0;
             myExistingFeatureBet = 0;
 
@@ -461,20 +553,17 @@
                 }
             });
 
-            // Initialize dynamic displays based on loaded configuration
             updateLiveValues();
 
-            // Auto-Lock & Auto-Reopen Logic
             const raceDate = parseDateString(nextRaceDate);
             const today = new Date();
-            
             const deadline = new Date(raceDate);
             deadline.setDate(deadline.getDate() - 1);
-            deadline.setHours(23, 59, 59); // Locks at 11:59PM the day before the race
+            deadline.setHours(23, 59, 59); 
 
             const reopenDate = new Date(raceDate);
             reopenDate.setDate(reopenDate.getDate() + 1);
-            reopenDate.setHours(0, 0, 0); // Re-opens precisely at Midnight the day after the race
+            reopenDate.setHours(0, 0, 0); 
 
             if (today > deadline && today < reopenDate) {
                 submitBtn.disabled = true;
@@ -485,21 +574,18 @@
     }
 
     function updateLiveValues() {
-        // Find what is currently selected right now
         const sprintSelected = document.querySelector('input[name="sprint-driver"]:checked');
         const featureSelected = document.querySelector('input[name="feature-driver"]:checked');
 
         const newSprintAmount = sprintSelected ? parseFloat(sprintSelected.getAttribute('data-amount')) : 0;
         const newFeatureAmount = featureSelected ? parseFloat(featureSelected.getAttribute('data-amount')) : 0;
 
-        // Dynamic Pot = Total Sheet Pot - Old Bet (if any) + Newly Selected Bet
         const currentSprintPot = baseSprintPot - myExistingSprintBet + newSprintAmount;
         const currentFeaturePot = baseFeaturePot - myExistingFeatureBet + newFeatureAmount;
 
         document.getElementById('sprint-pot-total').innerText = `$${currentSprintPot.toFixed(2)}`;
         document.getElementById('feature-pot-total').innerText = `$${currentFeaturePot.toFixed(2)}`;
 
-        // Dynamic Net Win/Loss = Base Net (from sheet) + Old Bets Placed - New Bets Selected
         const dynamicNet = baseSideBetNet + myExistingSprintBet + myExistingFeatureBet - newSprintAmount - newFeatureAmount;
 
         const netDisplay = document.getElementById('net-win-loss-display');
@@ -519,8 +605,16 @@
         document.getElementById('betting-section').classList.add('hidden');
         document.getElementById('login-section').classList.remove('hidden');
         document.getElementById('password-input').value = ""; 
-        document.getElementById('constructor-select').value = ""; 
-        document.documentElement.style.setProperty('--theme-color', '#e10600'); 
+        document.getElementById('public-name-input').value = ""; 
+        document.getElementById('public-mobile-input').value = ""; 
+        
+        // Reset to match active toggle
+        if (currentUserType === 'Constructor') {
+            document.documentElement.style.setProperty('--theme-color', '#e10600');
+        } else {
+            document.documentElement.style.setProperty('--theme-color', '#00D7B6');
+        }
+
         document.querySelectorAll('input[type="radio"]').forEach(r => {
             r.checked = false;
             r.dataset.wasChecked = "false";
@@ -534,6 +628,10 @@
         formData.append('raceType', raceType);
         formData.append('driver', selectedElement.value);
         formData.append('amount', selectedElement.getAttribute('data-amount'));
+        
+        // Append newly required fields for the updated GAS backend
+        formData.append('userType', currentUserType);
+        formData.append('mobile', currentMobile);
 
         return fetch(GOOGLE_SCRIPT_WEB_APP_URL, { 
             method: 'POST', 
