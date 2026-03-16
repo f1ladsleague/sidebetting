@@ -95,7 +95,6 @@
         
         .mini-dashboard { background: #1a1a21; border: 1px solid #333; padding: 12px; border-radius: 8px; border-left: 4px solid var(--team-color, #444); }
         
-        /* TEAM HEADER AND LOGO CSS */
         .team-header { display: flex; justify-content: space-between; align-items: center; border-bottom: 1px solid #333; padding-bottom: 8px; margin-bottom: 10px; }
         .mini-dashboard h4 { margin: 0; text-transform: uppercase; color: var(--team-color, #fff); font-size: 15px; letter-spacing: 1px; font-weight: 700; }
         .team-logo { height: 28px; max-width: 80px; object-fit: contain; }
@@ -169,7 +168,10 @@
     </div>
 
     <p class="fee-notice">*The League takes a 10% fee on all side bet winnings.</p>
-    <h2 id="welcome-message" style="color: var(--theme-color); margin-bottom: 20px;"></h2>
+
+    <img id="betting-team-logo" src="" alt="Team Logo" style="height: 60px; display: none; margin: 0 auto 10px auto; object-fit: contain;">
+    
+    <h2 id="welcome-message" style="color: var(--theme-color); margin-bottom: 20px; text-align: center;"></h2>
 
     <div class="dashboard-metrics">
         <div class="metric-row" id="metric-starting-cap">
@@ -203,17 +205,20 @@
     </div>
 
     <form id="bet-form">
-        <p style="text-align: center; color: #aaa; margin-bottom: 5px;">Select ONE driver for the Sprint and/or ONE for the Feature. Click a selected driver again to remove your bet.</p>
-        <p class="round-info" id="betting-round-text" style="font-size: 15px; margin-bottom: 25px;"></p>
+        <p style="text-align: center; color: #aaa; margin-bottom: 15px;">Select ONE driver for the Sprint and/or ONE for the Feature. Click a selected driver again to remove your bet.</p>
+        
+        <div style="background: rgba(255,255,255,0.05); border: 1px solid var(--theme-color); border-radius: 8px; padding: 15px; margin-bottom: 25px; text-align: center; box-shadow: 0 4px 10px rgba(0,0,0,0.2);">
+            <p id="betting-round-text" style="font-size: 22px; font-weight: 700; color: var(--theme-color); margin: 0; text-transform: uppercase; letter-spacing: 1px;"></p>
+        </div>
         
         <div class="race-section">
-            <h2 style="color: white; margin-top: 0;">Sprint Race</h2>
+            <h2 style="color: white; margin-top: 0; text-align: center; margin-bottom: 20px;">Sprint Race</h2>
             <div class="pot-display">Live Pot: <span id="sprint-pot-total">$0</span></div>
             <div id="sprint-drivers"></div>
         </div>
 
         <div class="race-section">
-            <h2 style="color: white; margin-top: 0;">Feature Race</h2>
+            <h2 style="color: white; margin-top: 0; text-align: center; margin-bottom: 20px;">Feature Race</h2>
             <div class="pot-display">Live Pot: <span id="feature-pot-total">$0</span></div>
             <div id="feature-drivers"></div>
         </div>
@@ -242,7 +247,6 @@
         "Shiyan": "https://raw.githubusercontent.com/f1ladsleague/sidebetting/362f6f915ee8da5d8a71320b12372157ccaf5f02/Driver_Photos/Shiyan.png"
     };
 
-    // TEAM LOGO MAPPING ADDED HERE
     const teamLogos = {
         "Aston Martin": "https://raw.githubusercontent.com/f1ladsleague/sidebetting/3bea2638655c2cd16aaf69b2541dd0f535f80c7f/Team_Logos/AM.png",
         "Ferrari": "https://raw.githubusercontent.com/f1ladsleague/sidebetting/3bea2638655c2cd16aaf69b2541dd0f535f80c7f/Team_Logos/FER.png",
@@ -402,7 +406,6 @@
                     const netColor = netBets > 0 ? '#00ff00' : (netBets < 0 ? '#ff3333' : '#888');
                     const netText = netBets > 0 ? `+$${netBets.toFixed(2)}` : (netBets < 0 ? `-$${Math.abs(netBets).toFixed(2)}` : `$0.00`);
                     
-                    // FETCH LOGO URL
                     const logoUrl = teamLogos[teamName] || "";
                     const logoImg = logoUrl ? `<img src="${logoUrl}" class="team-logo" alt="${teamName}">` : "";
 
@@ -536,6 +539,16 @@
                 document.getElementById('betting-section').classList.remove('hidden');
                 document.getElementById('welcome-message').innerText = `${selected}`;
                 
+                // SHOW TEAM LOGO FOR CONSTRUCTORS
+                const logoUrl = teamLogos[selected] || "";
+                const logoImg = document.getElementById('betting-team-logo');
+                if (logoUrl) {
+                    logoImg.src = logoUrl;
+                    logoImg.style.display = "block";
+                } else {
+                    logoImg.style.display = "none";
+                }
+                
                 const slfsPaid = parseSheetNumber(team[3]);
                 baseSideBetNet = parseSheetNumber(team[4]);
                 const raceFees = parseSheetNumber(team[5]);
@@ -579,6 +592,9 @@
             document.getElementById('login-section').classList.add('hidden');
             document.getElementById('betting-section').classList.remove('hidden');
             document.getElementById('welcome-message').innerText = `Welcome, ${publicFName}`;
+            
+            // HIDE TEAM LOGO FOR PUBLIC
+            document.getElementById('betting-team-logo').style.display = "none";
 
             await calculatePublicNetBets();
             await populateExistingBets();
@@ -707,6 +723,9 @@
         document.getElementById('public-fname-input').value = ""; 
         document.getElementById('public-sname-input').value = ""; 
         document.getElementById('public-email-input').value = ""; 
+        
+        // RESET LOGO AND THEME ON HOME
+        document.getElementById('betting-team-logo').style.display = "none";
         
         if (currentUserType === 'Constructor') {
             document.documentElement.style.setProperty('--theme-color', '#e10600');
