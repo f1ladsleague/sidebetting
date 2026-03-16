@@ -9,11 +9,13 @@
         :root { --theme-color: #e10600; --f1-dark: #15151e; --f1-card: #1f1f27; --f1-hover: #2a2a35; }
         
         body { font-family: 'Titillium Web', sans-serif; background-color: var(--f1-dark); color: #fff; margin: 0; padding: 20px; display: flex; justify-content: center; }
-        .container { background: var(--f1-card); width: 100%; max-width: 600px; padding: 30px; border-radius: 12px; box-shadow: 0 10px 30px rgba(0,0,0,0.5); }
+        .container { background: var(--f1-card); width: 100%; max-width: 600px; padding: 30px; border-radius: 12px; box-shadow: 0 10px 30px rgba(0,0,0,0.5); margin-bottom: 20px;}
         
+        /* Logo Styling */
+        .league-logo { max-height: 75px; margin: 0 auto 15px auto; display: block; border-radius: 6px; }
+
         h1 { text-align: center; text-transform: uppercase; font-weight: 700; margin: 0; }
         
-        /* New Header Wrapper to align back button and title */
         .header-wrapper { position: relative; display: flex; align-items: center; justify-content: center; border-bottom: 2px solid var(--theme-color); padding-bottom: 10px; margin-bottom: 20px; transition: border-color 0.3s ease; }
         .back-arrow { position: absolute; left: 0; color: #aaa; font-size: 16px; font-weight: 600; cursor: pointer; transition: 0.2s; text-transform: uppercase; letter-spacing: 1px; }
         .back-arrow:hover { color: #fff; }
@@ -56,20 +58,58 @@
         .cap-row .metric-value { color: var(--theme-color); font-size: 20px; }
         
         .divider { border-top: 1px dashed #444; margin: 6px 0; }
+
+        /* --- Landing Page Specific Styles --- */
+        .rules-card { background: rgba(225, 6, 0, 0.05); border: 1px solid rgba(225, 6, 0, 0.3); padding: 20px; border-radius: 8px; margin-top: 30px; margin-bottom: 30px; }
+        .rules-card h3 { color: var(--theme-color); text-transform: uppercase; margin-top: 0; font-size: 16px; border-bottom: 1px solid rgba(225, 6, 0, 0.2); padding-bottom: 8px; margin-bottom: 12px;}
+        .rules-card ul { margin: 0; padding-left: 20px; font-size: 13px; color: #ccc; }
+        .rules-card li { margin-bottom: 8px; line-height: 1.4; }
+
+        .overview-title { text-transform: uppercase; color: #fff; font-size: 18px; border-bottom: 2px solid #333; padding-bottom: 8px; margin-bottom: 15px; text-align: center; }
+        .paddock-grid { display: flex; flex-direction: column; gap: 15px; }
+        
+        /* Mini Constructor Dashboard */
+        .mini-dashboard { background: #1a1a21; border: 1px solid #333; padding: 12px; border-radius: 8px; border-left: 4px solid var(--team-color, #444); }
+        .mini-dashboard h4 { margin: 0 0 10px 0; text-transform: uppercase; color: var(--team-color, #fff); font-size: 14px; letter-spacing: 1px;}
+        .mini-dashboard .metric-row { padding: 2px 0; }
+        .mini-dashboard .metric-title { font-size: 11px; }
+        .mini-dashboard .metric-value { font-size: 13px; }
+        .mini-dashboard .cap-row { margin-top: 4px; padding-top: 8px; border-top: 1px solid #333; }
+        .mini-dashboard .cap-row .metric-title { font-size: 12px; color: #fff; }
+        .mini-dashboard .cap-row .metric-value { font-size: 15px; color: var(--team-color, #fff); }
     </style>
 </head>
 <body>
 
 <div class="container" id="login-section">
-    <h1 class="login-h1-border">F1 Lads League</h1>
+    <img src="https://raw.githubusercontent.com/f1ladsleague/sidebetting/e78422814abd6cb31f36f99696b471262536d272/Logo.png" alt="F1 Lads Logo" class="league-logo">
+    <h1 class="login-h1-border">SIDE BETS</h1>
     <p class="round-info" id="login-round-text">Loading Session...</p>
+    
     <h2>Constructor Login</h2>
     <select id="constructor-select"><option value="">Select your Team...</option></select>
     <input type="password" id="password-input" placeholder="Enter Password">
     <button class="btn-primary" onclick="login()">Enter Paddock</button>
+
+    <div class="rules-card">
+        <h3>Rules & Regulations</h3>
+        <ul>
+            <li><strong>Selection Limit:</strong> Select ONE driver for the Sprint and/or ONE driver for the Feature race.</li>
+            <li><strong>Deadlines:</strong> Bets lock strictly at 11:59 PM the day before the race weekend begins.</li>
+            <li><strong>League Cut:</strong> The League takes a flat 10% fee on all side bet winnings.</li>
+            <li><strong>Budget Cap:</strong> Your starting cap is adjusted by driver SLFs. Net Side Bets (W/L) do not increase your budget—only positive Side Bet Winnings add to your Cap.</li>
+        </ul>
+    </div>
+
+    <div class="overview-title">Paddock Overview</div>
+    <div class="paddock-grid" id="paddock-overview-grid">
+        <p style="text-align: center; color: #555; font-size: 13px;">Loading constructor data...</p>
+    </div>
 </div>
 
 <div class="container hidden" id="betting-section">
+    <img src="https://raw.githubusercontent.com/f1ladsleague/sidebetting/e78422814abd6cb31f36f99696b471262536d272/Logo.png" alt="F1 Lads Logo" class="league-logo">
+    
     <div class="header-wrapper">
         <div class="back-arrow" onclick="returnHome()">&#8592; Back</div>
         <h1>Manage Your Bets</h1>
@@ -110,7 +150,8 @@
     </div>
 
     <form id="bet-form">
-        <p style="text-align: center; color: #aaa; margin-bottom: 30px;">Select ONE driver for the Sprint and/or ONE for the Feature. Click a selected driver again to remove your bet.</p>
+        <p style="text-align: center; color: #aaa; margin-bottom: 5px;">Select ONE driver for the Sprint and/or ONE for the Feature. Click a selected driver again to remove your bet.</p>
+        <p class="round-info" id="betting-round-text" style="font-size: 15px; margin-bottom: 25px;"></p>
         
         <div class="race-section">
             <h2 style="color: white; margin-top: 0;">Sprint Race</h2>
@@ -157,6 +198,19 @@
 
     let sprintBetCounts = {};
     let featureBetCounts = {};
+
+    function getTeamColor(teamName) {
+        let themeColor = "#e10600"; 
+        const nameLower = teamName.toLowerCase();
+        
+        if (nameLower.includes("mercedes")) themeColor = "#00D7B6";
+        else if (nameLower.includes("red bull") || nameLower.includes("redbull")) themeColor = "#4781D7";
+        else if (nameLower.includes("ferrari")) themeColor = "#ED1131";
+        else if (nameLower.includes("mclaren")) themeColor = "#F47600";
+        else if (nameLower.includes("aston martin") || nameLower.includes("astonmartin")) themeColor = "#229971";
+
+        return themeColor;
+    }
 
     async function fetchCSV(url) {
         const cacheBusterUrl = url + "&nocache=" + new Date().getTime();
@@ -206,12 +260,48 @@
 
                 const headerText = `Round ${currentRound} | Next Race: ${displayDate}`;
                 document.getElementById('login-round-text').innerText = headerText;
+                document.getElementById('betting-round-text').innerText = headerText; // Applies to betting page
             }
 
             constructorsData = await fetchCSV(CONSTRUCTORS_CSV_URL);
             const constructorSelect = document.getElementById('constructor-select');
+            
+            // Generate Select Dropdown & Landing Page Overview
+            const overviewGrid = document.getElementById('paddock-overview-grid');
+            overviewGrid.innerHTML = ''; // Clear loading text
+
             constructorsData.forEach(c => {
-                if(c[0]) constructorSelect.innerHTML += `<option value="${c[0]}">${c[0]}</option>`;
+                const teamName = c[0];
+                if(teamName) {
+                    // Populate Select Options
+                    constructorSelect.innerHTML += `<option value="${teamName}">${teamName}</option>`;
+
+                    // Build Paddock Overview Cards
+                    const teamColor = getTeamColor(teamName);
+                    const slfsPaid = parseSheetNumber(c[3]);
+                    const netBets = parseSheetNumber(c[4]);
+                    const raceFees = parseSheetNumber(c[5]);
+                    const budgetCap = parseSheetNumber(c[6]);
+                    const sideBetWinnings = parseSheetNumber(c[7]);
+
+                    const feesColor = raceFees > 0 ? '#00ff00' : '#fff';
+                    const netColor = netBets > 0 ? '#00ff00' : (netBets < 0 ? '#ff3333' : '#888');
+                    const netText = netBets > 0 ? `+$${netBets.toFixed(2)}` : (netBets < 0 ? `-$${Math.abs(netBets).toFixed(2)}` : `$0.00`);
+
+                    const cardHTML = `
+                        <div class="mini-dashboard" style="--team-color: ${teamColor}">
+                            <h4>${teamName}</h4>
+                            <div class="metric-row"><span class="metric-title">Starting Cap</span><span class="metric-value" style="color:#ccc">$500.00</span></div>
+                            <div class="metric-row"><span class="metric-title">Driver SLFs</span><span class="metric-value" style="color:#ff4444">-$${slfsPaid.toFixed(2)}</span></div>
+                            <div class="metric-row"><span class="metric-title">Total Race Fees</span><span class="metric-value" style="color:${feesColor}">${raceFees>0?'+':''}$${raceFees.toFixed(2)}</span></div>
+                            <div class="metric-row"><span class="metric-title">Side Bet Winnings</span><span class="metric-value">+$${sideBetWinnings.toFixed(2)}</span></div>
+                            <div class="metric-row cap-row"><span class="metric-title">Budget Cap</span><span class="metric-value">$${budgetCap.toFixed(2)}</span></div>
+                            <div class="divider"></div>
+                            <div class="metric-row"><span class="metric-title" style="color:#888;">Net Side Bets</span><span class="metric-value" style="color:${netColor}">${netText}</span></div>
+                        </div>
+                    `;
+                    overviewGrid.innerHTML += cardHTML;
+                }
             });
             
             try {
@@ -288,16 +378,7 @@
     };
 
     function applyTeamTheme(teamName) {
-        let themeColor = "#e10600"; 
-        const nameLower = teamName.toLowerCase();
-        
-        if (nameLower.includes("mercedes")) themeColor = "#00D7B6";
-        else if (nameLower.includes("red bull") || nameLower.includes("redbull")) themeColor = "#4781D7";
-        else if (nameLower.includes("ferrari")) themeColor = "#ED1131";
-        else if (nameLower.includes("mclaren")) themeColor = "#F47600";
-        else if (nameLower.includes("aston martin") || nameLower.includes("astonmartin")) themeColor = "#229971";
-
-        document.documentElement.style.setProperty('--theme-color', themeColor);
+        document.documentElement.style.setProperty('--theme-color', getTeamColor(teamName));
     }
 
     async function login() {
@@ -471,7 +552,6 @@
         const featureSelected = document.querySelector('input[name="feature-driver"]:checked');
 
         if (!sprintSelected && !featureSelected) {
-            // Because they can deselect, if they try to submit 0 bets, let them know.
             alert("You must have at least one driver selected to place or update a bet.");
             submitBtn.innerText = hasExistingBets ? "Update Bets" : "Submit Bets";
             submitBtn.disabled = false;
