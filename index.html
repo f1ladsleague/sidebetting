@@ -60,7 +60,6 @@
         
         .avatar-wrapper { width: 50px; height: 50px; border-radius: 50%; overflow: hidden; margin-right: 15px; border: 2px solid #444; flex-shrink: 0; background-color: #1a1a21; transition: 0.2s; }
         
-        /* ZOOMED IN DRIVER CSS (Increased from 1.35 to 1.7) */
         .driver-avatar { width: 100%; height: 100%; object-fit: cover; transform: scale(1.7); transform-origin: center 15%; }
         
         .driver-name-block { display: flex; flex-direction: column; flex-grow: 1; }
@@ -95,7 +94,12 @@
         .paddock-grid { display: flex; flex-direction: column; gap: 15px; }
         
         .mini-dashboard { background: #1a1a21; border: 1px solid #333; padding: 12px; border-radius: 8px; border-left: 4px solid var(--team-color, #444); }
-        .mini-dashboard h4 { margin: 0 0 10px 0; text-transform: uppercase; color: var(--team-color, #fff); font-size: 14px; letter-spacing: 1px;}
+        
+        /* TEAM HEADER AND LOGO CSS */
+        .team-header { display: flex; justify-content: space-between; align-items: center; border-bottom: 1px solid #333; padding-bottom: 8px; margin-bottom: 10px; }
+        .mini-dashboard h4 { margin: 0; text-transform: uppercase; color: var(--team-color, #fff); font-size: 15px; letter-spacing: 1px; font-weight: 700; }
+        .team-logo { height: 28px; max-width: 80px; object-fit: contain; }
+        
         .mini-dashboard .metric-row { padding: 2px 0; }
         .mini-dashboard .metric-title { font-size: 11px; }
         .mini-dashboard .metric-value { font-size: 13px; }
@@ -238,10 +242,19 @@
         "Shiyan": "https://raw.githubusercontent.com/f1ladsleague/sidebetting/362f6f915ee8da5d8a71320b12372157ccaf5f02/Driver_Photos/Shiyan.png"
     };
 
+    // TEAM LOGO MAPPING ADDED HERE
+    const teamLogos = {
+        "Aston Martin": "https://raw.githubusercontent.com/f1ladsleague/sidebetting/3bea2638655c2cd16aaf69b2541dd0f535f80c7f/Team_Logos/AM.png",
+        "Ferrari": "https://raw.githubusercontent.com/f1ladsleague/sidebetting/3bea2638655c2cd16aaf69b2541dd0f535f80c7f/Team_Logos/FER.png",
+        "McLaren": "https://raw.githubusercontent.com/f1ladsleague/sidebetting/3bea2638655c2cd16aaf69b2541dd0f535f80c7f/Team_Logos/MCL.png",
+        "Mercedes": "https://raw.githubusercontent.com/f1ladsleague/sidebetting/3bea2638655c2cd16aaf69b2541dd0f535f80c7f/Team_Logos/MER.png",
+        "Red Bull": "https://raw.githubusercontent.com/f1ladsleague/sidebetting/3bea2638655c2cd16aaf69b2541dd0f535f80c7f/Team_Logos/RB.png"
+    };
+
     let constructorsData = [];
     let currentConstructor = ""; 
     let currentUserType = "Public"; 
-    let currentEmail = ""; // CHANGED VARIABLE NAME
+    let currentEmail = ""; 
     
     let currentRound = "";
     let nextRaceDate = "";
@@ -388,10 +401,17 @@
                     const feesColor = raceFees > 0 ? '#00ff00' : '#fff';
                     const netColor = netBets > 0 ? '#00ff00' : (netBets < 0 ? '#ff3333' : '#888');
                     const netText = netBets > 0 ? `+$${netBets.toFixed(2)}` : (netBets < 0 ? `-$${Math.abs(netBets).toFixed(2)}` : `$0.00`);
+                    
+                    // FETCH LOGO URL
+                    const logoUrl = teamLogos[teamName] || "";
+                    const logoImg = logoUrl ? `<img src="${logoUrl}" class="team-logo" alt="${teamName}">` : "";
 
                     const cardHTML = `
                         <div class="mini-dashboard" style="--team-color: ${teamColor}">
-                            <h4>${teamName}</h4>
+                            <div class="team-header">
+                                <h4>${teamName}</h4>
+                                ${logoImg}
+                            </div>
                             <div class="metric-row"><span class="metric-title">Starting Cap</span><span class="metric-value" style="color:#ccc">$500.00</span></div>
                             <div class="metric-row"><span class="metric-title">Driver SLFs</span><span class="metric-value" style="color:#ff4444">-$${slfsPaid.toFixed(2)}</span></div>
                             <div class="metric-row"><span class="metric-title">Total Race Fees</span><span class="metric-value" style="color:${feesColor}">${raceFees>0?'+':''}$${raceFees.toFixed(2)}</span></div>
@@ -707,7 +727,7 @@
         formData.append('raceType', raceType);
         
         formData.append('userType', currentUserType);
-        formData.append('email', currentEmail); // SENDING AS EMAIL
+        formData.append('email', currentEmail); 
 
         if (isDelete) {
             formData.append('action', 'delete');
