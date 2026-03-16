@@ -4,6 +4,7 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>F1 Lads League | Side Bets</title>
+    <link rel="icon" type="image/png" href="https://raw.githubusercontent.com/f1ladsleague/sidebetting/e78422814abd6cb31f36f99696b471262536d272/Logo.png">
     <link href="https://fonts.googleapis.com/css2?family=Titillium+Web:wght@400;600;700&display=swap" rel="stylesheet">
     <style>
         :root { --theme-color: #00D7B6; --f1-dark: #15151e; --f1-card: #1f1f27; --f1-hover: #2a2a35; }
@@ -13,14 +14,21 @@
         
         .league-logo { max-height: 75px; margin: 0 auto 15px auto; display: block; border-radius: 6px; }
         
-        /* New Hero Image CSS */
-        .hero-image { width: 100%; max-height: 250px; object-fit: cover; object-position: center 20%; border-radius: 8px; margin-bottom: 20px; border: 1px solid #333; box-shadow: 0 4px 10px rgba(0,0,0,0.3); }
+        /* UPDATED HERO IMAGE (No border, natural aspect ratio to stop cropping) */
+        .hero-image { width: 100%; height: auto; display: block; border-radius: 8px; margin-bottom: 20px; box-shadow: 0 4px 10px rgba(0,0,0,0.3); }
 
         h1 { text-align: center; text-transform: uppercase; font-weight: 700; margin: 0; }
         
-        .header-wrapper { position: relative; display: flex; align-items: center; justify-content: center; border-bottom: 2px solid var(--theme-color); padding-bottom: 10px; margin-bottom: 20px; transition: border-color 0.3s ease; }
-        .back-arrow { position: absolute; left: 0; color: #aaa; font-size: 16px; font-weight: 600; cursor: pointer; transition: 0.2s; text-transform: uppercase; letter-spacing: 1px; }
+        /* HEADER FIX FOR MOBILE OVERLAP */
+        .header-wrapper { position: relative; display: flex; align-items: center; justify-content: center; border-bottom: 2px solid var(--theme-color); padding-bottom: 10px; margin-bottom: 20px; transition: border-color 0.3s ease; min-height: 35px;}
+        .header-wrapper h1 { padding: 0 55px; font-size: 26px; line-height: 1.2; margin: 0; }
+        .back-arrow { position: absolute; left: 0; color: #aaa; font-size: 16px; font-weight: 600; cursor: pointer; transition: 0.2s; text-transform: uppercase; letter-spacing: 1px; top: 50%; transform: translateY(-50%);}
         .back-arrow:hover { color: #fff; }
+
+        @media (max-width: 480px) {
+            .header-wrapper h1 { font-size: 20px; padding: 0 50px; }
+            .back-arrow { font-size: 14px; }
+        }
 
         .login-h1-border { border-bottom: 2px solid var(--theme-color); padding-bottom: 10px; margin-bottom: 5px; transition: border-color 0.3s ease; }
 
@@ -45,14 +53,17 @@
         .hidden { display: none !important; }
         .race-section { background: #1a1a21; padding: 20px; border-radius: 8px; margin-bottom: 25px; border: 1px solid #333; }
         
-        /* Updated Driver Option CSS for Avatars */
         .driver-option { display: flex; justify-content: flex-start; align-items: center; padding: 10px 15px; background: var(--f1-hover); border: 2px solid transparent; border-radius: 8px; margin-bottom: 10px; cursor: pointer; transition: 0.2s; font-size: 18px; font-weight: 600; }
         .driver-option:hover { border-color: #555; }
         .driver-option:has(input:checked) { border-color: var(--theme-color); background: color-mix(in srgb, var(--theme-color) 15%, transparent); }
-        .driver-option:has(input:checked) .driver-avatar { border-color: var(--theme-color); }
+        
+        /* UPDATED AVATAR ZOOM CSS */
+        .driver-option:has(input:checked) .avatar-wrapper { border-color: var(--theme-color); }
         .driver-option input { display: none; } 
         
-        .driver-avatar { width: 45px; height: 45px; border-radius: 50%; object-fit: cover; margin-right: 15px; border: 2px solid #444; background-color: #1a1a21; transition: 0.2s; }
+        .avatar-wrapper { width: 50px; height: 50px; border-radius: 50%; overflow: hidden; margin-right: 15px; border: 2px solid #444; flex-shrink: 0; background-color: #1a1a21; transition: 0.2s; }
+        .driver-avatar { width: 100%; height: 100%; object-fit: cover; transform: scale(1.35); transform-origin: center 20%; }
+        
         .driver-name-block { display: flex; flex-direction: column; flex-grow: 1; }
         .driver-name-text { display: flex; align-items: center; }
         
@@ -215,7 +226,6 @@
     const DRIVERS_CSV_URL = "https://docs.google.com/spreadsheets/d/e/2PACX-1vTZKLukYpw5VzMfRbfXh80lj1B0gbUiVx_CoinOMVb-b2iFEMiWg_nW3KcMp88qKL3UfctvzYgEN_Lg/pub?gid=1372542075&single=true&output=csv";
     const BETS_CSV_URL = "https://docs.google.com/spreadsheets/d/e/2PACX-1vTZKLukYpw5VzMfRbfXh80lj1B0gbUiVx_CoinOMVb-b2iFEMiWg_nW3KcMp88qKL3UfctvzYgEN_Lg/pub?gid=80994690&single=true&output=csv";
 
-    // Driver Image Mapping
     const driverImages = {
         "Eranga": "https://raw.githubusercontent.com/f1ladsleague/sidebetting/362f6f915ee8da5d8a71320b12372157ccaf5f02/Driver_Photos/Eranga.png",
         "Kalpa": "https://raw.githubusercontent.com/f1ladsleague/sidebetting/362f6f915ee8da5d8a71320b12372157ccaf5f02/Driver_Photos/Kalpa.png",
@@ -426,12 +436,14 @@
                 const driverName = String(d[0]).trim();
                 const count = sprintBetCounts[driverName] || 0;
                 const badge = count > 0 ? `<span class="bet-badge">👤 ${count}</span>` : "";
-                // Grab avatar URL or use a transparent placeholder
                 const avatarUrl = driverImages[driverName] || "data:image/gif;base64,R0lGODlhAQABAIAAAAAAAP///yH5BAEAAAAALAAAAAABAAEAAAIBRAA7";
                 
+                // Add avatar wrapper for zoomed image effect
                 sprintDiv.innerHTML += `
                     <label class="driver-option">
-                        <img src="${avatarUrl}" class="driver-avatar" alt="${driverName}">
+                        <div class="avatar-wrapper">
+                            <img src="${avatarUrl}" class="driver-avatar" alt="${driverName}">
+                        </div>
                         <div class="driver-name-block">
                             <div class="driver-name-text">
                                 <span>${driverName}</span> ${badge}
@@ -449,9 +461,12 @@
                 const badge = count > 0 ? `<span class="bet-badge">👤 ${count}</span>` : "";
                 const avatarUrl = driverImages[driverName] || "data:image/gif;base64,R0lGODlhAQABAIAAAAAAAP///yH5BAEAAAAALAAAAAABAAEAAAIBRAA7";
 
+                // Add avatar wrapper for zoomed image effect
                 featureDiv.innerHTML += `
                     <label class="driver-option">
-                        <img src="${avatarUrl}" class="driver-avatar" alt="${driverName}">
+                        <div class="avatar-wrapper">
+                            <img src="${avatarUrl}" class="driver-avatar" alt="${driverName}">
+                        </div>
                         <div class="driver-name-block">
                             <div class="driver-name-text">
                                 <span>${driverName}</span> ${badge}
