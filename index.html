@@ -6,7 +6,8 @@
     <title>F1 Lads League | Side Bets</title>
     <link href="https://fonts.googleapis.com/css2?family=Titillium+Web:wght@400;600;700&display=swap" rel="stylesheet">
     <style>
-        :root { --theme-color: #e10600; --f1-dark: #15151e; --f1-card: #1f1f27; --f1-hover: #2a2a35; }
+        /* Default theme color changed to Public Blue/Green */
+        :root { --theme-color: #00D7B6; --f1-dark: #15151e; --f1-card: #1f1f27; --f1-hover: #2a2a35; }
         
         body { font-family: 'Titillium Web', sans-serif; background-color: var(--f1-dark); color: #fff; margin: 0; padding: 20px; display: flex; justify-content: center; }
         .container { background: var(--f1-card); width: 100%; max-width: 600px; padding: 30px; border-radius: 12px; box-shadow: 0 10px 30px rgba(0,0,0,0.5); margin-bottom: 20px;}
@@ -31,6 +32,10 @@
         select, input[type="password"], input[type="text"], input[type="tel"] { width: 100%; padding: 12px; margin: 10px 0 20px 0; background: var(--f1-hover); border: 1px solid #444; color: white; border-radius: 6px; font-size: 16px; box-sizing: border-box; }
         select:focus, input:focus { outline: none; border-color: var(--theme-color); }
         
+        /* Flexbox for the side-by-side name inputs */
+        .name-row { display: flex; gap: 10px; width: 100%; }
+        .name-row input { margin-bottom: 10px; }
+
         button.btn-primary { width: 100%; background: var(--theme-color); color: white; border: none; padding: 15px; font-size: 18px; font-weight: 700; border-radius: 6px; cursor: pointer; text-transform: uppercase; transition: 0.3s ease; }
         button.btn-primary:hover { filter: brightness(1.2); transform: translateY(-2px); }
         button:disabled { background: #555 !important; cursor: not-allowed; transform: none; color: #aaa; filter: none; }
@@ -89,33 +94,36 @@
     <p class="round-info" id="login-round-text">Loading Session...</p>
     
     <div class="login-toggle">
-        <button id="btn-constructor" class="toggle-active" onclick="setLoginMode('Constructor')">Constructor</button>
-        <button id="btn-public" onclick="setLoginMode('Public')">Public / Guest</button>
+        <button id="btn-constructor" onclick="setLoginMode('Constructor')">Constructor</button>
+        <button id="btn-public" class="toggle-active" onclick="setLoginMode('Public')">Public / Guest</button>
     </div>
 
-    <div id="constructor-fields">
+    <div id="constructor-fields" class="hidden">
         <select id="constructor-select"><option value="">Select your Team...</option></select>
         <input type="password" id="password-input" placeholder="Enter Password">
     </div>
 
-    <div id="public-fields" class="hidden">
-        <input type="text" id="public-name-input" placeholder="Enter Full Name">
+    <div id="public-fields">
+        <div class="name-row">
+            <input type="text" id="public-fname-input" placeholder="First Name">
+            <input type="text" id="public-sname-input" placeholder="Surname">
+        </div>
         <input type="tel" id="public-mobile-input" placeholder="Enter Mobile Number">
     </div>
 
     <button class="btn-primary" onclick="login()">Enter Paddock</button>
 
-    <div class="rules-card" id="rules-card">
+    <div class="rules-card public-theme" id="rules-card">
         <h3>Rules & Regulations</h3>
         <ul id="rules-list">
             <li><strong>Selection Limit:</strong> Select ONE driver for the Sprint and/or ONE driver for the Feature race.</li>
             <li><strong>Deadlines:</strong> Bets lock strictly at 11:59 PM the day before the race weekend begins.</li>
             <li><strong>League Cut:</strong> The League takes a flat 10% fee on all side bet winnings.</li>
-            <li><strong>Budget Cap:</strong> Your starting cap is adjusted by driver SLFs. Net Side Bets (W/L) do not increase your budget—only positive Side Bet Winnings add to your Cap.</li>
+            <li><strong>Public Guests:</strong> Welcome to the Paddock! Enter your name and mobile number to place bets and track your Net W/L. Your bets contribute to the communal Constructors pot.</li>
         </ul>
     </div>
 
-    <div id="paddock-overview-section">
+    <div id="paddock-overview-section" class="hidden">
         <div class="overview-title">Paddock Overview</div>
         <div class="paddock-grid" id="paddock-overview-grid">
             <p style="text-align: center; color: #555; font-size: 13px;">Loading constructor data...</p>
@@ -194,7 +202,7 @@
 
     let constructorsData = [];
     let currentConstructor = ""; 
-    let currentUserType = "Constructor"; 
+    let currentUserType = "Public"; // Changed default to Public
     let currentMobile = "";
     
     let currentRound = "";
@@ -478,15 +486,17 @@
                 alert("Incorrect constructor or password!");
             }
         } else {
-            const publicName = document.getElementById('public-name-input').value.trim();
+            const publicFName = document.getElementById('public-fname-input').value.trim();
+            const publicSName = document.getElementById('public-sname-input').value.trim();
             const publicMobile = document.getElementById('public-mobile-input').value.trim();
 
-            if (!publicName || !publicMobile) {
-                alert("Please enter both your Full Name and Mobile Number to enter.");
+            if (!publicFName || !publicSName || !publicMobile) {
+                alert("Please enter your First Name, Surname, and Mobile Number to enter.");
                 return;
             }
 
-            currentConstructor = publicName;
+            // Stitch the first and last name together with a space
+            currentConstructor = `${publicFName} ${publicSName}`;
             currentMobile = publicMobile;
             
             ['metric-starting-cap', 'metric-driver-slfs', 'metric-race-fees', 'metric-winnings', 'metric-budget-cap', 'metric-divider'].forEach(id => {
@@ -495,7 +505,7 @@
 
             document.getElementById('login-section').classList.add('hidden');
             document.getElementById('betting-section').classList.remove('hidden');
-            document.getElementById('welcome-message').innerText = `Welcome, ${publicName}`;
+            document.getElementById('welcome-message').innerText = `Welcome, ${publicFName}`;
 
             await calculatePublicNetBets();
             await populateExistingBets();
@@ -621,7 +631,8 @@
         document.getElementById('betting-section').classList.add('hidden');
         document.getElementById('login-section').classList.remove('hidden');
         document.getElementById('password-input').value = ""; 
-        document.getElementById('public-name-input').value = ""; 
+        document.getElementById('public-fname-input').value = ""; 
+        document.getElementById('public-sname-input').value = ""; 
         document.getElementById('public-mobile-input').value = ""; 
         
         if (currentUserType === 'Constructor') {
@@ -636,7 +647,6 @@
         });
     }
 
-    // UPDATE: Now accepts an `isDelete` flag
     const sendBet = async (raceType, selectedElement, isDelete = false) => {
         const formData = new URLSearchParams();
         formData.append('round', currentRound);
@@ -669,7 +679,6 @@
         const sprintSelected = document.querySelector('input[name="sprint-driver"]:checked');
         const featureSelected = document.querySelector('input[name="feature-driver"]:checked');
 
-        // Check if trying to submit nothing without having existing bets to delete
         if (!sprintSelected && !featureSelected && !hasExistingBets) {
             alert("You must select at least one driver to place a bet.");
             submitBtn.innerText = "Submit Bets";
@@ -680,15 +689,12 @@
         try {
             const promises = [];
             
-            // Sprint Logic (Send update OR delete)
             if (sprintSelected) {
                 promises.push(sendBet('Sprint', sprintSelected, false));
             } else if (myExistingSprintBet > 0) {
-                // If they deselect a previously existing sprint bet, we delete it
                 promises.push(sendBet('Sprint', null, true));
             }
 
-            // Feature Logic (Send update OR delete)
             if (featureSelected) {
                 promises.push(sendBet('Feature', featureSelected, false));
             } else if (myExistingFeatureBet > 0) {
