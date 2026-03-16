@@ -139,7 +139,7 @@
     <p class="round-info" id="login-round-text">Loading Session...</p>
     
     <div id="countdown-wrapper" style="background: rgba(0, 215, 182, 0.05); border: 1px solid var(--theme-color); border-radius: 8px; padding: 10px; margin-bottom: 20px; text-align: center; display: none; transition: 0.3s;">
-        <div style="font-size: 13px; color: #aaa; text-transform: uppercase; letter-spacing: 1px; margin-bottom: 5px;">Bets Lock In (AET)</div>
+        <div style="font-size: 13px; color: #aaa; text-transform: uppercase; letter-spacing: 1px; margin-bottom: 5px;">Betting Deadline</div>
         <div id="countdown-timer" style="font-size: 24px; font-weight: 700; color: var(--theme-color); font-family: monospace; letter-spacing: 1px; transition: 0.3s;">--d --h --m --s</div>
     </div>
     
@@ -611,6 +611,16 @@
     }
 
     async function login() {
+        // --- NEW DEADLINE CHECK ---
+        if (globalDeadlineDate) {
+            let currentSydney = new Date(new Date().toLocaleString("en-US", {timeZone: "Australia/Sydney"}));
+            if (currentSydney.getTime() > globalDeadlineDate.getTime()) {
+                alert("⚠️ Betting is currently suspended.\n\nThe deadline for this round has passed. Betting will reopen after the upcoming race weekend has completed.");
+                return; // Stops the login process completely
+            }
+        }
+        // --- END DEADLINE CHECK ---
+
         if (currentUserType === 'Constructor') {
             const selected = document.getElementById('constructor-select').value;
             const pass = document.getElementById('password-input').value;
