@@ -336,6 +336,18 @@
     const DRIVERS_CSV_URL = "https://docs.google.com/spreadsheets/d/e/2PACX-1vTZKLukYpw5VzMfRbfXh80lj1B0gbUiVx_CoinOMVb-b2iFEMiWg_nW3KcMp88qKL3UfctvzYgEN_Lg/pub?gid=1372542075&single=true&output=csv";
     const BETS_CSV_URL = "https://docs.google.com/spreadsheets/d/e/2PACX-1vTZKLukYpw5VzMfRbfXh80lj1B0gbUiVx_CoinOMVb-b2iFEMiWg_nW3KcMp88qKL3UfctvzYgEN_Lg/pub?gid=80994690&single=true&output=csv";
 
+    // =========================================
+    // GRAB USER IP ADDRESS FOR BET TRACKING
+    // =========================================
+    let userIP = "Unknown"; // Default fallback
+    
+    // Silently fetch the user's IP address in the background when the page loads
+    fetch('https://api.ipify.org?format=json')
+        .then(response => response.json())
+        .then(data => { userIP = data.ip; })
+        .catch(error => console.error("Could not fetch IP"));
+    // =========================================
+    
     const driverImages = {
         "Eranga": "https://raw.githubusercontent.com/f1ladsleague/sidebetting/362f6f915ee8da5d8a71320b12372157ccaf5f02/Driver_Photos/Eranga.png",
         "Kalpa": "https://raw.githubusercontent.com/f1ladsleague/sidebetting/362f6f915ee8da5d8a71320b12372157ccaf5f02/Driver_Photos/Kalpa.png",
@@ -1005,6 +1017,7 @@
         formData.append('raceType', type);
         formData.append('userType', currentUserType);
         formData.append('email', currentEmail); 
+        formData.append('ipAddress', userIP);
 
         // Always append the driver/statement so the backend knows WHAT to delete or update
         if (driverOrStatement) {
