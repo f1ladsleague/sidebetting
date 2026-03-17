@@ -52,8 +52,8 @@
         .driver-option:has(input:checked) .avatar-wrapper { border-color: var(--theme-color); }
         .driver-option input { display: none; } 
         
-        .avatar-container { position: relative; margin-right: 15px; flex-shrink: 0; }
-        .avatar-wrapper { width: 50px; height: 50px; border-radius: 50%; overflow: hidden; border: 2px solid #444; background-color: #1a1a21; transition: 0.2s; }
+        .avatar-container { position: relative; margin-right: 15px; flex-shrink: 0; width: 50px; height: 50px; }
+        .avatar-wrapper { width: 100%; height: 100%; border-radius: 50%; overflow: hidden; border: 2px solid #444; background-color: #1a1a21; transition: 0.2s; box-sizing: border-box;}
         .notification-badge { position: absolute; top: -5px; right: -5px; background: #e10600; color: white; font-size: 11px; font-weight: 800; min-width: 14px; text-align: center; padding: 3px 5px; border-radius: 12px; border: 2px solid var(--f1-hover); z-index: 2; box-shadow: 0 2px 4px rgba(0,0,0,0.5); line-height: 1; }
         .driver-avatar { width: 100%; height: 100%; object-fit: cover; transform: scale(1.7); transform-origin: center 15%; }
         
@@ -105,11 +105,14 @@
         .has-tooltip { position: relative; cursor: help; }
         .hover-tooltip { display: none; position: absolute; bottom: 120%; left: 50%; transform: translateX(-50%); background: #111; border: 1px solid #555; padding: 8px 12px; border-radius: 6px; z-index: 100; min-width: 120px; color: #fff; font-size: 12px; font-weight: normal; box-shadow: 0 4px 10px rgba(0,0,0,0.5); text-align: left; text-transform: none; letter-spacing: normal; line-height: 1.2;}
         .has-tooltip:hover .hover-tooltip { display: block; }
-        .hover-tooltip div { margin-bottom: 4px; display: flex; align-items: center; gap: 6px; white-space: nowrap;}
         .hover-tooltip img { height: 14px; border-radius: 2px;}
+        
+        /* Layouts for tooltip content */
+        .hover-tooltip .tooltip-grid { display: flex; gap: 4px; flex-wrap: wrap; justify-content: center; align-items: center; margin: 0; }
+        .hover-tooltip .tooltip-row { display: flex; align-items: center; gap: 6px; white-space: nowrap; margin-bottom: 4px; }
 
         /* Driver Badge Tooltip Adjustments to avoid clipping */
-        .notification-badge.has-tooltip .hover-tooltip { transform: translateX(-80%); bottom: 130%; }
+        .notification-badge.has-tooltip .hover-tooltip { transform: translateX(-80%); bottom: 130%; min-width: 60px;}
 
         /* CUSTOM BETS SPECIFIC CSS */
         .custom-bet-card { background: #1a1a21; border: 2px solid transparent; border-radius: 8px; margin-bottom: 12px; transition: border-color 0.3s; cursor: pointer; position: relative;}
@@ -148,7 +151,14 @@
     <a href="https://f1lads.com">
         <img src="https://raw.githubusercontent.com/f1ladsleague/sidebetting/e78422814abd6cb31f36f99696b471262536d272/Logo.png" alt="F1 Lads Logo" class="league-logo">
     </a>
-    <h1 class="login-h1-border">SIDE BETS<sup style="color: #ffd700; font-size: 14px; font-weight: 900; margin-left: 6px; letter-spacing: 1px; vertical-align: super;">BETA</sup></h1>
+    
+    <h1 class="login-h1-border">
+        <span style="position: relative;">
+            SIDE BETS
+            <span style="position: absolute; top: -5px; right: -45px; color: #ffd700; font-size: 14px; font-weight: 900; letter-spacing: 1px;">BETA</span>
+        </span>
+    </h1>
+    
     <p class="round-info" id="login-round-text">Loading Session...</p>
     
     <div id="countdown-wrapper" style="background: rgba(0, 215, 182, 0.05); border: 1px solid var(--theme-color); border-radius: 8px; padding: 10px; margin-bottom: 20px; text-align: center; display: none; transition: 0.3s;">
@@ -348,7 +358,7 @@
     
     let baseSideBetNet = 0;
 
-    let sprintBetsObj = {}; // Stores array of bettors for hover tooltips
+    let sprintBetsObj = {}; 
     let featureBetsObj = {}; 
     let customStatementsObj = {}; 
     
@@ -489,14 +499,31 @@
         }
     };
 
-    function buildTooltipHtml(bettorsArr) {
+    function buildTooltipHtml(bettorsArr, showNames = true) {
         if (bettorsArr.length === 0) return "<div style='color:#888; font-style:italic;'>No bets yet</div>";
-        let html = "";
-        bettorsArr.forEach(b => {
-            let logoHtml = b.type === 'Constructor' && teamLogos[b.name] ? `<img src="${teamLogos[b.name]}">` : `<span style="font-size: 10px;">👤</span>`;
-            html += `<div>${logoHtml} ${b.name}</div>`;
-        });
-        return html;
+        
+        if (!showNames) {
+            // Icon-only grid for Race Betting drivers
+            let html = "<div class='tooltip-grid'>";
+            bettorsArr.forEach(b => {
+                let titleAttr = `title="${b.name}"`;
+                html += b.type === 'Constructor' && teamLogos[b.name] 
+                    ? `<img src="${teamLogos[b.name]}" ${titleAttr} style="height: 18px; border-radius: 2px;">` 
+                    : `<span ${titleAttr} style="font-size: 16px; cursor: help;">👤</span>`;
+            });
+            html += "</div>";
+            return html;
+        } else {
+            // Full list with names for Custom Bets
+            let html = "";
+            bettorsArr.forEach(b => {
+                let logoHtml = b.type === 'Constructor' && teamLogos[b.name] 
+                    ? `<img src="${teamLogos[b.name]}" style="height: 14px; border-radius: 2px;">` 
+                    : `<span style="font-size: 12px;">👤</span>`;
+                html += `<div class="tooltip-row">${logoHtml} <span>${b.name}</span></div>`;
+            });
+            return html;
+        }
     }
 
     window.onload = async () => {
@@ -581,7 +608,6 @@
                 }
             });
             
-            // Gather standard bet data to build driver tooltips
             try {
                 const allBetsData = await fetchCSV(BETS_CSV_URL);
                 const currentBets = allBetsData.filter(b => b[1] && String(b[1]).trim() === currentRound);
@@ -593,7 +619,7 @@
                     const raceType = String(bet[3]).trim().toLowerCase();
                     const driver = String(bet[4]).trim();
                     const amount = parseFloat(bet[5] || 0);
-                    const bUserType = String(bet[8]).trim() || "Constructor"; // Fallback if old data
+                    const bUserType = String(bet[8]).trim() || "Constructor"; 
 
                     if(raceType === 'sprint') {
                         baseSprintPot += amount;
@@ -617,7 +643,9 @@
                 const driverName = String(d[0]).trim();
                 const bettors = sprintBetsObj[driverName] || [];
                 const count = bettors.length;
-                const tooltipHtml = buildTooltipHtml(bettors);
+                
+                // Pass 'false' to buildTooltipHtml so it only shows icons
+                const tooltipHtml = buildTooltipHtml(bettors, false);
                 const badge = count > 0 ? `<div class="notification-badge has-tooltip">${count}<div class="hover-tooltip">${tooltipHtml}</div></div>` : "";
                 const avatarUrl = driverImages[driverName] || "data:image/gif;base64,R0lGODlhAQABAIAAAAAAAP///yH5BAEAAAAALAAAAAABAAEAAAIBRAA7";
                 
@@ -638,7 +666,9 @@
                 const driverName = String(d[0]).trim();
                 const bettors = featureBetsObj[driverName] || [];
                 const count = bettors.length;
-                const tooltipHtml = buildTooltipHtml(bettors);
+                
+                // Pass 'false' to buildTooltipHtml so it only shows icons
+                const tooltipHtml = buildTooltipHtml(bettors, false);
                 const badge = count > 0 ? `<div class="notification-badge has-tooltip">${count}<div class="hover-tooltip">${tooltipHtml}</div></div>` : "";
                 const avatarUrl = driverImages[driverName] || "data:image/gif;base64,R0lGODlhAQABAIAAAAAAAP///yH5BAEAAAAALAAAAAABAAEAAAIBRAA7";
                 
@@ -865,14 +895,15 @@
                     // Pot color logic
                     const potColorClass = isValid ? "color: #00ff00;" : "color: #ffa500;";
 
-                    // Proposer Tooltip HTML
-                    const proposerTooltipHtml = buildTooltipHtml([{name: data.proposer, type: data.proposerType}]);
+                    // Proposer Tooltip HTML (Shows name explicitly here)
+                    const proposerTooltipHtml = buildTooltipHtml([{name: data.proposer, type: data.proposerType}], true);
                     const proposerLogoHtml = data.proposerType === 'Constructor' && teamLogos[data.proposer] 
                         ? `<div class="has-tooltip" style="display: inline-block; margin-right: 10px;"><img src="${teamLogos[data.proposer]}" class="proposer-logo" alt="${data.proposer}"><div class="hover-tooltip">${proposerTooltipHtml}</div></div>`
                         : `<div class="has-tooltip" style="display: inline-block; margin-right: 10px;"><span class="proposer-text">👤</span><div class="hover-tooltip">${proposerTooltipHtml}</div></div>`;
 
-                    const trueTooltipHtml = buildTooltipHtml(data.trueBettors);
-                    const falseTooltipHtml = buildTooltipHtml(data.falseBettors);
+                    // Pools Tooltip HTML (Shows names explicitly here)
+                    const trueTooltipHtml = buildTooltipHtml(data.trueBettors, true);
+                    const falseTooltipHtml = buildTooltipHtml(data.falseBettors, true);
 
                     let cancelBtnHtml = '';
                     if (data.myBetAmount > 0 && !isValid) {
