@@ -12,8 +12,9 @@
         body { font-family: 'Titillium Web', sans-serif; background-color: var(--f1-dark); color: #fff; margin: 0; padding: 20px; display: flex; justify-content: center; }
         .container { background: var(--f1-card); width: 100%; max-width: 600px; padding: 30px; border-radius: 12px; box-shadow: 0 10px 30px rgba(0,0,0,0.5); margin-bottom: 20px;}
         
+        a img { border: none; outline: none; }
+        a:hover img { opacity: 0.8; transition: 0.2s; }
         .league-logo { max-height: 75px; margin: 0 auto 15px auto; display: block; border-radius: 6px; }
-        
         .hero-image { width: 100%; height: auto; display: block; border-radius: 8px; margin-bottom: 20px; box-shadow: 0 4px 10px rgba(0,0,0,0.3); }
 
         h1 { text-align: center; text-transform: uppercase; font-weight: 700; margin: 0; }
@@ -22,11 +23,6 @@
         .header-wrapper h1 { padding: 0 55px; font-size: 26px; line-height: 1.2; margin: 0; }
         .back-arrow { position: absolute; left: 0; color: #aaa; font-size: 16px; font-weight: 600; cursor: pointer; transition: 0.2s; text-transform: uppercase; letter-spacing: 1px; top: 50%; transform: translateY(-50%);}
         .back-arrow:hover { color: #fff; }
-
-        @media (max-width: 480px) {
-            .header-wrapper h1 { font-size: 20px; padding: 0 50px; }
-            .back-arrow { font-size: 14px; }
-        }
 
         .login-h1-border { border-bottom: 2px solid var(--theme-color); padding-bottom: 10px; margin-bottom: 5px; transition: border-color 0.3s ease; }
 
@@ -37,11 +33,10 @@
         .login-toggle button { flex: 1; padding: 12px; border: none; background: transparent; color: #888; font-weight: bold; cursor: pointer; text-transform: uppercase; transition: 0.3s; font-size: 14px; }
         .login-toggle button.toggle-active { background: var(--theme-color); color: white; }
 
-        select, input[type="password"], input[type="text"], input[type="email"] { width: 100%; padding: 12px; margin: 10px 0 20px 0; background: var(--f1-hover); border: 1px solid #444; color: white; border-radius: 6px; font-size: 16px; box-sizing: border-box; }
+        select, input[type="password"], input[type="text"], input[type="email"], input[type="number"] { width: 100%; padding: 12px; margin: 10px 0; background: var(--f1-hover); border: 1px solid #444; color: white; border-radius: 6px; font-size: 16px; box-sizing: border-box; }
         select:focus, input:focus { outline: none; border-color: var(--theme-color); }
         
         .name-row { display: flex; gap: 10px; width: 100%; }
-        .name-row input { margin-bottom: 10px; }
         .public-warning { color: #ffd700; font-size: 13px; text-align: center; margin-top: -5px; margin-bottom: 20px; font-weight: 600; line-height: 1.4; }
 
         button.btn-primary { width: 100%; background: var(--theme-color); color: white; border: none; padding: 15px; font-size: 18px; font-weight: 700; border-radius: 6px; cursor: pointer; text-transform: uppercase; transition: 0.3s ease; }
@@ -54,21 +49,15 @@
         .driver-option { display: flex; justify-content: flex-start; align-items: center; padding: 10px 15px; background: var(--f1-hover); border: 2px solid transparent; border-radius: 8px; margin-bottom: 10px; cursor: pointer; transition: 0.2s; font-size: 18px; font-weight: 600; }
         .driver-option:hover { border-color: #555; }
         .driver-option:has(input:checked) { border-color: var(--theme-color); background: color-mix(in srgb, var(--theme-color) 15%, transparent); }
-        
         .driver-option:has(input:checked) .avatar-wrapper { border-color: var(--theme-color); }
         .driver-option input { display: none; } 
         
-        /* NEW AVATAR & BADGE CSS */
         .avatar-container { position: relative; margin-right: 15px; flex-shrink: 0; }
         .avatar-wrapper { width: 50px; height: 50px; border-radius: 50%; overflow: hidden; border: 2px solid #444; background-color: #1a1a21; transition: 0.2s; }
         .notification-badge { position: absolute; top: -5px; right: -5px; background: #e10600; color: white; font-size: 11px; font-weight: 800; min-width: 14px; text-align: center; padding: 3px 5px; border-radius: 12px; border: 2px solid var(--f1-hover); z-index: 2; box-shadow: 0 2px 4px rgba(0,0,0,0.5); line-height: 1; }
-        /* ---------------------- */
-
         .driver-avatar { width: 100%; height: 100%; object-fit: cover; transform: scale(1.7); transform-origin: center 15%; }
         
         .driver-name-block { display: flex; flex-direction: column; flex-grow: 1; }
-        .driver-name-text { display: flex; align-items: center; }
-        
         .price-tag { background: #000; padding: 4px 10px; border-radius: 4px; color: #ffffff; font-weight: 700; margin-left: auto; font-size: 16px; }
         
         .pot-display { background: rgba(255,255,255,0.05); border: 1px solid var(--theme-color); border-radius: 6px; padding: 10px; text-align: center; font-size: 20px; font-weight: bold; margin-bottom: 15px; color: #fff; transition: border-color 0.3s ease; }
@@ -76,57 +65,46 @@
 
         .dashboard-metrics { background: #1a1a21; border: 1px solid #333; padding: 15px; border-radius: 8px; margin-bottom: 25px; display: flex; flex-direction: column; gap: 8px; }
         .metric-row { display: flex; justify-content: space-between; align-items: center; white-space: nowrap; padding: 4px 0; }
-        .metric-title { color: #aaa; font-size: 13px; text-transform: uppercase; letter-spacing: 0.5px; overflow: hidden; text-overflow: ellipsis; margin-right: 10px; }
+        .metric-title { color: #aaa; font-size: 13px; text-transform: uppercase; letter-spacing: 0.5px; margin-right: 10px; }
         .metric-value { font-size: 16px; font-weight: bold; color: #fff; font-family: monospace; transition: 0.3s; }
-        
         .cap-row { margin-top: 6px; padding-top: 12px; border-top: 1px solid #444; }
         .cap-row .metric-title { color: var(--theme-color); font-weight: bold; font-size: 15px; }
         .cap-row .metric-value { color: var(--theme-color); font-size: 20px; }
-        
         .divider { border-top: 1px dashed #444; margin: 6px 0; }
 
-        .rules-card { background: rgba(225, 6, 0, 0.05); border: 1px solid rgba(225, 6, 0, 0.3); padding: 20px; border-radius: 8px; margin-top: 30px; margin-bottom: 30px; transition: 0.3s ease; }
+        .rules-card { background: rgba(225, 6, 0, 0.05); border: 1px solid rgba(225, 6, 0, 0.3); padding: 20px; border-radius: 8px; margin-bottom: 20px; transition: 0.3s ease; }
         .rules-card h3 { color: var(--theme-color); text-transform: uppercase; margin-top: 0; font-size: 16px; border-bottom: 1px solid rgba(225, 6, 0, 0.2); padding-bottom: 8px; margin-bottom: 12px; transition: 0.3s ease; }
         .rules-card ul { margin: 0; padding-left: 20px; font-size: 13px; color: #ccc; }
         .rules-card li { margin-bottom: 8px; line-height: 1.4; }
-        
         .rules-card.public-theme { background: rgba(0, 215, 182, 0.05); border-color: rgba(0, 215, 182, 0.3); }
         .rules-card.public-theme h3 { border-bottom-color: rgba(0, 215, 182, 0.2); }
 
         .overview-title { text-transform: uppercase; color: #fff; font-size: 18px; border-bottom: 2px solid #333; padding-bottom: 8px; margin-bottom: 15px; text-align: center; }
         .paddock-grid { display: flex; flex-direction: column; gap: 15px; }
-        
         .mini-dashboard { background: #1a1a21; border: 1px solid #333; padding: 12px; border-radius: 8px; border-left: 4px solid var(--team-color, #444); }
-        
         .team-header { display: flex; justify-content: space-between; align-items: center; border-bottom: 1px solid #333; padding-bottom: 8px; margin-bottom: 10px; }
         .mini-dashboard h4 { margin: 0; text-transform: uppercase; color: var(--team-color, #fff); font-size: 15px; letter-spacing: 1px; font-weight: 700; }
         .team-logo { height: 28px; max-width: 80px; object-fit: contain; }
-        
         .mini-dashboard .metric-row { padding: 2px 0; }
         .mini-dashboard .metric-title { font-size: 11px; }
         .mini-dashboard .metric-value { font-size: 13px; }
-        .mini-dashboard .cap-row { 
-            margin-top: 8px; 
-            padding: 8px 6px; 
-            border-top: 1px solid #444; 
-            background: rgba(255, 255, 255, 0.05); 
-            border-radius: 4px;
-        }
+        .mini-dashboard .cap-row { margin-top: 8px; padding: 8px 6px; border-top: 1px solid #444; background: rgba(255, 255, 255, 0.05); border-radius: 4px; }
         .mini-dashboard .cap-row .metric-title { font-size: 12px; color: #fff; font-weight: 700; }
         .mini-dashboard .cap-row .metric-value { font-size: 17px; color: var(--team-color, #fff); font-weight: 900; }
-        .sync-warning {
-            background: rgba(244, 118, 0, 0.15); 
-            border: 1px solid #F47600;
-            color: #fff;
-            padding: 12px;
-            border-radius: 8px;
-            margin-bottom: 20px;
-            text-align: center;
-            font-size: 14px;
-            font-weight: 600;
-            display: none; 
-        }
-        .sync-warning span { color: #F47600; font-weight: 900; }
+        
+        #sync-warning-banner { display: none; background-color: rgba(255, 165, 0, 0.1); color: #ffa500; padding: 15px; margin-bottom: 25px; border: 1px solid #ffa500; border-radius: 8px; font-size: 14px; font-weight: bold; text-align: center; line-height: 1.5; width: 100%; box-sizing: border-box; }
+        #sync-warning-banner span { color: #ffa500; font-weight: 900; }
+
+        /* CUSTOM BETS SPECIFIC CSS */
+        .custom-bet-card { background: #1f1f27; border: 1px solid #444; border-radius: 8px; padding: 15px; margin-bottom: 15px; box-shadow: 0 4px 10px rgba(0,0,0,0.3); }
+        .custom-statement-text { font-size: 16px; font-weight: 700; line-height: 1.4; margin-bottom: 12px; color: #fff; border-left: 3px solid var(--theme-color); padding-left: 10px; }
+        .custom-pools { display: flex; gap: 10px; margin-bottom: 12px; }
+        .pool-badge { flex: 1; text-align: center; padding: 6px; border-radius: 4px; font-size: 13px; font-weight: bold; }
+        .pool-true { background: rgba(0, 255, 0, 0.1); border: 1px solid #00ff00; color: #00ff00; }
+        .pool-false { background: rgba(255, 0, 0, 0.1); border: 1px solid #ff4444; color: #ff4444; }
+        .custom-input-row { display: flex; gap: 10px; }
+        .custom-input-row input { flex: 1; margin: 0; }
+        .custom-input-row select { flex: 1; margin: 0; }
     </style>
 </head>
 <body>
@@ -150,38 +128,26 @@
         <button id="btn-public" class="toggle-active" onclick="setLoginMode('Public')">Public / Guest</button>
     </div>
 
-    <div id="constructor-fields" class="hidden">
-        <select id="constructor-select"><option value="">Select your Team...</option></select>
-        <input type="password" id="password-input" placeholder="Enter Password">
-    </div>
-
-    <div id="public-fields">
-        <div class="name-row">
-            <input type="text" id="public-fname-input" placeholder="First Name">
-            <input type="text" id="public-sname-input" placeholder="Surname">
+    <form id="login-form" onsubmit="event.preventDefault(); login();">
+        <div id="constructor-fields" class="hidden">
+            <select id="constructor-select"><option value="">Select your Team...</option></select>
+            <input type="password" id="password-input" placeholder="Enter Password">
         </div>
-        <input type="email" id="public-email-input" placeholder="Enter Email Address">
-        
-        <p class="public-warning">
-            ⚠️ WARNING: Please ensure you login using the exact spelling of your name and email address every time. 
-            These act as your unique profile details—if you use a different spelling, the system will treat you as a new user.
-        </p>
-    </div>
 
-    <button class="btn-primary" onclick="login()">Enter Paddock</button>
+        <div id="public-fields">
+            <div class="name-row">
+                <input type="text" id="public-fname-input" placeholder="First Name">
+                <input type="text" id="public-sname-input" placeholder="Surname">
+            </div>
+            <input type="email" id="public-email-input" placeholder="Enter Email Address">
+            <p class="public-warning">
+                ⚠️ WARNING: Please ensure you login using the exact spelling of your name and email address every time. 
+            </p>
+        </div>
+        <button type="submit" class="btn-primary" id="login-button">Enter Paddock</button>
+    </form>
 
-    <div class="rules-card public-theme" id="rules-card">
-        <h3>Rules & Regulations</h3>
-        <ul id="rules-list">
-            <li><strong>Public Guests:</strong> Welcome to the Paddock! Enter your name and email address to place bets and track your Net W/L.</li>
-            <li><strong>How does it work?:</strong> To participate, select one driver for the Sprint and/or Feature race to enter. The amount next to their name is the buy-in amount you are required to pay to play. If your driver wins, you split the total buy-in pot evenly with any other winning bettors after a flat 10% League Fee is deducted. If you lose, you must pay the buy-in amount to the league. For e.g., You pay $10 to bet that Driver A wins the Sprint Race. The total pot for the Sprint Race is $100 (including your $10). If Driver A wins, and you are one of two people who backed Driver A to win, the $90 remaining after the league's $10 cut is split so you receive a $45 payout (meaning you are up by $35).</li>
-            <li><strong>League Fee:</strong> The League takes a flat 10% fee on all side bet winnings.</li>
-            <li><strong>Selection Limit:</strong> You can only select ONE driver for the Sprint and/or ONE driver for the Feature race.</li>
-            <li><strong>Deadlines:</strong> Bets lock strictly at 11:59 PM the day before the race weekend begins.</li>
-        </ul>
-    </div>
-
-    <div id="paddock-overview-section" class="hidden">
+    <div id="paddock-overview-section" class="hidden" style="margin-top: 30px;">
         <div class="overview-title">Paddock Overview</div>
         <div class="paddock-grid" id="paddock-overview-grid">
             <p style="text-align: center; color: #555; font-size: 13px;">Loading constructor data...</p>
@@ -199,14 +165,12 @@
         <h1>Manage Your Bets</h1>
     </div>
 
-    <p class="fee-notice">*The League takes a 10% fee on all side bet winnings.</p>
-
     <div style="display: flex; justify-content: center; align-items: center; gap: 15px; margin-bottom: 20px;">
         <img id="betting-team-logo" src="" alt="Team Logo" style="height: 40px; display: none; object-fit: contain;">
         <h2 id="welcome-message" style="color: var(--theme-color); margin: 0; text-align: center;"></h2>
     </div>
     
-    <div id="sync-warning-banner" class="sync-warning">
+    <div id="sync-warning-banner">
         <span>⚠️ SYNC IN PROGRESS:</span> Your recent bets have been received but may take up to 5 minutes to reflect in your dashboard balances below.
     </div>
     
@@ -227,25 +191,26 @@
             <div class="metric-title">Side Bet Winnings</div>
             <div class="metric-value" id="side-bet-winnings-display">+$0.00</div>
         </div>
-        
         <div class="metric-row cap-row" id="metric-budget-cap">
             <div class="metric-title">Current Budget Cap</div>
             <div class="metric-value" id="budget-cap-display">$0.00</div>
         </div>
-
         <div class="divider" id="metric-divider"></div>
-
         <div class="metric-row">
-            <div class="metric-title" style="color: #888;">Net Side Bets (W/L)</div>
+            <div class="metric-title" style="color: #888;">Net W/L (Includes Custom Bets)</div>
             <div class="metric-value" id="net-win-loss-display" style="color: #888;">$0.00</div>
         </div>
     </div>
 
     <form id="bet-form">
-        <p style="text-align: center; color: #aaa; margin-bottom: 15px;">Select ONE driver for the Sprint and/or ONE for the Feature. Click a selected driver again to remove your bet.</p>
-        
         <div style="background: rgba(255, 215, 0, 0.05); border: 1px solid rgba(255, 215, 0, 0.3); border-radius: 8px; padding: 10px; margin-bottom: 25px; text-align: center; box-shadow: 0 4px 10px rgba(0,0,0,0.2);">
             <p id="betting-round-text" style="font-size: 16px; font-weight: 700; color: #ffd700; margin: 0; text-transform: uppercase; letter-spacing: 1px;"></p>
+        </div>
+
+        <h1 style="color: var(--theme-color); font-size: 24px; margin-bottom: 10px; border-bottom: 2px solid #333; padding-bottom: 5px;">Pool Betting</h1>
+        <div class="rules-card" id="standard-rules-card">
+            <h3>Pool Bet Rules</h3>
+            <ul id="standard-rules-list"></ul>
         </div>
         
         <div class="race-section">
@@ -260,11 +225,43 @@
             <div id="feature-drivers"></div>
         </div>
 
-        <button type="submit" class="btn-primary" id="submit-btn">Submit Bets</button>
+        <h1 style="color: #00bfff; font-size: 24px; margin-top: 40px; margin-bottom: 10px; border-bottom: 2px solid #333; padding-bottom: 5px;">Custom Bets</h1>
+        <div class="rules-card" style="background: rgba(0, 191, 255, 0.05); border-color: rgba(0, 191, 255, 0.3);">
+            <h3 style="color: #00bfff; border-bottom-color: rgba(0, 191, 255, 0.2);">Proposition Rules</h3>
+            <ul style="color: #ccc;">
+                <li><strong>How it works:</strong> Propose a verifiable TRUE/FALSE statement or wager on an existing one.</li>
+                <li><strong>Pari-Mutuel Payouts:</strong> If you bet on the winning stance (True or False), you split the entire pot (True + False totals) proportionally with anyone else who bet your way, minus a 10% League Fee.</li>
+                <li><strong>Invalid Bets:</strong> Statements must be unambiguous. Constructors cannot bet exclusively on their own drivers. Invalid statements will be voided.</li>
+            </ul>
+        </div>
+
+        <div class="race-section" style="border-color: #00bfff;">
+            <h2 style="color: white; margin-top: 0; text-align: center; margin-bottom: 20px;">Active Propositions</h2>
+            <div id="custom-bets-list">
+                <p style="text-align: center; color: #aaa; font-style: italic;">No custom bets proposed yet for this round.</p>
+            </div>
+
+            <div style="border-top: 1px dashed #444; margin-top: 20px; padding-top: 20px;">
+                <h3 style="color: #00bfff; margin-top: 0; font-size: 16px; text-transform: uppercase;">Propose A New Bet</h3>
+                <input type="text" id="new-custom-statement" placeholder="e.g. Rodda finishes ahead of Sahan..." style="margin-bottom: 15px;">
+                <div class="custom-input-row">
+                    <input type="number" id="new-custom-amount" placeholder="Stake Amount ($)" min="1">
+                    <select id="new-custom-stance">
+                        <option value="TRUE">I bet this is TRUE</option>
+                        <option value="FALSE">I bet this is FALSE</option>
+                    </select>
+                </div>
+            </div>
+        </div>
+
+        <button type="submit" class="btn-primary" id="submit-btn" style="margin-top: 10px; padding: 20px; font-size: 20px;">Submit All Bets</button>
     </form>
 </div>
 
 <script>
+    // 🚨 ADD YOUR NEW "CUSTOM BETS" CSV PUBLISH LINK BELOW 🚨
+    const CUSTOM_BETS_CSV_URL = "https://docs.google.com/spreadsheets/d/e/2PACX-1vTZKLukYpw5VzMfRbfXh80lj1B0gbUiVx_CoinOMVb-b2iFEMiWg_nW3KcMp88qKL3UfctvzYgEN_Lg/pub?gid=513445458&single=true&output=csv";
+    // -----------------------------------------------------------
     const GOOGLE_SCRIPT_WEB_APP_URL = "https://script.google.com/macros/s/AKfycbzl82qkQw4mf_dFbV6ExR0Va3JRLGUQ7bOPN2oy0yPUateuocYtELzgF9HpQ9GnGGB4uw/exec";
     const SETTINGS_CSV_URL = "https://docs.google.com/spreadsheets/d/e/2PACX-1vTZKLukYpw5VzMfRbfXh80lj1B0gbUiVx_CoinOMVb-b2iFEMiWg_nW3KcMp88qKL3UfctvzYgEN_Lg/pub?gid=2057582908&single=true&output=csv";
     const CONSTRUCTORS_CSV_URL = "https://docs.google.com/spreadsheets/d/e/2PACX-1vTZKLukYpw5VzMfRbfXh80lj1B0gbUiVx_CoinOMVb-b2iFEMiWg_nW3KcMp88qKL3UfctvzYgEN_Lg/pub?gid=1589744882&single=true&output=csv";
@@ -306,17 +303,18 @@
     
     let myExistingSprintBet = 0;
     let myExistingFeatureBet = 0;
+    let myExistingCustomBetsTotal = 0; // Total money staked by user in custom bets
     
     let baseSideBetNet = 0;
 
     let sprintBetCounts = {};
     let featureBetCounts = {};
+    let customStatementsObj = {}; // Holds pool data for custom bets
     
     let globalDeadlineDate = null; 
 
     function updateCountdown() {
         if (!globalDeadlineDate) return;
-        
         let currentSydney = new Date(new Date().toLocaleString("en-US", {timeZone: "Australia/Sydney"}));
         let diff = globalDeadlineDate.getTime() - currentSydney.getTime();
         
@@ -345,8 +343,8 @@
         const btnPublic = document.getElementById('btn-public');
         const fieldsConstructor = document.getElementById('constructor-fields');
         const fieldsPublic = document.getElementById('public-fields');
-        const rulesCard = document.getElementById('rules-card');
-        const rulesList = document.getElementById('rules-list');
+        const rulesCard = document.getElementById('standard-rules-card');
+        const rulesList = document.getElementById('standard-rules-list');
         const overviewSection = document.getElementById('paddock-overview-section');
 
         if (mode === 'Constructor') {
@@ -360,9 +358,8 @@
             overviewSection.classList.remove('hidden');
 
             rulesList.innerHTML = `
-                <li><strong>How does it work?:</strong> To participate, select one driver for the Sprint and/or Feature race. If your driver wins, you split the total pot evenly with other winners after a 10% League Fee.</li>
-                <li><strong>Budget Cap:</strong> Your starting cap is adjusted by driver SLFs. If you lose money, it does not decrease your Cap; however, positive Side Bet Winnings will add to your Cap.</li>
-                <li><strong>Selection Limit:</strong> Select only ONE driver for the Sprint and/or ONE driver for the Feature race.</li>
+                <li><strong>How does it work?:</strong> Select ONE driver for the Sprint and/or Feature race. If your driver wins, you split the total pot evenly with other winners after a 10% League Fee.</li>
+                <li><strong>Budget Cap:</strong> Your starting cap is adjusted by driver SLFs. Losing bets do not decrease your Cap; however, positive Side Bet Winnings will add to your Cap.</li>
                 <li><strong>Deadlines:</strong> Bets lock strictly at 11:59 PM the day before the race weekend begins.</li>
             `;
         } else {
@@ -376,9 +373,8 @@
             overviewSection.classList.add('hidden');
 
             rulesList.innerHTML = `
-                <li><strong>Public Guests:</strong> Welcome to the Paddock! Enter your name and email address to place bets and track your Net W/L.</li>
-                <li><strong>How does it work?:</strong> To participate, select one driver for the Sprint and/or Feature race to enter. The amount next to their name is the buy-in amount you are required to pay to play. If your driver wins, you split the total buy-in pot evenly with any other winning bettors after a flat 10% League Fee is deducted. If you lose, you must pay the buy-in amount to the league. For e.g., You pay $10 to bet that Driver A wins the Sprint Race. The total pot for the Sprint Race is $100 (including your $10). If Driver A wins, and you are one of two people who backed Driver A to win, the $90 remaining after the league's $10 cut is split so you receive a $45 payout (meaning you are up by $35).</li>
-                <li><strong>Selection Limit:</strong> You can only select ONE driver for the Sprint and/or ONE driver for the Feature race.</li>
+                <li><strong>Public Guests:</strong> Welcome! Enter your exact name and email to track your Net W/L.</li>
+                <li><strong>How does it work?:</strong> Select ONE driver for the Sprint and/or Feature race. If your driver wins, you split the pot evenly with other winners after a flat 10% League Fee.</li>
                 <li><strong>Deadlines:</strong> Bets lock strictly at 11:59 PM the day before the race weekend begins.</li>
             `;
         }
@@ -387,18 +383,16 @@
     function getTeamColor(teamName) {
         let themeColor = "#e10600"; 
         const nameLower = teamName.toLowerCase();
-        
         if (nameLower.includes("mercedes")) themeColor = "#00D7B6";
         else if (nameLower.includes("red bull") || nameLower.includes("redbull")) themeColor = "#4781D7";
         else if (nameLower.includes("ferrari")) themeColor = "#ED1131";
         else if (nameLower.includes("mclaren")) themeColor = "#F47600";
         else if (nameLower.includes("aston martin") || nameLower.includes("astonmartin")) themeColor = "#229971";
-
         return themeColor;
     }
 
     async function fetchCSV(url) {
-        const cacheBusterUrl = url + "&nocache=" + new Date().getTime();
+        const cacheBusterUrl = url + (url.includes('?') ? '&' : '?') + "nocache=" + new Date().getTime();
         const response = await fetch(cacheBusterUrl, { cache: "no-store" });
         const text = await response.text();
         const cleanText = text.replace(/\r/g, ''); 
@@ -431,9 +425,7 @@
         const lastBetTime = localStorage.getItem('f1lads_last_bet');
         if (lastBetTime) {
             const timePassed = Date.now() - parseInt(lastBetTime);
-            const fiveMinutes = 5 * 60 * 1000;
-            
-            if (timePassed < fiveMinutes) {
+            if (timePassed < (5 * 60 * 1000)) {
                 document.getElementById('sync-warning-banner').style.display = 'block';
             } else {
                 localStorage.removeItem('f1lads_last_bet');
@@ -471,7 +463,6 @@
 
             constructorsData = await fetchCSV(CONSTRUCTORS_CSV_URL);
             const constructorSelect = document.getElementById('constructor-select');
-            
             const overviewGrid = document.getElementById('paddock-overview-grid');
             overviewGrid.innerHTML = ''; 
 
@@ -479,7 +470,6 @@
                 const teamName = c[0];
                 if(teamName) {
                     constructorSelect.innerHTML += `<option value="${teamName}">${teamName}</option>`;
-
                     const teamColor = getTeamColor(teamName);
                     const slfsPaid = parseSheetNumber(c[3]);
                     const netBets = parseSheetNumber(c[4]);
@@ -490,16 +480,12 @@
                     const feesColor = raceFees > 0 ? '#00ff00' : '#fff';
                     const netColor = netBets > 0 ? '#00ff00' : (netBets < 0 ? '#ff3333' : '#888');
                     const netText = netBets > 0 ? `+$${netBets.toFixed(2)}` : (netBets < 0 ? `-$${Math.abs(netBets).toFixed(2)}` : `$0.00`);
-                    
                     const logoUrl = teamLogos[teamName] || "";
                     const logoImg = logoUrl ? `<img src="${logoUrl}" class="team-logo" alt="${teamName}">` : "";
 
-                    const cardHTML = `
+                    overviewGrid.innerHTML += `
                         <div class="mini-dashboard" style="--team-color: ${teamColor}">
-                            <div class="team-header">
-                                <h4>${teamName}</h4>
-                                ${logoImg}
-                            </div>
+                            <div class="team-header"><h4>${teamName}</h4>${logoImg}</div>
                             <div class="metric-row"><span class="metric-title">Starting Cap</span><span class="metric-value" style="color:#ccc">$500.00</span></div>
                             <div class="metric-row"><span class="metric-title">Driver SLFs</span><span class="metric-value" style="color:#ff4444">-$${slfsPaid.toFixed(2)}</span></div>
                             <div class="metric-row"><span class="metric-title">Total Race Fees</span><span class="metric-value" style="color:${feesColor}">${raceFees>0?'+':''}$${raceFees.toFixed(2)}</span></div>
@@ -507,21 +493,17 @@
                             <div class="metric-row cap-row"><span class="metric-title">Budget Cap</span><span class="metric-value">$${budgetCap.toFixed(2)}</span></div>
                             <div class="divider"></div>
                             <div class="metric-row"><span class="metric-title" style="color:#888;">Net Side Bets</span><span class="metric-value" style="color:${netColor}">${netText}</span></div>
-                        </div>
-                    `;
-                    overviewGrid.innerHTML += cardHTML;
+                        </div>`;
                 }
             });
             
             try {
                 const allBetsData = await fetchCSV(BETS_CSV_URL);
                 const currentBets = allBetsData.filter(b => b[1] && String(b[1]).trim() === currentRound);
-                
                 currentBets.forEach(bet => {
                     const raceType = String(bet[3]).trim().toLowerCase();
                     const driver = String(bet[4]).trim();
                     const amount = parseFloat(bet[5] || 0);
-                    
                     if(raceType === 'sprint') {
                         baseSprintPot += amount;
                         sprintBetCounts[driver] = (sprintBetCounts[driver] || 0) + 1;
@@ -534,7 +516,6 @@
 
             let driversData = await fetchCSV(DRIVERS_CSV_URL);
             driversData = driversData.filter(d => d[0]); 
-            
             const sprintSorted = [...driversData].sort((a, b) => Number(b[1]) - Number(a[1]));
             const featureSorted = [...driversData].sort((a, b) => Number(b[2]) - Number(a[2]));
 
@@ -544,23 +525,7 @@
                 const count = sprintBetCounts[driverName] || 0;
                 const badge = count > 0 ? `<div class="notification-badge">${count}</div>` : "";
                 const avatarUrl = driverImages[driverName] || "data:image/gif;base64,R0lGODlhAQABAIAAAAAAAP///yH5BAEAAAAALAAAAAABAAEAAAIBRAA7";
-                
-                sprintDiv.innerHTML += `
-                    <label class="driver-option">
-                        <div class="avatar-container">
-                            <div class="avatar-wrapper">
-                                <img src="${avatarUrl}" class="driver-avatar" alt="${driverName}">
-                            </div>
-                            ${badge}
-                        </div>
-                        <div class="driver-name-block">
-                            <div class="driver-name-text">
-                                <span>${driverName}</span>
-                            </div>
-                        </div>
-                        <span class="price-tag">$${d[1]}</span>
-                        <input type="radio" name="sprint-driver" value="${driverName}" data-amount="${d[1]}" data-was-checked="false">
-                    </label>`;
+                sprintDiv.innerHTML += `<label class="driver-option"><div class="avatar-container"><div class="avatar-wrapper"><img src="${avatarUrl}" class="driver-avatar" alt="${driverName}"></div>${badge}</div><div class="driver-name-block"><div class="driver-name-text"><span>${driverName}</span></div></div><span class="price-tag">$${d[1]}</span><input type="radio" name="sprint-driver" value="${driverName}" data-amount="${d[1]}" data-was-checked="false"></label>`;
             });
 
             const featureDiv = document.getElementById('feature-drivers');
@@ -569,23 +534,7 @@
                 const count = featureBetCounts[driverName] || 0;
                 const badge = count > 0 ? `<div class="notification-badge">${count}</div>` : "";
                 const avatarUrl = driverImages[driverName] || "data:image/gif;base64,R0lGODlhAQABAIAAAAAAAP///yH5BAEAAAAALAAAAAABAAEAAAIBRAA7";
-
-                featureDiv.innerHTML += `
-                    <label class="driver-option">
-                        <div class="avatar-container">
-                            <div class="avatar-wrapper">
-                                <img src="${avatarUrl}" class="driver-avatar" alt="${driverName}">
-                            </div>
-                            ${badge}
-                        </div>
-                        <div class="driver-name-block">
-                            <div class="driver-name-text">
-                                <span>${driverName}</span>
-                            </div>
-                        </div>
-                        <span class="price-tag">$${d[2]}</span>
-                        <input type="radio" name="feature-driver" value="${driverName}" data-amount="${d[2]}" data-was-checked="false">
-                    </label>`;
+                featureDiv.innerHTML += `<label class="driver-option"><div class="avatar-container"><div class="avatar-wrapper"><img src="${avatarUrl}" class="driver-avatar" alt="${driverName}"></div>${badge}</div><div class="driver-name-block"><div class="driver-name-text"><span>${driverName}</span></div></div><span class="price-tag">$${d[2]}</span><input type="radio" name="feature-driver" value="${driverName}" data-amount="${d[2]}" data-was-checked="false"></label>`;
             });
 
             document.querySelectorAll('.driver-option input[type="radio"]').forEach(radio => {
@@ -611,15 +560,10 @@
     }
 
     async function login() {
-        // --- NEW DEADLINE CHECK ---
-        if (globalDeadlineDate) {
-            let currentSydney = new Date(new Date().toLocaleString("en-US", {timeZone: "Australia/Sydney"}));
-            if (currentSydney.getTime() > globalDeadlineDate.getTime()) {
-                alert("⚠️ Betting is currently suspended.\n\nThe deadline for this round has passed. Betting will reopen after the upcoming race weekend has completed.");
-                return; // Stops the login process completely
-            }
+        if (globalDeadlineDate && (new Date(new Date().toLocaleString("en-US", {timeZone: "Australia/Sydney"})).getTime() > globalDeadlineDate.getTime())) {
+            alert("⚠️ Betting is currently suspended.\n\nThe deadline for this round has passed. Betting will reopen after the upcoming race weekend has completed.");
+            return; 
         }
-        // --- END DEADLINE CHECK ---
 
         if (currentUserType === 'Constructor') {
             const selected = document.getElementById('constructor-select').value;
@@ -642,36 +586,25 @@
                 
                 const logoUrl = teamLogos[selected] || "";
                 const logoImg = document.getElementById('betting-team-logo');
-                if (logoUrl) {
-                    logoImg.src = logoUrl;
-                    logoImg.style.display = "block";
-                } else {
-                    logoImg.style.display = "none";
-                }
+                if (logoUrl) { logoImg.src = logoUrl; logoImg.style.display = "block"; } 
+                else { logoImg.style.display = "none"; }
                 
                 const slfsPaid = parseSheetNumber(team[3]);
-                baseSideBetNet = parseSheetNumber(team[4]);
+                baseSideBetNet = parseSheetNumber(team[4]); // Note: Make sure Dashboard includes Custom Winnings
                 const raceFees = parseSheetNumber(team[5]);
                 const budgetCap = parseSheetNumber(team[6]);
-                const sideBetWinnings = parseSheetNumber(team[7]);
+                const sideBetWinnings = parseSheetNumber(team[7]); // Add Custom winnings here in sheet logic
 
                 document.getElementById('driver-slfs-display').innerText = `-$${slfsPaid.toFixed(2)}`;
                 document.getElementById('side-bet-winnings-display').innerText = `+$${sideBetWinnings.toFixed(2)}`;
                 document.getElementById('budget-cap-display').innerText = `$${budgetCap.toFixed(2)}`;
                 
                 const raceFeesElem = document.getElementById('race-fees-display');
-                if (raceFees > 0) {
-                    raceFeesElem.innerText = `+$${raceFees.toFixed(2)}`;
-                    raceFeesElem.style.color = "#00ff00";
-                } else {
-                    raceFeesElem.innerText = `$0.00`;
-                    raceFeesElem.style.color = "#fff";
-                }
+                if (raceFees > 0) { raceFeesElem.innerText = `+$${raceFees.toFixed(2)}`; raceFeesElem.style.color = "#00ff00"; } 
+                else { raceFeesElem.innerText = `$0.00`; raceFeesElem.style.color = "#fff"; }
 
                 await populateExistingBets();
-            } else {
-                alert("Incorrect constructor or password!");
-            }
+            } else { alert("Incorrect constructor or password!"); }
         } else {
             const publicFName = document.getElementById('public-fname-input').value.trim();
             const publicSName = document.getElementById('public-sname-input').value.trim();
@@ -692,7 +625,6 @@
             document.getElementById('login-section').classList.add('hidden');
             document.getElementById('betting-section').classList.remove('hidden');
             document.getElementById('welcome-message').innerText = `Welcome, ${publicFName}`;
-            
             document.getElementById('betting-team-logo').style.display = "none";
 
             await calculatePublicNetBets();
@@ -710,38 +642,27 @@
                 const bWinnings = parseFloat(b[7] || 0);
                 const bUserType = String(b[8]).trim();
                 const bEmail = String(b[9]).trim();
-
                 if (bUserType === 'Public' && bName === currentConstructor && bEmail === currentEmail) {
                     publicNet += (bWinnings - bAmount);
                 }
             });
             baseSideBetNet = publicNet;
-        } catch(e) {
-            console.error("Could not calculate public net bets.");
-        }
+        } catch(e) { console.error("Could not calc public net bets."); }
     }
 
     async function populateExistingBets() {
         try {
+            // Populate standard bets
             const betsData = await fetchCSV(BETS_CSV_URL);
-            
             const myBets = betsData.filter(b => {
                 const isCurrentRound = b[1] && String(b[1]).trim() === currentRound;
                 const matchesName = b[2] && String(b[2]).trim() === currentConstructor;
                 const rowUserType = String(b[8]).trim();
                 const rowEmail = String(b[9]).trim();
-
-                if (currentUserType === 'Constructor') {
-                    return isCurrentRound && matchesName && rowUserType !== 'Public';
-                } else {
-                    return isCurrentRound && matchesName && rowUserType === 'Public' && rowEmail === currentEmail;
-                }
+                if (currentUserType === 'Constructor') return isCurrentRound && matchesName && rowUserType !== 'Public';
+                else return isCurrentRound && matchesName && rowUserType === 'Public' && rowEmail === currentEmail;
             });
             
-            const submitBtn = document.getElementById('submit-btn');
-            hasExistingBets = myBets.length > 0;
-            submitBtn.innerText = hasExistingBets ? "Update Bets" : "Submit Bets";
-
             myExistingSprintBet = 0;
             myExistingFeatureBet = 0;
 
@@ -749,42 +670,85 @@
                 const raceType = String(bet[3]).trim().toLowerCase();
                 const driver = String(bet[4]).trim();   
                 const amt = parseFloat(bet[5] || 0);
-                
                 if (raceType === 'sprint') {
                     const radio = document.querySelector(`input[name="sprint-driver"][value="${driver}"]`);
-                    if (radio) {
-                        radio.checked = true;
-                        radio.dataset.wasChecked = "true";
-                        myExistingSprintBet = amt;
-                    }
+                    if (radio) { radio.checked = true; radio.dataset.wasChecked = "true"; myExistingSprintBet = amt; }
                 } else if (raceType === 'feature') {
                     const radio = document.querySelector(`input[name="feature-driver"][value="${driver}"]`);
-                    if (radio) {
-                        radio.checked = true;
-                        radio.dataset.wasChecked = "true";
-                        myExistingFeatureBet = amt;
-                    }
+                    if (radio) { radio.checked = true; radio.dataset.wasChecked = "true"; myExistingFeatureBet = amt; }
                 }
             });
+            hasExistingBets = myBets.length > 0;
+
+            // Populate CUSTOM bets
+            customStatementsObj = {};
+            myExistingCustomBetsTotal = 0;
+            
+            if (CUSTOM_BETS_CSV_URL && CUSTOM_BETS_CSV_URL !== "PASTE_YOUR_NEW_CUSTOM_BETS_CSV_URL_HERE") {
+                const customBetsData = await fetchCSV(CUSTOM_BETS_CSV_URL);
+                const currentCustomBets = customBetsData.filter(b => b[1] && String(b[1]).trim() === currentRound);
+                
+                currentCustomBets.forEach(bet => {
+                    const bUser = String(bet[2]).trim();
+                    const bUserType = String(bet[3]).trim();
+                    const bEmail = String(bet[4]).trim();
+                    const bStatement = String(bet[5]).trim();
+                    const bStance = String(bet[6]).trim().toUpperCase();
+                    const bAmount = parseFloat(bet[7] || 0);
+
+                    if (!customStatementsObj[bStatement]) {
+                        customStatementsObj[bStatement] = { truePot: 0, falsePot: 0, myBetAmount: 0, myBetStance: "TRUE" };
+                    }
+                    if (bStance === 'TRUE') customStatementsObj[bStatement].truePot += bAmount;
+                    if (bStance === 'FALSE') customStatementsObj[bStatement].falsePot += bAmount;
+
+                    // Did I place this bet?
+                    let isMyBet = false;
+                    if (currentUserType === 'Constructor' && bUserType !== 'Public' && bUser === currentConstructor) isMyBet = true;
+                    if (currentUserType === 'Public' && bUserType === 'Public' && bUser === currentConstructor && bEmail === currentEmail) isMyBet = true;
+
+                    if (isMyBet) {
+                        customStatementsObj[bStatement].myBetAmount = bAmount;
+                        customStatementsObj[bStatement].myBetStance = bStance;
+                        myExistingCustomBetsTotal += bAmount;
+                        hasExistingBets = true;
+                    }
+                });
+            }
+
+            // Render existing custom bets to UI
+            const customListDiv = document.getElementById('custom-bets-list');
+            const statementKeys = Object.keys(customStatementsObj);
+            
+            if (statementKeys.length > 0) {
+                customListDiv.innerHTML = ''; // Clear "None yet" message
+                statementKeys.forEach((statement, idx) => {
+                    const data = customStatementsObj[statement];
+                    customListDiv.innerHTML += `
+                        <div class="custom-bet-card">
+                            <div class="custom-statement-text">"${statement}"</div>
+                            <div class="custom-pools">
+                                <div class="pool-badge pool-true">TRUE POOL: $${data.truePot.toFixed(2)}</div>
+                                <div class="pool-badge pool-false">FALSE POOL: $${data.falsePot.toFixed(2)}</div>
+                            </div>
+                            <div class="custom-input-row">
+                                <input type="number" id="custom-amount-${idx}" data-statement="${statement}" value="${data.myBetAmount > 0 ? data.myBetAmount : ''}" placeholder="Stake ($)" min="0" oninput="updateLiveValues()">
+                                <select id="custom-stance-${idx}" onchange="updateLiveValues()">
+                                    <option value="TRUE" ${data.myBetStance === 'TRUE' ? 'selected' : ''}>Bet TRUE</option>
+                                    <option value="FALSE" ${data.myBetStance === 'FALSE' ? 'selected' : ''}>Bet FALSE</option>
+                                </select>
+                            </div>
+                        </div>
+                    `;
+                });
+            }
+
+            const submitBtn = document.getElementById('submit-btn');
+            submitBtn.innerText = hasExistingBets ? "Update All Bets" : "Submit All Bets";
 
             updateLiveValues();
 
-            const raceDate = parseDateString(nextRaceDate);
-            const today = new Date(new Date().toLocaleString("en-US", {timeZone: "Australia/Sydney"}));
-            const deadline = new Date(raceDate);
-            deadline.setDate(deadline.getDate() - 1);
-            deadline.setHours(23, 59, 59); 
-
-            const reopenDate = new Date(raceDate);
-            reopenDate.setDate(reopenDate.getDate() + 1);
-            reopenDate.setHours(0, 0, 0); 
-
-            if (today > deadline && today < reopenDate) {
-                submitBtn.disabled = true;
-                submitBtn.innerText = "Bets Locked For Race Weekend";
-                document.querySelectorAll('input[type="radio"]').forEach(r => r.disabled = true);
-            }
-        } catch(e) {}
+        } catch(e) { console.error("Error populating existing bets", e); }
     }
 
     function updateLiveValues() {
@@ -800,7 +764,17 @@
         document.getElementById('sprint-pot-total').innerText = `$${currentSprintPot.toFixed(2)}`;
         document.getElementById('feature-pot-total').innerText = `$${currentFeaturePot.toFixed(2)}`;
 
-        const dynamicNet = baseSideBetNet + myExistingSprintBet + myExistingFeatureBet - newSprintAmount - newFeatureAmount;
+        // Calculate custom bets total from DOM inputs
+        let newCustomBetsTotal = 0;
+        const statementKeys = Object.keys(customStatementsObj);
+        statementKeys.forEach((_, idx) => {
+            const val = parseFloat(document.getElementById(`custom-amount-${idx}`).value) || 0;
+            newCustomBetsTotal += val;
+        });
+        const newProposalAmt = parseFloat(document.getElementById('new-custom-amount').value) || 0;
+        newCustomBetsTotal += newProposalAmt;
+
+        const dynamicNet = baseSideBetNet + myExistingSprintBet + myExistingFeatureBet + myExistingCustomBetsTotal - newSprintAmount - newFeatureAmount - newCustomBetsTotal;
 
         const netDisplay = document.getElementById('net-win-loss-display');
         if (dynamicNet > 0) {
@@ -814,50 +788,31 @@
             netDisplay.style.color = "#888";
         }
     }
+    
+    // Recalculate if they type in the 'propose new' box
+    document.getElementById('new-custom-amount').addEventListener('input', updateLiveValues);
 
     function returnHome() {
-        document.getElementById('betting-section').classList.add('hidden');
-        document.getElementById('login-section').classList.remove('hidden');
-        document.getElementById('password-input').value = ""; 
-        document.getElementById('public-fname-input').value = ""; 
-        document.getElementById('public-sname-input').value = ""; 
-        document.getElementById('public-email-input').value = ""; 
-        
-        document.getElementById('betting-team-logo').style.display = "none";
-        
-        if (currentUserType === 'Constructor') {
-            document.documentElement.style.setProperty('--theme-color', '#e10600');
-        } else {
-            document.documentElement.style.setProperty('--theme-color', '#00D7B6');
-        }
-
-        document.querySelectorAll('input[type="radio"]').forEach(r => {
-            r.checked = false;
-            r.dataset.wasChecked = "false";
-        });
+        window.location.reload(); // Hard reset to clear complex forms safely
     }
 
-    const sendBet = async (raceType, selectedElement, isDelete = false, signal) => {
+    const sendBet = async (type, driverOrStatement, amount, stance, isDelete = false, signal) => {
         const formData = new URLSearchParams();
         formData.append('round', currentRound);
         formData.append('constructor', currentConstructor);
-        formData.append('raceType', raceType);
-        
+        formData.append('raceType', type);
         formData.append('userType', currentUserType);
         formData.append('email', currentEmail); 
 
         if (isDelete) {
             formData.append('action', 'delete');
         } else {
-            formData.append('driver', selectedElement.value);
-            formData.append('amount', selectedElement.getAttribute('data-amount'));
+            formData.append('driver', driverOrStatement);
+            formData.append('amount', amount);
+            if (type === 'Custom') formData.append('stance', stance);
         }
 
-        return fetch(GOOGLE_SCRIPT_WEB_APP_URL, { 
-            method: 'POST', 
-            body: formData,
-            signal: signal 
-        });
+        return fetch(GOOGLE_SCRIPT_WEB_APP_URL, { method: 'POST', body: formData, signal: signal });
     };
 
     document.getElementById('bet-form').addEventListener('submit', async function(e) {
@@ -868,56 +823,67 @@
 
         const sprintSelected = document.querySelector('input[name="sprint-driver"]:checked');
         const featureSelected = document.querySelector('input[name="feature-driver"]:checked');
+        
+        // Grab Custom Bets Inputs
+        let customBetsToProcess = [];
+        const statementKeys = Object.keys(customStatementsObj);
+        statementKeys.forEach((statement, idx) => {
+            const amount = parseFloat(document.getElementById(`custom-amount-${idx}`).value) || 0;
+            const stance = document.getElementById(`custom-stance-${idx}`).value;
+            customBetsToProcess.push({ statement, amount, stance });
+        });
 
-        if (!sprintSelected && !featureSelected && !hasExistingBets) {
-            alert("You must select at least one driver to place a bet.");
-            submitBtn.innerText = "Submit Bets";
+        // Grab New Proposal
+        const newStatement = document.getElementById('new-custom-statement').value.trim();
+        const newAmt = parseFloat(document.getElementById('new-custom-amount').value) || 0;
+        const newStance = document.getElementById('new-custom-stance').value;
+
+        if (!sprintSelected && !featureSelected && customBetsToProcess.every(b => b.amount === 0) && newAmt === 0 && !hasExistingBets) {
+            alert("You must place at least one bet or proposition.");
+            submitBtn.innerText = "Submit All Bets";
             submitBtn.disabled = false;
             return;
         }
 
         const controller = new AbortController();
-        
-        const timeoutId = setTimeout(() => {
-            controller.abort(); 
-        }, 30000);
+        const timeoutId = setTimeout(() => { controller.abort(); }, 30000);
 
         try {
             const promises = [];
             
-            if (sprintSelected) {
-                promises.push(sendBet('Sprint', sprintSelected, false, controller.signal));
-            } else if (myExistingSprintBet > 0) {
-                promises.push(sendBet('Sprint', null, true, controller.signal));
+            // Pool Bets
+            if (sprintSelected) promises.push(sendBet('Sprint', sprintSelected.value, sprintSelected.getAttribute('data-amount'), null, false, controller.signal));
+            else if (myExistingSprintBet > 0) promises.push(sendBet('Sprint', null, 0, null, true, controller.signal));
+
+            if (featureSelected) promises.push(sendBet('Feature', featureSelected.value, featureSelected.getAttribute('data-amount'), null, false, controller.signal));
+            else if (myExistingFeatureBet > 0) promises.push(sendBet('Feature', null, 0, null, true, controller.signal));
+
+            // Existing Custom Bets Overrides
+            customBetsToProcess.forEach(bet => {
+                const oldData = customStatementsObj[bet.statement];
+                if (bet.amount > 0) promises.push(sendBet('Custom', bet.statement, bet.amount, bet.stance, false, controller.signal));
+                else if (oldData && oldData.myBetAmount > 0) promises.push(sendBet('Custom', bet.statement, 0, null, true, controller.signal));
+            });
+
+            // Propose New Custom Bet
+            if (newStatement && newAmt > 0) {
+                promises.push(sendBet('Custom', newStatement, newAmt, newStance, false, controller.signal));
             }
 
-            if (featureSelected) {
-                promises.push(sendBet('Feature', featureSelected, false, controller.signal));
-            } else if (myExistingFeatureBet > 0) {
-                promises.push(sendBet('Feature', null, true, controller.signal));
-            }
-            
             await Promise.all(promises);
-            
             clearTimeout(timeoutId);
             
             setTimeout(() => {
                 localStorage.setItem('f1lads_last_bet', Date.now()); 
-                
-                alert(`Bets successfully updated for Round ${currentRound}!`);
+                alert(`All bets and propositions successfully locked for Round ${currentRound}!`);
                 window.location.reload(); 
             }, 800);
             
         } catch (error) {
             clearTimeout(timeoutId);
-            
-            if (error.name === 'AbortError') {
-                alert("⏱️ Request timed out (30 seconds). The server is busy, please try submitting again.");
-            } else {
-                alert("⚠️ Connection error. Please check your internet and try again.");
-            }
-            
-            submitBtn.innerText = hasExistingBets ? "Update Bets" : "Submit Bets";
+            if (error.name === 'AbortError') alert("⏱️ Request timed out. The server is busy, please try submitting again.");
+            else alert("⚠️ Connection error. Please check your internet and try again.");
+            submitBtn.innerText = hasExistingBets ? "Update All Bets" : "Submit All Bets";
             submitBtn.disabled = false;
         }
     });
