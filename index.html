@@ -10,14 +10,14 @@
         :root { --theme-color: #00D7B6; --f1-dark: #15151e; --f1-card: #1f1f27; --f1-hover: #2a2a35; }
         
         body { font-family: 'Titillium Web', sans-serif; background-color: var(--f1-dark); color: #fff; margin: 0; padding: 20px; display: flex; justify-content: center; }
-        .container { background: var(--f1-card); width: 100%; max-width: 600px; padding: 30px; border-radius: 12px; box-shadow: 0 10px 30px rgba(0,0,0,0.5); margin-bottom: 20px;}
+        .container { background: var(--f1-card); width: 100%; max-width: 600px; padding: 30px; border-radius: 12px; box-shadow: 0 10px 30px rgba(0,0,0,0.5); margin-bottom: 20px; position: relative;}
         
         a img { border: none; outline: none; }
         a:hover img { opacity: 0.8; transition: 0.2s; }
         .league-logo { max-height: 75px; margin: 0 auto 15px auto; display: block; border-radius: 6px; }
         .hero-image { width: 100%; height: auto; display: block; border-radius: 8px; margin-bottom: 20px; box-shadow: 0 4px 10px rgba(0,0,0,0.3); }
 
-        h1 { text-align: center; text-transform: uppercase; font-weight: 700; margin: 0; }
+        h1 { text-align: center; text-transform: uppercase; font-weight: 700; margin: 0; display: flex; align-items: center; justify-content: center; gap: 10px; }
         
         .header-wrapper { position: relative; display: flex; align-items: center; justify-content: center; border-bottom: 2px solid var(--theme-color); padding-bottom: 10px; margin-bottom: 20px; transition: border-color 0.3s ease; min-height: 35px;}
         .header-wrapper h1 { padding: 0 55px; font-size: 26px; line-height: 1.2; margin: 0; }
@@ -44,7 +44,7 @@
         button:disabled { background: #555 !important; cursor: not-allowed; transform: none; color: #aaa; filter: none; }
         
         .hidden { display: none !important; }
-        .race-section { background: #1a1a21; padding: 20px; border-radius: 8px; margin-bottom: 25px; border: 1px solid #333; }
+        .race-section { background: #1a1a21; padding: 20px; border-radius: 8px; margin-bottom: 25px; border: 1px solid #333; position: relative;}
         
         .driver-option { display: flex; justify-content: flex-start; align-items: center; padding: 10px 15px; background: var(--f1-hover); border: 2px solid transparent; border-radius: 8px; margin-bottom: 10px; cursor: pointer; transition: 0.2s; font-size: 18px; font-weight: 600; }
         .driver-option:hover { border-color: #555; }
@@ -72,15 +72,6 @@
         .cap-row .metric-value { color: var(--theme-color); font-size: 20px; }
         .divider { border-top: 1px dashed #444; margin: 6px 0; }
 
-        .rules-card { background: rgba(225, 6, 0, 0.05); border: 1px solid rgba(225, 6, 0, 0.3); padding: 20px; border-radius: 8px; margin-bottom: 20px; transition: 0.3s ease; }
-        /* Hardcoded to Red for Constructors so it doesn't change color */
-        .rules-card h3 { color: #e10600; text-transform: uppercase; margin-top: 0; font-size: 16px; border-bottom: 1px solid rgba(225, 6, 0, 0.2); padding-bottom: 8px; margin-bottom: 12px; transition: 0.3s ease; }
-        .rules-card ul { margin: 0; padding-left: 20px; font-size: 13px; color: #ccc; }
-        .rules-card li { margin-bottom: 8px; line-height: 1.4; }
-        /* Restores green theme strictly for Public guests */
-        .rules-card.public-theme { background: rgba(0, 215, 182, 0.05); border-color: rgba(0, 215, 182, 0.3); }
-        .rules-card.public-theme h3 { color: #00D7B6; border-bottom-color: rgba(0, 215, 182, 0.2); }
-
         .overview-title { text-transform: uppercase; color: #fff; font-size: 18px; border-bottom: 2px solid #333; padding-bottom: 8px; margin-bottom: 15px; text-align: center; }
         .paddock-grid { display: flex; flex-direction: column; gap: 15px; }
         .mini-dashboard { background: #1a1a21; border: 1px solid #333; padding: 12px; border-radius: 8px; border-left: 4px solid var(--team-color, #444); }
@@ -97,16 +88,64 @@
         #sync-warning-banner { display: none; background-color: rgba(255, 165, 0, 0.1); color: #ffa500; padding: 15px; margin-bottom: 25px; border: 1px solid #ffa500; border-radius: 8px; font-size: 14px; font-weight: bold; text-align: center; line-height: 1.5; width: 100%; box-sizing: border-box; }
         #sync-warning-banner span { color: #ffa500; font-weight: 900; }
 
+        /* INFO ICON AND TOOLTIPS FOR RULES */
+        .info-icon { position: relative; cursor: pointer; font-size: 18px; margin-left: 5px; color: #aaa; }
+        .info-tooltip { display: none; position: absolute; bottom: 130%; left: 50%; transform: translateX(-50%); background: #1f1f27; border: 1px solid var(--theme-color); padding: 15px; border-radius: 8px; width: 300px; box-shadow: 0 10px 30px rgba(0,0,0,0.8); z-index: 50; text-align: left; font-size: 13px; color: #ccc; font-family: 'Titillium Web', sans-serif; font-weight: normal; text-transform: none; line-height: 1.4; }
+        .info-tooltip::after { content: ""; position: absolute; top: 100%; left: 50%; margin-left: -8px; border-width: 8px; border-style: solid; border-color: var(--theme-color) transparent transparent transparent; }
+        .info-icon:hover .info-tooltip { display: block; }
+        .info-tooltip h3 { color: var(--theme-color); text-transform: uppercase; margin-top: 0; font-size: 14px; border-bottom: 1px solid rgba(255,255,255,0.1); padding-bottom: 5px; margin-bottom: 10px; }
+        .info-tooltip ul { margin: 0; padding-left: 15px; }
+        .info-tooltip li { margin-bottom: 6px; }
+
+        /* CURRENCY INPUT */
+        .currency-input { position: relative; display: flex; align-items: center; flex: 1; margin: 0; }
+        .currency-input span { position: absolute; left: 12px; color: #aaa; font-weight: bold; font-size: 16px; pointer-events: none;}
+        .currency-input input { padding-left: 28px !important; width: 100%; margin: 0; }
+
         /* CUSTOM BETS SPECIFIC CSS */
-        .custom-bet-card { background: #1f1f27; border: 1px solid #444; border-radius: 8px; padding: 15px; margin-bottom: 15px; box-shadow: 0 4px 10px rgba(0,0,0,0.3); }
-        .custom-statement-text { font-size: 16px; font-weight: 700; line-height: 1.4; color: #fff; border-left: 3px solid var(--theme-color); padding-left: 10px; }
-        .custom-pools { display: flex; gap: 10px; margin-bottom: 12px; }
-        .pool-badge { flex: 1; text-align: center; padding: 6px; border-radius: 4px; font-size: 13px; font-weight: bold; }
-        .pool-true { background: rgba(0, 255, 0, 0.1); border: 1px solid #00ff00; color: #00ff00; }
-        .pool-false { background: rgba(255, 0, 0, 0.1); border: 1px solid #ff4444; color: #ff4444; }
+        .custom-bet-card { background: #1a1a21; border: 2px solid transparent; border-radius: 8px; margin-bottom: 12px; transition: border-color 0.3s; cursor: pointer; position: relative;}
+        .custom-bet-card:hover { border-color: #555; }
+        .border-valid { border-color: #00ff00 !important; }
+        .border-waiting { border-color: #ffa500 !important; }
+        
+        .bet-summary { padding: 15px; display: flex; justify-content: space-between; align-items: center; gap: 10px;}
+        .statement-title-wrap { display: flex; align-items: center; flex: 1; overflow: hidden;}
+        .proposer-logo { height: 20px; margin-right: 10px; border-radius: 3px; }
+        .proposer-text { font-size: 16px; margin-right: 10px; }
+        .custom-statement-text { font-size: 15px; font-weight: 700; line-height: 1.3; color: #fff; text-overflow: ellipsis; }
+        
+        .bet-status-col { display: flex; flex-direction: column; align-items: flex-end; gap: 5px; flex-shrink: 0;}
+        .status-badge { padding: 3px 8px; border-radius: 12px; font-size: 10px; font-weight: 900; letter-spacing: 0.5px; text-transform: uppercase; }
+        .status-valid { background: rgba(0,255,0,0.1); color: #00ff00; border: 1px solid #00ff00; }
+        .status-waiting { background: rgba(255,165,0,0.1); color: #ffa500; border: 1px solid #ffa500; }
+        .pot-total-text { font-size: 13px; font-weight: 800; color: #fff; }
+
+        .bet-details { padding: 0 15px 15px 15px; border-top: 1px dashed #333; margin-top: 5px; padding-top: 15px; cursor: default;}
+        .custom-pools { display: flex; gap: 10px; margin-bottom: 15px; }
+        .pool-badge { flex: 1; text-align: center; padding: 8px; border-radius: 4px; font-size: 13px; font-weight: bold; position: relative; cursor: help;}
+        .pool-true { background: rgba(0, 255, 0, 0.05); border: 1px solid #00ff00; color: #00ff00; }
+        .pool-false { background: rgba(255, 0, 0, 0.05); border: 1px solid #ff4444; color: #ff4444; }
+        
+        /* HOVER TOOLTIPS FOR POOLS */
+        .pool-hover-tooltip { display: none; position: absolute; bottom: 110%; left: 50%; transform: translateX(-50%); background: #111; border: 1px solid #555; padding: 8px 12px; border-radius: 6px; z-index: 100; min-width: 120px; color: #fff; font-size: 12px; font-weight: normal; box-shadow: 0 4px 10px rgba(0,0,0,0.5); text-align: left;}
+        .pool-badge:hover .pool-hover-tooltip { display: block; }
+        .pool-hover-tooltip div { margin-bottom: 4px; display: flex; align-items: center; gap: 6px; white-space: nowrap;}
+        .pool-hover-tooltip img { height: 14px; }
+
         .custom-input-row { display: flex; gap: 10px; }
-        .custom-input-row input { flex: 1; margin: 0; }
         .custom-input-row select { flex: 1; margin: 0; }
+        
+        .cancel-btn { background: transparent; border: 1px solid #ff4444; color: #ff4444; padding: 8px 15px; border-radius: 6px; cursor: pointer; font-size: 14px; font-weight: bold; transition: 0.2s; width: 100%; margin-top: 10px; text-transform: uppercase;}
+        .cancel-btn:hover { background: #ff4444; color: white; }
+
+        /* MODAL CSS */
+        .modal-overlay { display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.8); z-index: 1000; justify-content: center; align-items: center; padding: 20px; box-sizing: border-box;}
+        .modal-content { background: #1f1f27; border: 1px solid #00bfff; border-radius: 12px; padding: 25px; width: 100%; max-width: 400px; position: relative; box-shadow: 0 10px 40px rgba(0, 191, 255, 0.2);}
+        .close-modal { position: absolute; top: 15px; right: 20px; color: #aaa; font-size: 24px; font-weight: bold; cursor: pointer; transition: 0.2s;}
+        .close-modal:hover { color: #fff; }
+        
+        .add-bet-btn { background: #00bfff; color: white; border: none; border-radius: 50%; width: 35px; height: 35px; font-size: 24px; font-weight: bold; cursor: pointer; display: flex; justify-content: center; align-items: center; transition: 0.2s; box-shadow: 0 2px 8px rgba(0,191,255,0.4); position: absolute; right: 20px; top: 20px;}
+        .add-bet-btn:hover { transform: scale(1.1); background: #009acd; }
     </style>
 </head>
 <body>
@@ -209,11 +248,15 @@
             <p id="betting-round-text" style="font-size: 16px; font-weight: 700; color: #ffd700; margin: 0; text-transform: uppercase; letter-spacing: 1px;"></p>
         </div>
 
-        <h1 style="color: var(--theme-color); font-size: 24px; margin-bottom: 10px; border-bottom: 2px solid #333; padding-bottom: 5px;">Race Betting</h1>
-        <div class="rules-card" id="standard-rules-card">
-            <h3>Race Betting Rules</h3>
-            <ul id="standard-rules-list"></ul>
-        </div>
+        <h1 style="color: var(--theme-color); font-size: 24px; margin-bottom: 20px; border-bottom: 2px solid #333; padding-bottom: 5px;">
+            Race Betting
+            <div class="info-icon">ℹ️
+                <div class="info-tooltip">
+                    <h3>Race Betting Rules</h3>
+                    <ul id="standard-rules-list"></ul>
+                </div>
+            </div>
+        </h1>
         
         <div class="race-section">
             <h2 style="color: white; margin-top: 0; text-align: center; margin-bottom: 20px;">Sprint Race</h2>
@@ -227,37 +270,59 @@
             <div id="feature-drivers"></div>
         </div>
 
-        <h1 style="color: #00bfff; font-size: 24px; margin-top: 40px; margin-bottom: 10px; border-bottom: 2px solid #333; padding-bottom: 5px;">Custom Bets</h1>
-        <div class="rules-card" style="background: rgba(0, 191, 255, 0.05); border-color: rgba(0, 191, 255, 0.3);">
-            <h3 style="color: #00bfff; border-bottom-color: rgba(0, 191, 255, 0.2);">Custom Betting Rules</h3>
-            <ul style="color: #ccc;">
-                <li><strong>How it works:</strong> Propose a clear TRUE or FALSE statement about an upcoming race and set a wager. Other bettors can accept your bet by taking the opposite side.</li>
-                <li><strong>The Pot & Payouts:</strong> The total money wagered by both sides creates the Pot. If your side wins, you split the Pot proportionally with anyone else who bet the same way as you, minus a flat 10% League Fee.</li>
-                <li><strong>Valid Bets:</strong> If only one side of the statement is bet on (e.g., people bet TRUE but nobody bets FALSE), the bet is considered INVALID and all wagers are returned.</li>
-            </ul>
-        </div>
+        <h1 style="color: #00bfff; font-size: 24px; margin-top: 40px; margin-bottom: 20px; border-bottom: 2px solid #333; padding-bottom: 5px; position: relative;">
+            Custom Bets
+            <div class="info-icon">ℹ️
+                <div class="info-tooltip">
+                    <h3 style="color: #00bfff; border-bottom-color: rgba(0, 191, 255, 0.2);">Custom Betting Rules</h3>
+                    <ul>
+                        <li><strong>How it works:</strong> Propose a clear TRUE or FALSE statement about an upcoming race and set a wager. Other bettors can accept your bet by taking the opposite side.</li>
+                        <li><strong>The Pot & Payouts:</strong> The total money wagered by both sides creates the Pot. If your side wins, you split the Pot proportionally with anyone else who bet the same way as you, minus a flat 10% League Fee.</li>
+                        <li><strong>Valid Bets:</strong> If only one side of the statement is bet on (e.g., people bet TRUE but nobody bets FALSE), the bet is considered INVALID and all wagers are returned.</li>
+                    </ul>
+                </div>
+            </div>
+            <button type="button" class="add-bet-btn" onclick="openModal()" title="Propose A New Bet">+</button>
+        </h1>
 
-        <div class="race-section" style="border-color: #00bfff;">
-            <h2 style="color: white; margin-top: 0; text-align: center; margin-bottom: 20px;">Active Bets</h2>
+        <div class="race-section" style="border-color: #00bfff; padding: 15px;">
             <div id="custom-bets-list">
                 <p style="text-align: center; color: #aaa; font-style: italic;">No custom bets proposed yet for this round.</p>
-            </div>
-
-            <div style="border-top: 1px dashed #444; margin-top: 20px; padding-top: 20px;">
-                <h3 style="color: #00bfff; margin-top: 0; font-size: 16px; text-transform: uppercase;">Propose A New Bet</h3>
-                <input type="text" id="new-custom-statement" placeholder="e.g. Rodda finishes ahead of Sahan..." style="margin-bottom: 15px;">
-                <div class="custom-input-row">
-                    <input type="number" id="new-custom-amount" placeholder="Stake Amount ($)" min="1">
-                    <select id="new-custom-stance">
-                        <option value="TRUE">TRUE</option>
-                        <option value="FALSE">FALSE</option>
-                    </select>
-                </div>
             </div>
         </div>
 
         <button type="submit" class="btn-primary" id="submit-btn" style="margin-top: 10px; padding: 20px; font-size: 20px;">Submit All Bets</button>
     </form>
+</div>
+
+<div id="new-bet-modal" class="modal-overlay">
+    <div class="modal-content">
+        <span class="close-modal" onclick="closeModal()">&times;</span>
+        <h3 style="color: #00bfff; margin-top: 0; font-size: 20px; text-transform: uppercase; border-bottom: 1px solid #333; padding-bottom: 10px; margin-bottom: 20px;">Propose A New Bet</h3>
+        
+        <label style="color: #aaa; font-size: 13px; font-weight: bold; margin-bottom: 5px; display: block;">Verifiable Statement:</label>
+        <input type="text" id="new-custom-statement" placeholder="e.g. Rodda finishes ahead of Sahan..." style="margin-bottom: 20px;">
+        
+        <div class="custom-input-row" style="margin-bottom: 20px;">
+            <div style="flex: 1;">
+                <label style="color: #aaa; font-size: 13px; font-weight: bold; margin-bottom: 5px; display: block;">Stake Amount:</label>
+                <div class="currency-input">
+                    <span>$</span>
+                    <input type="number" id="new-custom-amount" placeholder="0" min="1" oninput="updateLiveValues()">
+                </div>
+            </div>
+            <div style="flex: 1;">
+                <label style="color: #aaa; font-size: 13px; font-weight: bold; margin-bottom: 5px; display: block;">Your Stance:</label>
+                <select id="new-custom-stance">
+                    <option value="TRUE">TRUE</option>
+                    <option value="FALSE">FALSE</option>
+                </select>
+            </div>
+        </div>
+        
+        <p style="font-size: 12px; color: #888; margin-bottom: 20px; line-height: 1.4;">* Your proposal will be added to the Active Bets list when you click 'Submit All Bets' on the main page.</p>
+        <button type="button" class="btn-primary" style="background: #00bfff; font-size: 16px; padding: 12px;" onclick="closeModal()">Save Proposal</button>
+    </div>
 </div>
 
 <script>
@@ -315,6 +380,23 @@
     
     let globalDeadlineDate = null; 
 
+    // MODAL LOGIC
+    function openModal() {
+        document.getElementById('new-bet-modal').style.display = 'flex';
+    }
+    function closeModal() {
+        document.getElementById('new-bet-modal').style.display = 'none';
+        updateLiveValues();
+    }
+    
+    // ACCORDION LOGIC
+    window.toggleBetCard = function(element) {
+        const details = element.querySelector('.bet-details');
+        if (details) {
+            details.classList.toggle('hidden');
+        }
+    }
+
     function updateCountdown() {
         if (!globalDeadlineDate || isNaN(globalDeadlineDate.getTime())) return;
         let currentSydney = new Date(new Date().toLocaleString("en-US", {timeZone: "Australia/Sydney"}));
@@ -345,7 +427,6 @@
         const btnPublic = document.getElementById('btn-public');
         const fieldsConstructor = document.getElementById('constructor-fields');
         const fieldsPublic = document.getElementById('public-fields');
-        const rulesCard = document.getElementById('standard-rules-card');
         const rulesList = document.getElementById('standard-rules-list');
         const overviewSection = document.getElementById('paddock-overview-section');
 
@@ -356,7 +437,6 @@
             fieldsPublic.classList.add('hidden');
             document.documentElement.style.setProperty('--theme-color', '#e10600');
             
-            rulesCard.classList.remove('public-theme');
             overviewSection.classList.remove('hidden');
 
             rulesList.innerHTML = `
@@ -372,7 +452,6 @@
             fieldsConstructor.classList.add('hidden');
             document.documentElement.style.setProperty('--theme-color', '#00D7B6'); 
             
-            rulesCard.classList.add('public-theme');
             overviewSection.classList.add('hidden');
 
             rulesList.innerHTML = `
@@ -427,11 +506,11 @@
         return isNegative ? -num : num;
     }
 
-    // THE FIX FOR THE CANCEL CUSTOM BET BUTTON
     window.cancelCustomBet = async function(statement, event) {
+        event.stopPropagation(); // Prevents the card from expanding/collapsing when clicking the button
         if(!confirm("Are you sure you want to cancel your bet on this statement?")) return;
         const btn = event.target;
-        btn.innerText = "Canceling...";
+        btn.innerText = "CANCELYING...";
         btn.disabled = true;
         
         try {
@@ -440,13 +519,12 @@
             window.location.reload();
         } catch(e) {
             alert("Error canceling bet. Check connection.");
-            btn.innerText = "Cancel My Bet";
+            btn.innerText = "CANCEL BET";
             btn.disabled = false;
         }
     };
 
     window.onload = async () => {
-        // Fix for Glitch 1: Pre-populate the rules box immediately on load
         setLoginMode(currentUserType);
 
         const lastBetTime = localStorage.getItem('f1lads_last_bet');
@@ -681,6 +759,16 @@
         } catch(e) { console.error("Could not calc public net bets."); }
     }
 
+    function buildTooltipHtml(bettorsArr) {
+        if (bettorsArr.length === 0) return "<div style='color:#888; font-style:italic;'>No bets yet</div>";
+        let html = "";
+        bettorsArr.forEach(b => {
+            let logoHtml = b.type === 'Constructor' && teamLogos[b.name] ? `<img src="${teamLogos[b.name]}">` : `<span style="font-size: 10px;">👤</span>`;
+            html += `<div>${logoHtml} ${b.name}</div>`;
+        });
+        return html;
+    }
+
     async function populateExistingBets() {
         try {
             const betsData = await fetchCSV(BETS_CSV_URL);
@@ -727,10 +815,20 @@
                     const bAmount = parseFloat(bet[7] || 0);
 
                     if (!customStatementsObj[bStatement]) {
-                        customStatementsObj[bStatement] = { truePot: 0, falsePot: 0, myBetAmount: 0, myBetStance: "TRUE" };
+                        customStatementsObj[bStatement] = { 
+                            truePot: 0, falsePot: 0, myBetAmount: 0, myBetStance: "TRUE",
+                            proposer: bUser, proposerType: bUserType,
+                            trueBettors: [], falseBettors: []
+                        };
                     }
-                    if (bStance === 'TRUE') customStatementsObj[bStatement].truePot += bAmount;
-                    if (bStance === 'FALSE') customStatementsObj[bStatement].falsePot += bAmount;
+                    if (bStance === 'TRUE') {
+                        customStatementsObj[bStatement].truePot += bAmount;
+                        customStatementsObj[bStatement].trueBettors.push({name: bUser, type: bUserType});
+                    }
+                    if (bStance === 'FALSE') {
+                        customStatementsObj[bStatement].falsePot += bAmount;
+                        customStatementsObj[bStatement].falseBettors.push({name: bUser, type: bUserType});
+                    }
 
                     let isMyBet = false;
                     if (currentUserType === 'Constructor' && bUserType !== 'Public' && bUser === currentConstructor) isMyBet = true;
@@ -749,42 +847,75 @@
             const statementKeys = Object.keys(customStatementsObj);
             
             if (statementKeys.length > 0) {
+                // Sort array: Valid bets first, then waiting for opponent
+                statementKeys.sort((a, b) => {
+                    const aValid = customStatementsObj[a].truePot > 0 && customStatementsObj[a].falsePot > 0;
+                    const bValid = customStatementsObj[b].truePot > 0 && customStatementsObj[b].falsePot > 0;
+                    if (aValid === bValid) return 0;
+                    return aValid ? -1 : 1;
+                });
+
                 customListDiv.innerHTML = ''; 
                 statementKeys.forEach((statement, idx) => {
                     const data = customStatementsObj[statement];
                     const totalPot = data.truePot + data.falsePot;
                     const isValid = data.truePot > 0 && data.falsePot > 0;
                     
-                    const validBadge = isValid 
-                        ? `<span style="background: rgba(0,255,0,0.1); color: #00ff00; border: 1px solid #00ff00; padding: 3px 8px; border-radius: 12px; font-size: 11px; font-weight: bold; letter-spacing: 0.5px;">✅ VALID BET</span>` 
-                        : `<span style="background: rgba(255,165,0,0.1); color: #ffa500; border: 1px solid #ffa500; padding: 3px 8px; border-radius: 12px; font-size: 11px; font-weight: bold; letter-spacing: 0.5px;">⚠️ WAITING FOR OPPONENT</span>`;
+                    const validBadgeClass = isValid ? "status-valid" : "status-waiting";
+                    const validBadgeText = isValid ? "✅ VALID BET" : "⚠️ WAITING FOR OPPONENT";
+                    const borderClass = isValid ? "border-valid" : "border-waiting";
+
+                    const proposerLogoHtml = data.proposerType === 'Constructor' && teamLogos[data.proposer] 
+                        ? `<img src="${teamLogos[data.proposer]}" class="proposer-logo" alt="${data.proposer}" title="Proposed by ${data.proposer}">`
+                        : `<span class="proposer-text" title="Proposed by ${data.proposer}">👤</span>`;
+
+                    const trueTooltipHtml = buildTooltipHtml(data.trueBettors);
+                    const falseTooltipHtml = buildTooltipHtml(data.falseBettors);
 
                     let cancelBtnHtml = '';
                     if (data.myBetAmount > 0 && !isValid) {
-                        cancelBtnHtml = `<div style="text-align: center; margin-top: 10px;"><button type="button" onclick="cancelCustomBet('${statement.replace(/'/g, "\\'")}', event)" style="background: transparent; border: 1px solid #ff4444; color: #ff4444; padding: 6px 12px; border-radius: 4px; cursor: pointer; font-size: 13px; font-weight: bold; transition: 0.2s;">Cancel My Bet</button></div>`;
+                        cancelBtnHtml = `<button type="button" class="cancel-btn" onclick="cancelCustomBet('${statement.replace(/'/g, "\\'")}', event)">Cancel Bet</button>`;
                     }
 
+                    // Default expansion logic: if the user hasn't bet on it, it's collapsed. If they have, it's expanded to easily update.
+                    const isExpanded = data.myBetAmount > 0 ? "" : "hidden";
+
                     customListDiv.innerHTML += `
-                        <div class="custom-bet-card">
-                            <div style="display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 10px;">
-                                <div class="custom-statement-text" style="margin-bottom: 0;">"${statement}"</div>
-                                ${validBadge}
+                        <div class="custom-bet-card ${borderClass}" onclick="toggleBetCard(this)">
+                            <div class="bet-summary">
+                                <div class="statement-title-wrap">
+                                    ${proposerLogoHtml}
+                                    <span class="custom-statement-text">"${statement}"</span>
+                                </div>
+                                <div class="bet-status-col">
+                                    <div class="status-badge ${validBadgeClass}">${validBadgeText}</div>
+                                    <div class="pot-total-text">Pot: $${totalPot.toFixed(2)}</div>
+                                </div>
                             </div>
-                            <div style="text-align: center; font-size: 16px; font-weight: 900; color: #fff; margin-bottom: 12px; border-bottom: 1px dashed #444; padding-bottom: 10px;">
-                                TOTAL POT: $${totalPot.toFixed(2)}
+                            
+                            <div class="bet-details ${isExpanded}" onclick="event.stopPropagation();">
+                                <div class="custom-pools">
+                                    <div class="pool-badge pool-true">
+                                        TRUE POOL: $${data.truePot.toFixed(2)}
+                                        <div class="pool-hover-tooltip">${trueTooltipHtml}</div>
+                                    </div>
+                                    <div class="pool-badge pool-false">
+                                        FALSE POOL: $${data.falsePot.toFixed(2)}
+                                        <div class="pool-hover-tooltip">${falseTooltipHtml}</div>
+                                    </div>
+                                </div>
+                                <div class="custom-input-row">
+                                    <div class="currency-input">
+                                        <span>$</span>
+                                        <input type="number" id="custom-amount-${idx}" data-statement="${statement}" value="${data.myBetAmount > 0 ? data.myBetAmount : ''}" placeholder="Stake" min="0" oninput="updateLiveValues()">
+                                    </div>
+                                    <select id="custom-stance-${idx}" onchange="updateLiveValues()">
+                                        <option value="TRUE" ${data.myBetStance === 'TRUE' ? 'selected' : ''}>TRUE</option>
+                                        <option value="FALSE" ${data.myBetStance === 'FALSE' ? 'selected' : ''}>FALSE</option>
+                                    </select>
+                                </div>
+                                ${cancelBtnHtml}
                             </div>
-                            <div class="custom-pools">
-                                <div class="pool-badge pool-true">TRUE POOL: $${data.truePot.toFixed(2)}</div>
-                                <div class="pool-badge pool-false">FALSE POOL: $${data.falsePot.toFixed(2)}</div>
-                            </div>
-                            <div class="custom-input-row">
-                                <input type="number" id="custom-amount-${idx}" data-statement="${statement}" value="${data.myBetAmount > 0 ? data.myBetAmount : ''}" placeholder="Stake ($)" min="0" oninput="updateLiveValues()">
-                                <select id="custom-stance-${idx}" onchange="updateLiveValues()">
-                                    <option value="TRUE" ${data.myBetStance === 'TRUE' ? 'selected' : ''}>TRUE</option>
-                                    <option value="FALSE" ${data.myBetStance === 'FALSE' ? 'selected' : ''}>FALSE</option>
-                                </select>
-                            </div>
-                            ${cancelBtnHtml}
                         </div>
                     `;
                 });
@@ -834,8 +965,6 @@
             netDisplay.style.color = "#888";
         }
     }
-    
-    document.getElementById('new-custom-amount').addEventListener('input', updateLiveValues);
 
     function returnHome() {
         window.location.reload(); 
