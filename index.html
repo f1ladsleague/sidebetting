@@ -994,17 +994,21 @@
         formData.append('userType', currentUserType);
         formData.append('email', currentEmail); 
 
+        // Always append the driver/statement so the backend knows WHAT to delete or update
+        if (driverOrStatement) {
+            formData.append('driver', driverOrStatement);
+        }
+
         if (isDelete) {
             formData.append('action', 'delete');
         } else {
-            formData.append('driver', driverOrStatement);
             formData.append('amount', amount);
             if (type === 'Custom') formData.append('stance', stance);
         }
 
         return fetch(GOOGLE_SCRIPT_WEB_APP_URL, { method: 'POST', body: formData, signal: signal });
     };
-
+    
     document.getElementById('bet-form').addEventListener('submit', async function(e) {
         e.preventDefault();
         const submitBtn = document.getElementById('submit-btn');
