@@ -52,8 +52,9 @@
         .driver-option:has(input:checked) .avatar-wrapper { border-color: var(--theme-color); }
         .driver-option input { display: none; } 
         
-        .avatar-container { position: relative; margin-right: 15px; flex-shrink: 0; width: 50px; height: 50px; }
-        .avatar-wrapper { width: 100%; height: 100%; border-radius: 50%; overflow: hidden; border: 2px solid #444; background-color: #1a1a21; transition: 0.2s; box-sizing: border-box;}
+        /* REVERTED TO PERFECTLY FIX BADGE POSITIONING */
+        .avatar-container { position: relative; margin-right: 15px; flex-shrink: 0; }
+        .avatar-wrapper { width: 50px; height: 50px; border-radius: 50%; overflow: hidden; border: 2px solid #444; background-color: #1a1a21; transition: 0.2s; }
         .notification-badge { position: absolute; top: -5px; right: -5px; background: #e10600; color: white; font-size: 11px; font-weight: 800; min-width: 14px; text-align: center; padding: 3px 5px; border-radius: 12px; border: 2px solid var(--f1-hover); z-index: 2; box-shadow: 0 2px 4px rgba(0,0,0,0.5); line-height: 1; }
         .driver-avatar { width: 100%; height: 100%; object-fit: cover; transform: scale(1.7); transform-origin: center 15%; }
         
@@ -88,12 +89,13 @@
         #sync-warning-banner { display: none; background-color: rgba(255, 165, 0, 0.1); color: #ffa500; padding: 15px; margin-bottom: 25px; border: 1px solid #ffa500; border-radius: 8px; font-size: 14px; font-weight: bold; text-align: center; line-height: 1.5; width: 100%; box-sizing: border-box; }
         #sync-warning-banner span { color: #ffa500; font-weight: 900; }
 
-        /* EXPANDABLE ACCORDION RULES */
+        /* EXPANDABLE ACCORDION RULES - CENTERED */
         .rules-accordion { background: rgba(255, 255, 255, 0.05); border: 1px solid rgba(255, 255, 255, 0.1); border-radius: 8px; margin-bottom: 20px; overflow: hidden; transition: 0.3s; }
-        .rules-accordion summary { padding: 12px 15px; font-weight: bold; cursor: pointer; list-style: none; display: flex; justify-content: space-between; align-items: center; font-size: 15px; text-transform: uppercase; color: var(--theme-color); user-select: none; }
-        .rules-accordion summary::after { content: "▼"; font-size: 12px; transition: transform 0.3s ease; }
-        .rules-accordion[open] summary::after { transform: rotate(180deg); }
-        .rules-accordion ul { padding: 0 15px 15px 35px; margin: 0; color: #ccc; font-size: 13px; line-height: 1.5; }
+        .rules-accordion summary { display: block; text-align: center; position: relative; padding: 12px 30px; font-weight: bold; cursor: pointer; list-style: none; font-size: 15px; text-transform: uppercase; user-select: none; }
+        .rules-accordion summary::-webkit-details-marker { display: none; }
+        .rules-accordion summary::after { content: "▼"; position: absolute; right: 15px; top: 50%; transform: translateY(-50%); font-size: 12px; transition: transform 0.3s ease; }
+        .rules-accordion[open] summary::after { transform: translateY(-50%) rotate(180deg); }
+        .rules-accordion ul { padding: 0 15px 15px 15px; margin: 0; color: #ccc; font-size: 13px; line-height: 1.5; text-align: center; list-style: none; }
         .rules-accordion li { margin-bottom: 8px; }
 
         /* CURRENCY INPUT */
@@ -106,13 +108,7 @@
         .hover-tooltip { display: none; position: absolute; bottom: 120%; left: 50%; transform: translateX(-50%); background: #111; border: 1px solid #555; padding: 8px 12px; border-radius: 6px; z-index: 100; min-width: 120px; color: #fff; font-size: 12px; font-weight: normal; box-shadow: 0 4px 10px rgba(0,0,0,0.5); text-align: left; text-transform: none; letter-spacing: normal; line-height: 1.2;}
         .has-tooltip:hover .hover-tooltip { display: block; }
         .hover-tooltip img { height: 14px; border-radius: 2px;}
-        
-        /* Layouts for tooltip content */
-        .hover-tooltip .tooltip-grid { display: flex; gap: 4px; flex-wrap: wrap; justify-content: center; align-items: center; margin: 0; }
         .hover-tooltip .tooltip-row { display: flex; align-items: center; gap: 6px; white-space: nowrap; margin-bottom: 4px; }
-
-        /* Driver Badge Tooltip Adjustments to avoid clipping */
-        .notification-badge.has-tooltip .hover-tooltip { transform: translateX(-80%); bottom: 130%; min-width: 60px;}
 
         /* CUSTOM BETS SPECIFIC CSS */
         .custom-bet-card { background: #1a1a21; border: 2px solid transparent; border-radius: 8px; margin-bottom: 12px; transition: border-color 0.3s; cursor: pointer; position: relative;}
@@ -120,11 +116,11 @@
         .border-valid { border-color: #00ff00 !important; }
         .border-waiting { border-color: #ffa500 !important; }
         
-        .bet-summary { padding: 15px; display: flex; justify-content: space-between; align-items: center; gap: 10px;}
-        .statement-title-wrap { display: flex; align-items: center; flex: 1; overflow: hidden;}
-        .proposer-logo { height: 20px; margin-right: 10px; border-radius: 3px; }
-        .proposer-text { font-size: 16px; margin-right: 10px; }
-        .custom-statement-text { font-size: 15px; font-weight: 700; line-height: 1.3; color: #fff; text-overflow: ellipsis; }
+        .bet-summary { padding: 15px; display: flex; justify-content: space-between; align-items: flex-start; gap: 15px; }
+        .statement-title-wrap { display: flex; align-items: flex-start; flex: 1; }
+        .proposer-logo { height: 20px; border-radius: 3px; display: block;}
+        .proposer-text { font-size: 18px; line-height: 1; }
+        .custom-statement-text { font-size: 15px; font-weight: 700; line-height: 1.4; color: #fff; word-wrap: break-word;}
         
         .bet-status-col { display: flex; flex-direction: column; align-items: flex-end; gap: 5px; flex-shrink: 0;}
         .status-badge { padding: 3px 8px; border-radius: 12px; font-size: 10px; font-weight: 900; letter-spacing: 0.5px; text-transform: uppercase; }
@@ -143,6 +139,13 @@
         
         .cancel-btn { background: transparent; border: 1px solid #ff4444; color: #ff4444; padding: 8px 15px; border-radius: 6px; cursor: pointer; font-size: 14px; font-weight: bold; transition: 0.2s; width: 100%; margin-top: 10px; text-transform: uppercase;}
         .cancel-btn:hover { background: #ff4444; color: white; }
+
+        /* FIX OVERLAP ON MOBILE */
+        @media (max-width: 480px) {
+            .bet-summary { flex-direction: column; align-items: flex-start; gap: 10px; }
+            .statement-title-wrap { width: 100%; }
+            .bet-status-col { flex-direction: row; align-items: center; justify-content: space-between; width: 100%; border-top: 1px solid #333; padding-top: 10px; margin-top: 5px; }
+        }
     </style>
 </head>
 <body>
@@ -153,7 +156,7 @@
     </a>
     
     <h1 class="login-h1-border">
-        <span style="position: relative;">
+        <span style="position: relative; display: inline-block;">
             SIDE BETS
             <span style="position: absolute; top: -5px; right: -45px; color: #ffd700; font-size: 14px; font-weight: 900; letter-spacing: 1px;">BETA</span>
         </span>
@@ -358,8 +361,8 @@
     
     let baseSideBetNet = 0;
 
-    let sprintBetsObj = {}; 
-    let featureBetsObj = {}; 
+    let sprintBetCounts = {}; 
+    let featureBetCounts = {}; 
     let customStatementsObj = {}; 
     
     let globalDeadlineDate = null; 
@@ -482,7 +485,7 @@
     }
 
     window.cancelCustomBet = async function(statement, event) {
-        event.stopPropagation(); // Prevents expanding/collapsing
+        event.stopPropagation(); 
         if(!confirm("Are you sure you want to cancel your bet on this statement?")) return;
         const btn = event.target;
         btn.innerText = "CANCELING...";
@@ -499,31 +502,16 @@
         }
     };
 
-    function buildTooltipHtml(bettorsArr, showNames = true) {
+    function buildTooltipHtml(bettorsArr) {
         if (bettorsArr.length === 0) return "<div style='color:#888; font-style:italic;'>No bets yet</div>";
-        
-        if (!showNames) {
-            // Icon-only grid for Race Betting drivers
-            let html = "<div class='tooltip-grid'>";
-            bettorsArr.forEach(b => {
-                let titleAttr = `title="${b.name}"`;
-                html += b.type === 'Constructor' && teamLogos[b.name] 
-                    ? `<img src="${teamLogos[b.name]}" ${titleAttr} style="height: 18px; border-radius: 2px;">` 
-                    : `<span ${titleAttr} style="font-size: 16px; cursor: help;">👤</span>`;
-            });
-            html += "</div>";
-            return html;
-        } else {
-            // Full list with names for Custom Bets
-            let html = "";
-            bettorsArr.forEach(b => {
-                let logoHtml = b.type === 'Constructor' && teamLogos[b.name] 
-                    ? `<img src="${teamLogos[b.name]}" style="height: 14px; border-radius: 2px;">` 
-                    : `<span style="font-size: 12px;">👤</span>`;
-                html += `<div class="tooltip-row">${logoHtml} <span>${b.name}</span></div>`;
-            });
-            return html;
-        }
+        let html = "";
+        bettorsArr.forEach(b => {
+            let logoHtml = b.type === 'Constructor' && teamLogos[b.name] 
+                ? `<img src="${teamLogos[b.name]}" style="height: 14px; border-radius: 2px;">` 
+                : `<span style="font-size: 12px;">👤</span>`;
+            html += `<div class="tooltip-row">${logoHtml} <span>${b.name}</span></div>`;
+        });
+        return html;
     }
 
     window.onload = async () => {
@@ -611,24 +599,21 @@
             try {
                 const allBetsData = await fetchCSV(BETS_CSV_URL);
                 const currentBets = allBetsData.filter(b => b[1] && String(b[1]).trim() === currentRound);
-                sprintBetsObj = {};
-                featureBetsObj = {};
+                
+                sprintBetCounts = {};
+                featureBetCounts = {};
 
                 currentBets.forEach(bet => {
-                    const bUser = String(bet[2]).trim();
                     const raceType = String(bet[3]).trim().toLowerCase();
                     const driver = String(bet[4]).trim();
                     const amount = parseFloat(bet[5] || 0);
-                    const bUserType = String(bet[8]).trim() || "Constructor"; 
 
                     if(raceType === 'sprint') {
                         baseSprintPot += amount;
-                        if(!sprintBetsObj[driver]) sprintBetsObj[driver] = [];
-                        sprintBetsObj[driver].push({name: bUser, type: bUserType});
+                        sprintBetCounts[driver] = (sprintBetCounts[driver] || 0) + 1;
                     } else if(raceType === 'feature') {
                         baseFeaturePot += amount;
-                        if(!featureBetsObj[driver]) featureBetsObj[driver] = [];
-                        featureBetsObj[driver].push({name: bUser, type: bUserType});
+                        featureBetCounts[driver] = (featureBetCounts[driver] || 0) + 1;
                     }
                 });
             } catch(e) {}
@@ -641,12 +626,10 @@
             const sprintDiv = document.getElementById('sprint-drivers');
             sprintSorted.forEach(d => {
                 const driverName = String(d[0]).trim();
-                const bettors = sprintBetsObj[driverName] || [];
-                const count = bettors.length;
+                const count = sprintBetCounts[driverName] || 0;
                 
-                // Pass 'false' to buildTooltipHtml so it only shows icons
-                const tooltipHtml = buildTooltipHtml(bettors, false);
-                const badge = count > 0 ? `<div class="notification-badge has-tooltip">${count}<div class="hover-tooltip">${tooltipHtml}</div></div>` : "";
+                // Reverted badge layout perfectly back to what worked
+                const badge = count > 0 ? `<div class="notification-badge">${count}</div>` : "";
                 const avatarUrl = driverImages[driverName] || "data:image/gif;base64,R0lGODlhAQABAIAAAAAAAP///yH5BAEAAAAALAAAAAABAAEAAAIBRAA7";
                 
                 sprintDiv.innerHTML += `
@@ -664,12 +647,10 @@
             const featureDiv = document.getElementById('feature-drivers');
             featureSorted.forEach(d => {
                 const driverName = String(d[0]).trim();
-                const bettors = featureBetsObj[driverName] || [];
-                const count = bettors.length;
+                const count = featureBetCounts[driverName] || 0;
                 
-                // Pass 'false' to buildTooltipHtml so it only shows icons
-                const tooltipHtml = buildTooltipHtml(bettors, false);
-                const badge = count > 0 ? `<div class="notification-badge has-tooltip">${count}<div class="hover-tooltip">${tooltipHtml}</div></div>` : "";
+                // Reverted badge layout perfectly back to what worked
+                const badge = count > 0 ? `<div class="notification-badge">${count}</div>` : "";
                 const avatarUrl = driverImages[driverName] || "data:image/gif;base64,R0lGODlhAQABAIAAAAAAAP///yH5BAEAAAAALAAAAAABAAEAAAIBRAA7";
                 
                 featureDiv.innerHTML += `
@@ -895,15 +876,16 @@
                     // Pot color logic
                     const potColorClass = isValid ? "color: #00ff00;" : "color: #ffa500;";
 
-                    // Proposer Tooltip HTML (Shows name explicitly here)
-                    const proposerTooltipHtml = buildTooltipHtml([{name: data.proposer, type: data.proposerType}], true);
-                    const proposerLogoHtml = data.proposerType === 'Constructor' && teamLogos[data.proposer] 
-                        ? `<div class="has-tooltip" style="display: inline-block; margin-right: 10px;"><img src="${teamLogos[data.proposer]}" class="proposer-logo" alt="${data.proposer}"><div class="hover-tooltip">${proposerTooltipHtml}</div></div>`
-                        : `<div class="has-tooltip" style="display: inline-block; margin-right: 10px;"><span class="proposer-text">👤</span><div class="hover-tooltip">${proposerTooltipHtml}</div></div>`;
+                    // Solid Proposer Icon Logic (no missing image question marks)
+                    const proposerTooltipHtml = buildTooltipHtml([{name: data.proposer, type: data.proposerType}]);
+                    const logoSrc = data.proposerType === 'Constructor' && teamLogos[data.proposer] ? teamLogos[data.proposer] : null;
+                    
+                    const proposerLogoHtml = logoSrc 
+                        ? `<div class="has-tooltip" style="display: flex; align-items: center; margin-right: 10px; cursor: help;"><img src="${logoSrc}" class="proposer-logo" alt="${data.proposer}"><div class="hover-tooltip">${proposerTooltipHtml}</div></div>`
+                        : `<div class="has-tooltip" style="display: flex; align-items: center; margin-right: 10px; cursor: help;"><span class="proposer-text" style="font-size: 18px; line-height: 1;">👤</span><div class="hover-tooltip">${proposerTooltipHtml}</div></div>`;
 
-                    // Pools Tooltip HTML (Shows names explicitly here)
-                    const trueTooltipHtml = buildTooltipHtml(data.trueBettors, true);
-                    const falseTooltipHtml = buildTooltipHtml(data.falseBettors, true);
+                    const trueTooltipHtml = buildTooltipHtml(data.trueBettors);
+                    const falseTooltipHtml = buildTooltipHtml(data.falseBettors);
 
                     let cancelBtnHtml = '';
                     if (data.myBetAmount > 0 && !isValid) {
