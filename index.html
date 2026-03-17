@@ -15,7 +15,10 @@
         a img { border: none; outline: none; }
         a:hover img { opacity: 0.8; transition: 0.2s; }
         .league-logo { max-height: 75px; margin: 0 auto 15px auto; display: block; border-radius: 6px; }
-        .hero-image { width: 100%; height: auto; display: block; border-radius: 8px; margin-bottom: 20px; box-shadow: 0 4px 10px rgba(0,0,0,0.3); }
+
+        /* BACKGROUND IMAGE FOR LOGIN PAGE */
+        .login-header-bg { position: absolute; top: 0; left: 0; width: 100%; height: 260px; background-image: url('https://raw.githubusercontent.com/f1ladsleague/sidebetting/362f6f915ee8da5d8a71320b12372157ccaf5f02/Driver_Photos/Drivers.png'); background-size: cover; background-position: center top; opacity: 0.15; z-index: 0; border-top-left-radius: 12px; border-top-right-radius: 12px; mask-image: linear-gradient(to bottom, rgba(0,0,0,1) 40%, rgba(0,0,0,0) 100%); -webkit-mask-image: linear-gradient(to bottom, rgba(0,0,0,1) 40%, rgba(0,0,0,0) 100%); }
+        #login-section > * { position: relative; z-index: 1; }
 
         h1 { text-align: center; text-transform: uppercase; font-weight: 700; margin: 0; display: flex; align-items: center; justify-content: center; gap: 10px; }
         
@@ -52,7 +55,6 @@
         .driver-option:has(input:checked) .avatar-wrapper { border-color: var(--theme-color); }
         .driver-option input { display: none; } 
         
-        /* REVERTED TO PERFECTLY FIX BADGE POSITIONING */
         .avatar-container { position: relative; margin-right: 15px; flex-shrink: 0; }
         .avatar-wrapper { width: 50px; height: 50px; border-radius: 50%; overflow: hidden; border: 2px solid #444; background-color: #1a1a21; transition: 0.2s; }
         .notification-badge { position: absolute; top: -5px; right: -5px; background: #e10600; color: white; font-size: 11px; font-weight: 800; min-width: 14px; text-align: center; padding: 3px 5px; border-radius: 12px; border: 2px solid var(--f1-hover); z-index: 2; box-shadow: 0 2px 4px rgba(0,0,0,0.5); line-height: 1; }
@@ -89,13 +91,13 @@
         #sync-warning-banner { display: none; background-color: rgba(255, 165, 0, 0.1); color: #ffa500; padding: 15px; margin-bottom: 25px; border: 1px solid #ffa500; border-radius: 8px; font-size: 14px; font-weight: bold; text-align: center; line-height: 1.5; width: 100%; box-sizing: border-box; }
         #sync-warning-banner span { color: #ffa500; font-weight: 900; }
 
-        /* EXPANDABLE ACCORDION RULES - CENTERED */
+        /* EXPANDABLE ACCORDION RULES - CENTERED TITLE, LEFT TEXT */
         .rules-accordion { background: rgba(255, 255, 255, 0.05); border: 1px solid rgba(255, 255, 255, 0.1); border-radius: 8px; margin-bottom: 20px; overflow: hidden; transition: 0.3s; }
         .rules-accordion summary { display: block; text-align: center; position: relative; padding: 12px 30px; font-weight: bold; cursor: pointer; list-style: none; font-size: 15px; text-transform: uppercase; user-select: none; }
         .rules-accordion summary::-webkit-details-marker { display: none; }
         .rules-accordion summary::after { content: "▼"; position: absolute; right: 15px; top: 50%; transform: translateY(-50%); font-size: 12px; transition: transform 0.3s ease; }
         .rules-accordion[open] summary::after { transform: translateY(-50%) rotate(180deg); }
-        .rules-accordion ul { padding: 0 15px 15px 15px; margin: 0; color: #ccc; font-size: 13px; line-height: 1.5; text-align: center; list-style: none; }
+        .rules-accordion ul { padding: 0 15px 15px 35px; margin: 0; color: #ccc; font-size: 13px; line-height: 1.5; text-align: left; list-style: disc; }
         .rules-accordion li { margin-bottom: 8px; }
 
         /* CURRENCY INPUT */
@@ -140,17 +142,24 @@
         .cancel-btn { background: transparent; border: 1px solid #ff4444; color: #ff4444; padding: 8px 15px; border-radius: 6px; cursor: pointer; font-size: 14px; font-weight: bold; transition: 0.2s; width: 100%; margin-top: 10px; text-transform: uppercase;}
         .cancel-btn:hover { background: #ff4444; color: white; }
 
-        /* FIX OVERLAP ON MOBILE */
+        /* FIX OVERLAP & LAYOUT ON MOBILE */
         @media (max-width: 480px) {
             .bet-summary { flex-direction: column; align-items: flex-start; gap: 10px; }
             .statement-title-wrap { width: 100%; }
             .bet-status-col { flex-direction: row; align-items: center; justify-content: space-between; width: 100%; border-top: 1px solid #333; padding-top: 10px; margin-top: 5px; }
+            
+            /* Stack custom pools and inputs evenly on mobile */
+            .custom-pools { flex-direction: column; gap: 8px; margin-bottom: 10px; }
+            .custom-input-row { flex-direction: column; gap: 8px; }
+            .pool-badge { padding: 12px; font-size: 14px; width: 100%; box-sizing: border-box;}
         }
     </style>
 </head>
 <body>
 
-<div class="container" id="login-section">
+<div class="container" id="login-section" style="overflow: hidden;">
+    <div class="login-header-bg"></div>
+    
     <a href="https://f1lads.com">
         <img src="https://raw.githubusercontent.com/f1ladsleague/sidebetting/e78422814abd6cb31f36f99696b471262536d272/Logo.png" alt="F1 Lads Logo" class="league-logo">
     </a>
@@ -158,7 +167,7 @@
     <h1 class="login-h1-border">
         <span style="position: relative; display: inline-block;">
             SIDE BETS
-            <span style="position: absolute; top: -5px; right: -45px; color: #ffd700; font-size: 14px; font-weight: 900; letter-spacing: 1px;">BETA</span>
+            <span style="position: absolute; top: -5px; right: -30px; color: #ffd700; font-size: 11px; font-weight: 900; letter-spacing: 0px;">BETA</span>
         </span>
     </h1>
     
@@ -168,8 +177,6 @@
         <div style="font-size: 13px; color: #aaa; text-transform: uppercase; letter-spacing: 1px; margin-bottom: 5px;">Betting Deadline</div>
         <div id="countdown-timer" style="font-size: 24px; font-weight: 700; color: var(--theme-color); font-family: monospace; letter-spacing: 1px; transition: 0.3s;">--d --h --m --s</div>
     </div>
-    
-    <img src="https://raw.githubusercontent.com/f1ladsleague/sidebetting/362f6f915ee8da5d8a71320b12372157ccaf5f02/Driver_Photos/Drivers.png" class="hero-image" alt="The Grid">
 
     <div class="login-toggle">
         <button id="btn-constructor" onclick="setLoginMode('Constructor')">Constructor</button>
@@ -628,7 +635,6 @@
                 const driverName = String(d[0]).trim();
                 const count = sprintBetCounts[driverName] || 0;
                 
-                // Reverted badge layout perfectly back to what worked
                 const badge = count > 0 ? `<div class="notification-badge">${count}</div>` : "";
                 const avatarUrl = driverImages[driverName] || "data:image/gif;base64,R0lGODlhAQABAIAAAAAAAP///yH5BAEAAAAALAAAAAABAAEAAAIBRAA7";
                 
@@ -649,7 +655,6 @@
                 const driverName = String(d[0]).trim();
                 const count = featureBetCounts[driverName] || 0;
                 
-                // Reverted badge layout perfectly back to what worked
                 const badge = count > 0 ? `<div class="notification-badge">${count}</div>` : "";
                 const avatarUrl = driverImages[driverName] || "data:image/gif;base64,R0lGODlhAQABAIAAAAAAAP///yH5BAEAAAAALAAAAAABAAEAAAIBRAA7";
                 
@@ -1008,7 +1013,7 @@
 
         return fetch(GOOGLE_SCRIPT_WEB_APP_URL, { method: 'POST', body: formData, signal: signal });
     };
-    
+
     document.getElementById('bet-form').addEventListener('submit', async function(e) {
         e.preventDefault();
         const submitBtn = document.getElementById('submit-btn');
