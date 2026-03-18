@@ -160,27 +160,6 @@
             .custom-input-row { flex-direction: column; gap: 8px; }
             .pool-badge { padding: 12px; font-size: 14px; width: 100%; box-sizing: border-box;}
         }
-            /* WILDCARD MODAL STYLES */
-            .modal-overlay {
-                display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%;
-                background: rgba(0, 0, 0, 0.85); z-index: 9999; justify-content: center; align-items: center; padding: 20px; box-sizing: border-box; backdrop-filter: blur(3px);
-            }
-            .modal-content {
-                background: var(--f1-card); border: 1px solid var(--theme-color); border-radius: 12px;
-                padding: 25px; max-width: 450px; width: 100%; text-align: center; box-shadow: 0 10px 40px rgba(0,0,0,0.8);
-            }
-            .modal-title { color: #ff4444; font-size: 22px; font-weight: 700; margin-top: 0; text-transform: uppercase; margin-bottom: 10px; }
-            .modal-text { font-size: 15px; line-height: 1.5; color: #ccc; margin-bottom: 15px; }
-            .modal-warning { color: #ff4444; font-weight: bold; margin-bottom: 20px; font-size: 15px; line-height: 1.4; }
-            .modal-checkbox-row { display: flex; align-items: center; justify-content: flex-start; gap: 12px; margin-bottom: 25px; text-align: left; background: rgba(255, 68, 68, 0.1); padding: 12px; border-radius: 6px; border: 1px solid rgba(255, 68, 68, 0.3);}
-            .modal-checkbox-row input { width: auto; margin: 0; cursor: pointer; transform: scale(1.3); flex-shrink: 0; }
-            .modal-checkbox-row label { font-size: 14px; font-weight: 600; cursor: pointer; color: #fff; line-height: 1.3; }
-            .modal-actions { display: flex; gap: 10px; }
-            .modal-actions button { flex: 1; padding: 12px; border: none; border-radius: 6px; font-weight: bold; font-size: 14px; cursor: pointer; text-transform: uppercase; transition: 0.2s; }
-            .btn-cancel { background: transparent; border: 1px solid #555 !important; color: #ccc; }
-            .btn-cancel:hover { background: #555; color: #fff; }
-            .btn-proceed { background: var(--theme-color); color: #fff; }
-            .btn-proceed:disabled { background: #333 !important; color: #666; cursor: not-allowed; }
     </style>
 </head>
 <body>
@@ -290,14 +269,12 @@
             <p id="betting-round-text" style="font-size: 16px; font-weight: 700; color: #ffd700; margin: 0; text-transform: uppercase; letter-spacing: 1px;"></p>
         </div>
 
-        <div style="display: flex; justify-content: center; align-items: center; margin-bottom: 15px; border-bottom: 2px solid #333; padding-bottom: 10px;">
-            <div style="display: flex; align-items: center; gap: 12px;">
-                <h1 style="color: var(--theme-color); font-size: 24px; margin: 0; border: none; padding: 0;">Race Betting</h1>
-                <div id="wildcard-link-container" class="has-tooltip" style="display: none; cursor: pointer;" onclick="openWildcardModal()">
-                    <img src="https://raw.githubusercontent.com/f1ladsleague/sidebetting/a08be42792c3d54404380d5c45ca22d81af0daf3/WildcardIcon.png" alt="Wildcard Track" style="height: 28px; filter: drop-shadow(0 2px 4px rgba(0,0,0,0.5)); transition: transform 0.2s;">
-                    <div class="hover-tooltip" style="bottom: 140%; white-space: nowrap;">View Wildcard Track</div>
-                </div>
-            </div>
+        <div style="display: flex; align-items: center; justify-content: space-between; margin-bottom: 15px; border-bottom: 2px solid #333; padding-bottom: 5px;">
+            <h1 style="color: var(--theme-color); font-size: 24px; margin: 0; border: none; padding: 0;">Race Betting</h1>
+            <a id="wildcard-link" href="#" target="_blank" class="has-tooltip" style="display: none;">
+                <img src="https://raw.githubusercontent.com/f1ladsleague/sidebetting/a08be42792c3d54404380d5c45ca22d81af0daf3/WildcardIcon.png" alt="Wildcard Track" style="height: 28px; filter: drop-shadow(0 2px 4px rgba(0,0,0,0.5)); transition: transform 0.2s;">
+                <div class="hover-tooltip" style="bottom: 140%; white-space: nowrap;">View Wildcard Track</div>
+            </a>
         </div>
         
         <details class="rules-accordion" style="border-color: var(--theme-color);">
@@ -355,14 +332,6 @@
     </form>
 </div>
 
-        <button type="submit" class="btn-primary" id="submit-btn" style="margin-top: 10px; padding: 20px; font-size: 20px;">Submit All Bets</button>
-    </form>
-</div>
-
-<div id="wildcard-modal" class="modal-overlay">
-... (rest of the modal html) ...
-</div>
-    
 <script>
     // 🚨 ADD YOUR NEW "CUSTOM BETS" CSV PUBLISH LINK BELOW 🚨
     const CUSTOM_BETS_CSV_URL = "https://docs.google.com/spreadsheets/d/e/2PACX-1vTZKLukYpw5VzMfRbfXh80lj1B0gbUiVx_CoinOMVb-b2iFEMiWg_nW3KcMp88qKL3UfctvzYgEN_Lg/pub?gid=513445458&single=true&output=csv";
@@ -1061,28 +1030,6 @@
     function returnHome() {
         window.location.reload(); 
     }
-
-    window.openWildcardModal = function() {
-        document.getElementById('wildcard-agree').checked = false;
-        document.getElementById('btn-proceed').disabled = true;
-        document.getElementById('wildcard-modal').style.display = "flex";
-    };
-
-    window.closeWildcardModal = function() {
-        document.getElementById('wildcard-modal').style.display = "none";
-    };
-
-    window.toggleProceedBtn = function() {
-        const isChecked = document.getElementById('wildcard-agree').checked;
-        document.getElementById('btn-proceed').disabled = !isChecked;
-    };
-
-    window.proceedToWildcard = function() {
-        if (window.currentWildcardUrl) {
-            window.open(window.currentWildcardUrl, '_blank');
-            closeWildcardModal(); 
-        }
-    };
 
     const sendBet = async (type, driverOrStatement, amount, stance, isDelete = false, signal) => {
         const formData = new URLSearchParams();
