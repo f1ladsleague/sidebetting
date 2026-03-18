@@ -269,7 +269,13 @@
             <p id="betting-round-text" style="font-size: 16px; font-weight: 700; color: #ffd700; margin: 0; text-transform: uppercase; letter-spacing: 1px;"></p>
         </div>
 
-        <h1 style="color: var(--theme-color); font-size: 24px; margin-bottom: 15px; border-bottom: 2px solid #333; padding-bottom: 5px;">Race Betting</h1>
+        <div style="display: flex; align-items: center; justify-content: space-between; margin-bottom: 15px; border-bottom: 2px solid #333; padding-bottom: 5px;">
+            <h1 style="color: var(--theme-color); font-size: 24px; margin: 0; border: none; padding: 0;">Race Betting</h1>
+            <a id="wildcard-link" href="#" target="_blank" class="has-tooltip" style="display: none;">
+                <img src="https://raw.githubusercontent.com/f1ladsleague/sidebetting/a08be42792c3d54404380d5c45ca22d81af0daf3/WildcardIcon.png" alt="Wildcard Track" style="height: 28px; filter: drop-shadow(0 2px 4px rgba(0,0,0,0.5)); transition: transform 0.2s;">
+                <div class="hover-tooltip" style="bottom: 140%; white-space: nowrap;">View Wildcard Track</div>
+            </a>
+        </div>
         
         <details class="rules-accordion" style="border-color: var(--theme-color);">
             <summary style="color: var(--theme-color);">Race Betting Rules</summary>
@@ -557,6 +563,21 @@
             const settingsData = await fetchCSV(SETTINGS_CSV_URL);
             if(settingsData.length > 0) {
                 currentRound = String(settingsData[0][0]).trim();
+                // --- NEW WILDCARD LINK LOGIC ---
+                const roundNum = parseInt(currentRound, 10);
+                const wildcardLinkEl = document.getElementById('wildcard-link');
+                if (!isNaN(roundNum)) {
+                    if (roundNum % 2 !== 0) {
+                        // Odd rounds (1, 3, 5, 7, 9, 11, 13)
+                        wildcardLinkEl.href = "https://docs.google.com/document/d/12Bj7ceGn1uj3XQit8vOUUdDp23J2zmeULKpa-4EGkI0/edit?usp=sharing";
+                    } else {
+                        // Even rounds (2, 4, 6, 8, 10, 12)
+                        wildcardLinkEl.href = "https://docs.google.com/document/d/1W9aMxoiOvGMOXHmDKnWMpE9Kh7fKKpuV8-HWw61111o/edit?usp=drive_link";
+                    }
+                    // Make the icon visible now that it has the correct link
+                    wildcardLinkEl.style.display = "block";
+                }
+                // -------------------------------
                 nextRaceDate = String(settingsData[0][1]).trim();
                 baseSprintPot = parseFloat(settingsData[0][2] || 0);
                 baseFeaturePot = parseFloat(settingsData[0][3] || 0);
