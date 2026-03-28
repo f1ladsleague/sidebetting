@@ -779,10 +779,10 @@
     }
 
     async function login() {
-        if (globalDeadlineDate && !isNaN(globalDeadlineDate.getTime()) && (new Date(new Date().toLocaleString("en-US", {timeZone: "Australia/Sydney"})).getTime() > globalDeadlineDate.getTime())) {
+        /*if (globalDeadlineDate && !isNaN(globalDeadlineDate.getTime()) && (new Date(new Date().toLocaleString("en-US", {timeZone: "Australia/Sydney"})).getTime() > globalDeadlineDate.getTime())) {
             alert("⚠️ Betting is currently suspended.\n\nThe deadline for this round has passed. Betting will reopen after the upcoming race weekend has completed.");
             return; 
-        }
+        }*/
 
         if (currentUserType === 'Constructor') {
             const selected = document.getElementById('constructor-select').value;
