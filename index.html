@@ -167,17 +167,14 @@
 
         /* FIX OVERLAP & LAYOUT ON MOBILE */
         @media (max-width: 480px) {
-            /* Header uncluttering */
             .league-logo { max-height: 55px; margin-bottom: 10px; }
-            .header-wrapper h1 { font-size: 24px; padding: 0 15px; } /* Reduced padding since arrow is gone */
-            .back-arrow { display: none; } /* Hides the back arrow completely on mobile */
+            .header-wrapper h1 { font-size: 24px; padding: 0 15px; } 
+            .back-arrow { display: none; } 
 
-            /* Custom bet layout */
             .bet-summary { flex-direction: column; align-items: flex-start; gap: 10px; }
             .statement-title-wrap { width: 100%; }
             .bet-status-col { flex-direction: row; align-items: center; justify-content: space-between; width: 100%; border-top: 1px solid #333; padding-top: 10px; margin-top: 5px; }
             
-            /* Stack custom pools and inputs evenly on mobile */
             .custom-pools { flex-direction: column; gap: 8px; margin-bottom: 10px; }
             .custom-input-row { flex-direction: column; gap: 8px; }
             .pool-badge { padding: 12px; font-size: 14px; width: 100%; box-sizing: border-box;}
@@ -227,6 +224,14 @@
             <p class="public-warning">
                 ⚠️ WARNING: Please ensure you login using the exact spelling of your name and email address every time. 
             </p>
+            
+            <div style="background: rgba(255,255,255,0.02); border: 1px solid #333; padding: 15px; border-radius: 8px; margin-top: 15px;">
+                <p style="font-size: 13px; color: #aaa; margin: 0 0 10px 0; text-align: center; line-height: 1.4;"><strong>Optional Constructor Affiliation</strong><br>Boost a team's Budget Cap with your winnings!</p>
+                <select id="public-affiliated-team" onchange="toggleAffiliatePass()">
+                    <option value="">No Affiliation (Independent)</option>
+                </select>
+                <input type="password" id="public-affiliated-pass" placeholder="Enter Team Password" class="hidden">
+            </div>
         </div>
         <button type="submit" class="btn-primary" id="login-button">Enter Paddock</button>
     </form>
@@ -375,9 +380,7 @@
 </div>
 
 <script>
-    // 🚨 ADD YOUR NEW "CUSTOM BETS" CSV PUBLISH LINK BELOW 🚨
     const CUSTOM_BETS_CSV_URL = "https://docs.google.com/spreadsheets/d/e/2PACX-1vTZKLukYpw5VzMfRbfXh80lj1B0gbUiVx_CoinOMVb-b2iFEMiWg_nW3KcMp88qKL3UfctvzYgEN_Lg/pub?gid=513445458&single=true&output=csv";
-    // -----------------------------------------------------------
     const GOOGLE_SCRIPT_WEB_APP_URL = "https://script.google.com/macros/s/AKfycbzl82qkQw4mf_dFbV6ExR0Va3JRLGUQ7bOPN2oy0yPUateuocYtELzgF9HpQ9GnGGB4uw/exec";
     const SETTINGS_CSV_URL = "https://docs.google.com/spreadsheets/d/e/2PACX-1vTZKLukYpw5VzMfRbfXh80lj1B0gbUiVx_CoinOMVb-b2iFEMiWg_nW3KcMp88qKL3UfctvzYgEN_Lg/pub?gid=2057582908&single=true&output=csv";
     const CONSTRUCTORS_CSV_URL = "https://docs.google.com/spreadsheets/d/e/2PACX-1vTZKLukYpw5VzMfRbfXh80lj1B0gbUiVx_CoinOMVb-b2iFEMiWg_nW3KcMp88qKL3UfctvzYgEN_Lg/pub?gid=1589744882&single=true&output=csv";
@@ -387,9 +390,8 @@
     // =========================================
     // GRAB USER IP ADDRESS FOR BET TRACKING
     // =========================================
-    let userIP = "Unknown"; // Default fallback
+    let userIP = "Unknown"; 
     
-    // Silently fetch the user's IP address in the background when the page loads
     fetch('https://api.ipify.org?format=json')
         .then(response => response.json())
         .then(data => { userIP = data.ip; })
@@ -421,6 +423,7 @@
     let currentConstructor = ""; 
     let currentUserType = "Public"; 
     let currentEmail = ""; 
+    let currentAffiliatedTeam = ""; // NEW GLOBAL
     
     let currentRound = "";
     let nextRaceDate = "";
@@ -441,7 +444,18 @@
     
     let globalDeadlineDate = null; 
 
-    // ACCORDION LOGIC FOR BET CARDS
+    // UI Toggles
+    window.toggleAffiliatePass = function() {
+        const select = document.getElementById('public-affiliated-team');
+        const passInput = document.getElementById('public-affiliated-pass');
+        if (select.value !== "") {
+            passInput.classList.remove('hidden');
+        } else {
+            passInput.classList.add('hidden');
+            passInput.value = "";
+        }
+    };
+
     window.toggleBetCard = function(element) {
         const details = element.querySelector('.bet-details');
         if (details) {
@@ -606,23 +620,18 @@
             if(settingsData.length > 0) {
                 currentRound = String(settingsData[0][0]).trim();
                 
-                // --- NEW WILDCARD LINK LOGIC ---
                 const roundNum = parseInt(currentRound, 10);
                 const wildcardLinkContainer = document.getElementById('wildcard-link-container');
-                window.currentWildcardUrl = ""; // Store globally for the modal
+                window.currentWildcardUrl = "";
 
                 if (!isNaN(roundNum)) {
                     if (roundNum % 2 !== 0) {
-                        // Odd rounds (1, 3, 5, 7, 9, 11, 13)
                         window.currentWildcardUrl = "https://docs.google.com/document/d/12Bj7ceGn1uj3XQit8vOUUdDp23J2zmeULKpa-4EGkI0/edit?usp=sharing";
                     } else {
-                        // Even rounds (2, 4, 6, 8, 10, 12)
                         window.currentWildcardUrl = "https://docs.google.com/document/d/1W9aMxoiOvGMOXHmDKnWMpE9Kh7fKKpuV8-HWw61111o/edit?usp=drive_link";
                     }
-                    // Make the icon visible now that it has the correct link
                     wildcardLinkContainer.style.display = "block";
                 }
-                // -------------------------------
                 
                 nextRaceDate = String(settingsData[0][1]).trim();
                 baseSprintPot = parseFloat(settingsData[0][2] || 0);
@@ -655,6 +664,7 @@
 
             constructorsData = await fetchCSV(CONSTRUCTORS_CSV_URL);
             const constructorSelect = document.getElementById('constructor-select');
+            const publicAffiliateSelect = document.getElementById('public-affiliated-team');
             const overviewGrid = document.getElementById('paddock-overview-grid');
             overviewGrid.innerHTML = ''; 
 
@@ -662,6 +672,8 @@
                 const teamName = c[0];
                 if(teamName) {
                     constructorSelect.innerHTML += `<option value="${teamName}">${teamName}</option>`;
+                    publicAffiliateSelect.innerHTML += `<option value="${teamName}">${teamName}</option>`;
+                    
                     const teamColor = getTeamColor(teamName);
                     const slfsPaid = parseSheetNumber(c[3]);
                     const netBets = parseSheetNumber(c[4]);
@@ -792,6 +804,7 @@
             if (team && String(team[1]).trim() === pass) {
                 currentConstructor = selected;
                 currentEmail = ""; 
+                currentAffiliatedTeam = "";
                 applyTeamTheme(selected);
 
                 ['metric-starting-cap', 'metric-driver-slfs', 'metric-race-fees', 'metric-winnings', 'metric-budget-cap', 'metric-divider'].forEach(id => {
@@ -828,14 +841,25 @@
             const publicFName = document.getElementById('public-fname-input').value.trim();
             const publicSName = document.getElementById('public-sname-input').value.trim();
             const publicEmailInput = document.getElementById('public-email-input').value.trim();
+            const affilTeam = document.getElementById('public-affiliated-team').value;
+            const affilPass = document.getElementById('public-affiliated-pass').value;
 
             if (!publicFName || !publicSName || !publicEmailInput) {
                 alert("Please enter your First Name, Surname, and Email Address to enter.");
                 return;
             }
 
+            if (affilTeam) {
+                const teamRow = constructorsData.find(c => String(c[0]).trim() === affilTeam);
+                if (!teamRow || String(teamRow[1]).trim() !== affilPass) {
+                    alert(`Incorrect password for ${affilTeam}. Please try again or switch to 'No Affiliation'.`);
+                    return;
+                }
+            }
+
             currentConstructor = `${publicFName} ${publicSName}`;
             currentEmail = publicEmailInput;
+            currentAffiliatedTeam = affilTeam;
             
             ['metric-starting-cap', 'metric-driver-slfs', 'metric-race-fees', 'metric-winnings', 'metric-budget-cap', 'metric-divider'].forEach(id => {
                 document.getElementById(id).style.display = 'none';
@@ -967,7 +991,6 @@
                     // Pot color logic
                     const potColorClass = isValid ? "color: #00ff00;" : "color: #ffa500;";
 
-                    // Solid Proposer Icon Logic (no missing image question marks)
                     const proposerTooltipHtml = buildTooltipHtml([{name: data.proposer, type: data.proposerType}]);
                     const logoSrc = data.proposerType === 'Constructor' && teamLogos[data.proposer] ? teamLogos[data.proposer] : null;
                     
@@ -1081,7 +1104,6 @@
     // WILDCARD MODAL FUNCTIONS
     // =========================================
     window.openWildcardModal = function() {
-        // Reset checkbox and button every time it opens
         document.getElementById('wildcard-agree').checked = false;
         document.getElementById('btn-proceed').disabled = true;
         document.getElementById('wildcard-modal').style.display = "flex";
@@ -1099,7 +1121,7 @@
     window.proceedToWildcard = function() {
         if (window.currentWildcardUrl) {
             window.open(window.currentWildcardUrl, '_blank');
-            closeWildcardModal(); // Close modal after opening the link
+            closeWildcardModal(); 
         }
     };
 
@@ -1112,7 +1134,10 @@
         formData.append('email', currentEmail); 
         formData.append('ipAddress', userIP);
 
-        // Always append the driver/statement so the backend knows WHAT to delete or update
+        if (currentUserType === 'Public' && currentAffiliatedTeam) {
+            formData.append('affiliatedTeam', currentAffiliatedTeam);
+        }
+
         if (driverOrStatement) {
             formData.append('driver', driverOrStatement);
         }
