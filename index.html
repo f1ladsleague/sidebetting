@@ -251,7 +251,7 @@
     
     <div class="header-wrapper">
         <div class="back-arrow" onclick="returnHome()">&#8592; Back</div>
-        <h1>Manage Your Bets</h1>
+        <h1 id="race-betting-header">Manage Your Bets</h1>
     </div>
 
     <div style="display: flex; justify-content: center; align-items: center; gap: 15px; margin-bottom: 20px;">
@@ -336,7 +336,7 @@
 
         <div class="race-section" style="border-color: #00bfff; padding: 20px;">
             
-            <div style="border-bottom: 1px dashed #444; margin-bottom: 25px; padding-bottom: 20px;">
+            <div id="new-custom-bet-section" style="border-bottom: 1px dashed #444; margin-bottom: 25px; padding-bottom: 20px;">
                 <h3 style="color: #00bfff; margin-top: 0; font-size: 16px; text-transform: uppercase;">Propose A New Bet</h3>
                 <input type="text" id="new-custom-statement" placeholder="e.g. Rodda finishes ahead of Sahan..." style="margin-bottom: 15px;">
                 <div class="custom-input-row">
@@ -387,6 +387,9 @@
     const DRIVERS_CSV_URL = "https://docs.google.com/spreadsheets/d/e/2PACX-1vTZKLukYpw5VzMfRbfXh80lj1B0gbUiVx_CoinOMVb-b2iFEMiWg_nW3KcMp88qKL3UfctvzYgEN_Lg/pub?gid=1372542075&single=true&output=csv";
     const BETS_CSV_URL = "https://docs.google.com/spreadsheets/d/e/2PACX-1vTZKLukYpw5VzMfRbfXh80lj1B0gbUiVx_CoinOMVb-b2iFEMiWg_nW3KcMp88qKL3UfctvzYgEN_Lg/pub?gid=80994690&single=true&output=csv";
 
+    // GLOBAL STATUS
+    let isLocked = false; 
+
     // =========================================
     // GRAB USER IP ADDRESS FOR BET TRACKING
     // =========================================
@@ -423,7 +426,7 @@
     let currentConstructor = ""; 
     let currentUserType = "Public"; 
     let currentEmail = ""; 
-    let currentAffiliatedTeam = ""; // NEW GLOBAL
+    let currentAffiliatedTeam = ""; 
     
     let currentRound = "";
     let nextRaceDate = "";
@@ -433,7 +436,13 @@
     let baseFeaturePot = 0;
     
     let myExistingSprintBet = 0;
+    let myExistingSprintBetDriver = "";
+    let myExistingSprintWinnings = 0;
+
     let myExistingFeatureBet = 0;
+    let myExistingFeatureBetDriver = "";
+    let myExistingFeatureWinnings = 0;
+
     let myExistingCustomBetsTotal = 0; 
     
     let baseSideBetNet = 0;
@@ -442,9 +451,11 @@
     let featureBetCounts = {}; 
     let customStatementsObj = {}; 
     
+    let sprintWinner = "";
+    let featureWinner = "";
+
     let globalDeadlineDate = null; 
 
-    // UI Toggles
     window.toggleAffiliatePass = function() {
         const select = document.getElementById('public-affiliated-team');
         const passInput = document.getElementById('public-affiliated-pass');
@@ -646,20 +657,26 @@
                     }
                 } catch(e) {}
 
-                const headerText = `Round ${currentRound} | Next Race: ${displayDate}`;
-                document.getElementById('login-round-text').innerText = headerText;
-                document.getElementById('betting-round-text').innerText = headerText; 
-                
                 const parsedRaceDate = parseDateString(nextRaceDate);
                 if (!isNaN(parsedRaceDate.getTime())) {
                     globalDeadlineDate = new Date(parsedRaceDate);
                     globalDeadlineDate.setDate(globalDeadlineDate.getDate() - 1);
                     globalDeadlineDate.setHours(23, 59, 59, 0);
 
+                    let currentSydney = new Date(new Date().toLocaleString("en-US", {timeZone: "Australia/Sydney"}));
+                    if (currentSydney.getTime() > globalDeadlineDate.getTime()) {
+                        isLocked = true;
+                    }
+
                     document.getElementById('countdown-wrapper').style.display = 'block';
                     updateCountdown();
                     setInterval(updateCountdown, 1000); 
                 }
+
+                const lockSuffix = isLocked ? " [LOCKED]" : "";
+                const headerText = `Round ${currentRound} | Next Race: ${displayDate}${lockSuffix}`;
+                document.getElementById('login-round-text').innerText = headerText;
+                document.getElementById('betting-round-text').innerText = headerText; 
             }
 
             constructorsData = await fetchCSV(CONSTRUCTORS_CSV_URL);
@@ -707,18 +724,21 @@
                 
                 sprintBetCounts = {};
                 featureBetCounts = {};
-
+                
                 currentBets.forEach(bet => {
                     const raceType = String(bet[3]).trim().toLowerCase();
                     const driver = String(bet[4]).trim();
                     const amount = parseFloat(bet[5] || 0);
+                    const winnerRaw = String(bet[6] || "").trim();
 
                     if(raceType === 'sprint') {
                         baseSprintPot += amount;
                         sprintBetCounts[driver] = (sprintBetCounts[driver] || 0) + 1;
+                        if (winnerRaw !== "") sprintWinner = winnerRaw;
                     } else if(raceType === 'feature') {
                         baseFeaturePot += amount;
                         featureBetCounts[driver] = (featureBetCounts[driver] || 0) + 1;
+                        if (winnerRaw !== "") featureWinner = winnerRaw;
                     }
                 });
             } catch(e) {}
@@ -729,40 +749,44 @@
             const featureSorted = [...driversData].sort((a, b) => Number(b[2]) - Number(a[2]));
 
             const sprintDiv = document.getElementById('sprint-drivers');
+            const featureDiv = document.getElementById('feature-drivers');
+
+            // Render Sprint Drivers
             sprintSorted.forEach(d => {
                 const driverName = String(d[0]).trim();
                 const count = sprintBetCounts[driverName] || 0;
-                
                 const badge = count > 0 ? `<div class="notification-badge">${count}</div>` : "";
                 const avatarUrl = driverImages[driverName] || "data:image/gif;base64,R0lGODlhAQABAIAAAAAAAP///yH5BAEAAAAALAAAAAABAAEAAAIBRAA7";
                 
+                // Used for updating later in populateExistingBets
                 sprintDiv.innerHTML += `
-                    <label class="driver-option">
+                    <label class="driver-option" id="sprint-option-${driverName.replace(/\s+/g, '')}">
                         <div class="avatar-container">
                             <div class="avatar-wrapper"><img src="${avatarUrl}" class="driver-avatar" alt="${driverName}"></div>
                             ${badge}
                         </div>
                         <div class="driver-name-block"><div class="driver-name-text"><span>${driverName}</span></div></div>
+                        <div id="sprint-lock-status-${driverName.replace(/\s+/g, '')}" style="display:none;"></div>
                         <span class="price-tag">$${d[1]}</span>
                         <input type="radio" name="sprint-driver" value="${driverName}" data-amount="${d[1]}" data-was-checked="false">
                     </label>`;
             });
 
-            const featureDiv = document.getElementById('feature-drivers');
+            // Render Feature Drivers
             featureSorted.forEach(d => {
                 const driverName = String(d[0]).trim();
                 const count = featureBetCounts[driverName] || 0;
-                
                 const badge = count > 0 ? `<div class="notification-badge">${count}</div>` : "";
                 const avatarUrl = driverImages[driverName] || "data:image/gif;base64,R0lGODlhAQABAIAAAAAAAP///yH5BAEAAAAALAAAAAABAAEAAAIBRAA7";
                 
                 featureDiv.innerHTML += `
-                    <label class="driver-option">
+                    <label class="driver-option" id="feature-option-${driverName.replace(/\s+/g, '')}">
                         <div class="avatar-container">
                             <div class="avatar-wrapper"><img src="${avatarUrl}" class="driver-avatar" alt="${driverName}"></div>
                             ${badge}
                         </div>
                         <div class="driver-name-block"><div class="driver-name-text"><span>${driverName}</span></div></div>
+                        <div id="feature-lock-status-${driverName.replace(/\s+/g, '')}" style="display:none;"></div>
                         <span class="price-tag">$${d[2]}</span>
                         <input type="radio" name="feature-driver" value="${driverName}" data-amount="${d[2]}" data-was-checked="false">
                     </label>`;
@@ -770,6 +794,7 @@
 
             document.querySelectorAll('.driver-option input[type="radio"]').forEach(radio => {
                 radio.addEventListener('click', function(e) {
+                    if (isLocked) return;
                     if (this.dataset.wasChecked === "true") {
                         this.checked = false;
                         this.dataset.wasChecked = "false";
@@ -791,11 +816,6 @@
     }
 
     async function login() {
-        if (globalDeadlineDate && !isNaN(globalDeadlineDate.getTime()) && (new Date(new Date().toLocaleString("en-US", {timeZone: "Australia/Sydney"})).getTime() > globalDeadlineDate.getTime())) {
-            alert("⚠️ Betting is currently suspended.\n\nThe deadline for this round has passed. Betting will reopen after the upcoming race weekend has completed.");
-            return; 
-        }
-
         if (currentUserType === 'Constructor') {
             const selected = document.getElementById('constructor-select').value;
             const pass = document.getElementById('password-input').value;
@@ -912,15 +932,86 @@
                 const raceType = String(bet[3]).trim().toLowerCase();
                 const driver = String(bet[4]).trim();   
                 const amt = parseFloat(bet[5] || 0);
+                const winnings = parseFloat(bet[7] || 0);
                 if (raceType === 'sprint') {
                     const radio = document.querySelector(`input[name="sprint-driver"][value="${driver}"]`);
-                    if (radio) { radio.checked = true; radio.dataset.wasChecked = "true"; myExistingSprintBet = amt; }
+                    if (radio) { radio.checked = true; radio.dataset.wasChecked = "true"; myExistingSprintBet = amt; myExistingSprintBetDriver = driver; myExistingSprintWinnings = winnings; }
                 } else if (raceType === 'feature') {
                     const radio = document.querySelector(`input[name="feature-driver"][value="${driver}"]`);
-                    if (radio) { radio.checked = true; radio.dataset.wasChecked = "true"; myExistingFeatureBet = amt; }
+                    if (radio) { radio.checked = true; radio.dataset.wasChecked = "true"; myExistingFeatureBet = amt; myExistingFeatureBetDriver = driver; myExistingFeatureWinnings = winnings;}
                 }
             });
             hasExistingBets = myBets.length > 0;
+
+            // Update UI for Locked Sprint & Feature 
+            if (isLocked) {
+                // SPRINT LOCK
+                document.querySelectorAll('input[name="sprint-driver"]').forEach(radio => {
+                    const dName = radio.value;
+                    const optionLabel = document.getElementById(`sprint-option-${dName.replace(/\s+/g, '')}`);
+                    const statusDiv = document.getElementById(`sprint-lock-status-${dName.replace(/\s+/g, '')}`);
+                    radio.disabled = true;
+                    optionLabel.style.cursor = "default";
+
+                    let lockedHtml = "";
+                    let isMyPick = (myExistingSprintBetDriver === dName);
+                    
+                    if (isMyPick) {
+                        lockedHtml += `<div style="background: var(--theme-color); color: #000; font-size: 11px; font-weight: 900; padding: 3px 8px; border-radius: 4px; margin-right: 10px; white-space: nowrap;">YOUR BET ($${myExistingSprintBet.toFixed(0)})</div>`;
+                        if (sprintWinner === dName) {
+                            lockedHtml += `<div style="background: #00ff00; color: #000; font-size: 11px; font-weight: 900; padding: 3px 8px; border-radius: 4px; margin-right: 10px; white-space: nowrap;">WINNER (+$${myExistingSprintWinnings.toFixed(2)})</div>`;
+                        } else if (sprintWinner && sprintWinner !== "") {
+                            lockedHtml += `<div style="background: #ff4444; color: #fff; font-size: 11px; font-weight: 900; padding: 3px 8px; border-radius: 4px; margin-right: 10px; white-space: nowrap;">LOSS</div>`;
+                        } else {
+                            lockedHtml += `<div style="background: #ffa500; color: #000; font-size: 11px; font-weight: 900; padding: 3px 8px; border-radius: 4px; margin-right: 10px; white-space: nowrap;">AWAITING RESULTS</div>`;
+                        }
+                    } else if (sprintWinner === dName) {
+                        lockedHtml += `<div style="background: #00ff00; color: #000; font-size: 11px; font-weight: 900; padding: 3px 8px; border-radius: 4px; margin-right: 10px; white-space: nowrap;">WINNER</div>`;
+                    }
+                    
+                    if (lockedHtml !== "") {
+                        statusDiv.innerHTML = lockedHtml;
+                        statusDiv.style.display = "flex";
+                        statusDiv.style.alignItems = "center";
+                    }
+
+                    if (!isMyPick && sprintWinner !== dName) optionLabel.style.opacity = "0.4";
+                });
+
+                // FEATURE LOCK
+                document.querySelectorAll('input[name="feature-driver"]').forEach(radio => {
+                    const dName = radio.value;
+                    const optionLabel = document.getElementById(`feature-option-${dName.replace(/\s+/g, '')}`);
+                    const statusDiv = document.getElementById(`feature-lock-status-${dName.replace(/\s+/g, '')}`);
+                    radio.disabled = true;
+                    optionLabel.style.cursor = "default";
+
+                    let lockedHtml = "";
+                    let isMyPick = (myExistingFeatureBetDriver === dName);
+                    
+                    if (isMyPick) {
+                        lockedHtml += `<div style="background: var(--theme-color); color: #000; font-size: 11px; font-weight: 900; padding: 3px 8px; border-radius: 4px; margin-right: 10px; white-space: nowrap;">YOUR BET ($${myExistingFeatureBet.toFixed(0)})</div>`;
+                        if (featureWinner === dName) {
+                            lockedHtml += `<div style="background: #00ff00; color: #000; font-size: 11px; font-weight: 900; padding: 3px 8px; border-radius: 4px; margin-right: 10px; white-space: nowrap;">WINNER (+$${myExistingFeatureWinnings.toFixed(2)})</div>`;
+                        } else if (featureWinner && featureWinner !== "") {
+                            lockedHtml += `<div style="background: #ff4444; color: #fff; font-size: 11px; font-weight: 900; padding: 3px 8px; border-radius: 4px; margin-right: 10px; white-space: nowrap;">LOSS</div>`;
+                        } else {
+                            lockedHtml += `<div style="background: #ffa500; color: #000; font-size: 11px; font-weight: 900; padding: 3px 8px; border-radius: 4px; margin-right: 10px; white-space: nowrap;">AWAITING RESULTS</div>`;
+                        }
+                    } else if (featureWinner === dName) {
+                        lockedHtml += `<div style="background: #00ff00; color: #000; font-size: 11px; font-weight: 900; padding: 3px 8px; border-radius: 4px; margin-right: 10px; white-space: nowrap;">WINNER</div>`;
+                    }
+                    
+                    if (lockedHtml !== "") {
+                        statusDiv.innerHTML = lockedHtml;
+                        statusDiv.style.display = "flex";
+                        statusDiv.style.alignItems = "center";
+                    }
+
+                    if (!isMyPick && featureWinner !== dName) optionLabel.style.opacity = "0.4";
+                });
+            }
+
 
             // Populate CUSTOM bets
             customStatementsObj = {};
@@ -937,12 +1028,14 @@
                     const bStatement = String(bet[5]).trim();
                     const bStance = String(bet[6]).trim().toUpperCase();
                     const bAmount = parseFloat(bet[7] || 0);
+                    const bResult = String(bet[8]).trim().toUpperCase();
+                    const bWinnings = parseFloat(bet[9] || 0);
 
                     if (!customStatementsObj[bStatement]) {
                         customStatementsObj[bStatement] = { 
-                            truePot: 0, falsePot: 0, myBetAmount: 0, myBetStance: "TRUE",
+                            truePot: 0, falsePot: 0, myBetAmount: 0, myBetStance: "TRUE", myWinnings: 0,
                             proposer: bUser, proposerType: bUserType,
-                            trueBettors: [], falseBettors: []
+                            trueBettors: [], falseBettors: [], officialResult: ""
                         };
                     }
                     if (bStance === 'TRUE') {
@@ -954,6 +1047,8 @@
                         customStatementsObj[bStatement].falseBettors.push({name: bUser, type: bUserType});
                     }
 
+                    if (bResult && bResult !== "") customStatementsObj[bStatement].officialResult = bResult;
+
                     let isMyBet = false;
                     if (currentUserType === 'Constructor' && bUserType !== 'Public' && bUser === currentConstructor) isMyBet = true;
                     if (currentUserType === 'Public' && bUserType === 'Public' && bUser === currentConstructor && bEmail === currentEmail) isMyBet = true;
@@ -961,6 +1056,7 @@
                     if (isMyBet) {
                         customStatementsObj[bStatement].myBetAmount = bAmount;
                         customStatementsObj[bStatement].myBetStance = bStance;
+                        customStatementsObj[bStatement].myWinnings = bWinnings;
                         myExistingCustomBetsTotal += bAmount;
                         hasExistingBets = true;
                     }
@@ -987,8 +1083,6 @@
                     const validBadgeClass = isValid ? "status-valid" : "status-waiting";
                     const validBadgeText = isValid ? "✅ VALID BET" : "⚠️ WAITING FOR OPPONENT";
                     const borderClass = isValid ? "border-valid" : "border-waiting";
-                    
-                    // Pot color logic
                     const potColorClass = isValid ? "color: #00ff00;" : "color: #ffa500;";
 
                     const proposerTooltipHtml = buildTooltipHtml([{name: data.proposer, type: data.proposerType}]);
@@ -1000,13 +1094,51 @@
 
                     const trueTooltipHtml = buildTooltipHtml(data.trueBettors);
                     const falseTooltipHtml = buildTooltipHtml(data.falseBettors);
-
-                    let cancelBtnHtml = '';
-                    if (data.myBetAmount > 0 && !isValid) {
-                        cancelBtnHtml = `<button type="button" class="cancel-btn" onclick="cancelCustomBet('${statement.replace(/'/g, "\\'")}', event)">Cancel Bet</button>`;
-                    }
-
                     const isExpanded = data.myBetAmount > 0 ? "" : "hidden";
+
+                    let inputRowHtml = '';
+                    if (isLocked) {
+                        let resultHtml = "";
+                        let bRes = data.officialResult ? data.officialResult.toUpperCase() : "";
+                        
+                        if (bRes === "TRUE" || bRes === "FALSE") {
+                            let winText = "";
+                            if (data.myBetAmount > 0) {
+                                if (data.myWinnings > 0) winText = `<div style="color: #00ff00; font-weight: bold; margin-top: 5px;">🏆 WINNER! Payout: $${data.myWinnings.toFixed(2)}</div>`;
+                                else winText = `<div style="color: #ff4444; font-weight: bold; margin-top: 5px;">❌ LOSS</div>`;
+                            }
+                            resultHtml = `<div style="margin-top: 15px; padding-top: 15px; border-top: 1px dashed #333;">
+                                            <div style="color: #aaa; font-size: 13px;">OFFICIAL RESULT: <strong style="color: ${bRes==='TRUE'?'#00ff00':'#ff4444'};">${bRes}</strong></div>
+                                            ${data.myBetAmount > 0 ? `<div style="font-size: 14px; margin-top: 5px;">Your Bet: <strong>$${data.myBetAmount.toFixed(2)} on ${data.myBetStance}</strong></div>` : ''}
+                                            ${winText}
+                                          </div>`;
+                        } else if (bRes === "INVALID") {
+                            resultHtml = `<div style="margin-top: 15px; padding-top: 15px; border-top: 1px dashed #333; color: #ffa500; font-weight: bold;">⚠️ INVALID (Bets Refunded)</div>`;
+                        } else {
+                            resultHtml = `<div style="margin-top: 15px; padding-top: 15px; border-top: 1px dashed #333; color: #ffa500; font-weight: bold;">⏳ AWAITING RESULTS</div>`;
+                        }
+                        
+                        inputRowHtml = resultHtml;
+                    } else {
+                        let cancelBtnHtml = '';
+                        if (data.myBetAmount > 0 && !isValid) {
+                            cancelBtnHtml = `<button type="button" class="cancel-btn" onclick="cancelCustomBet('${statement.replace(/'/g, "\\'")}', event)">Cancel Bet</button>`;
+                        }
+                        
+                        inputRowHtml = `
+                            <div class="custom-input-row">
+                                <div class="currency-input">
+                                    <span>$</span>
+                                    <input type="number" id="custom-amount-${idx}" data-statement="${statement}" value="${data.myBetAmount > 0 ? data.myBetAmount : ''}" placeholder="Stake" min="0" oninput="updateLiveValues()">
+                                </div>
+                                <select id="custom-stance-${idx}" onchange="updateLiveValues()">
+                                    <option value="TRUE" ${data.myBetStance === 'TRUE' ? 'selected' : ''}>TRUE</option>
+                                    <option value="FALSE" ${data.myBetStance === 'FALSE' ? 'selected' : ''}>FALSE</option>
+                                </select>
+                            </div>
+                            ${cancelBtnHtml}
+                        `;
+                    }
 
                     customListDiv.innerHTML += `
                         <div class="custom-bet-card ${borderClass}" onclick="toggleBetCard(this)">
@@ -1032,25 +1164,22 @@
                                         <div class="hover-tooltip">${falseTooltipHtml}</div>
                                     </div>
                                 </div>
-                                <div class="custom-input-row">
-                                    <div class="currency-input">
-                                        <span>$</span>
-                                        <input type="number" id="custom-amount-${idx}" data-statement="${statement}" value="${data.myBetAmount > 0 ? data.myBetAmount : ''}" placeholder="Stake" min="0" oninput="updateLiveValues()">
-                                    </div>
-                                    <select id="custom-stance-${idx}" onchange="updateLiveValues()">
-                                        <option value="TRUE" ${data.myBetStance === 'TRUE' ? 'selected' : ''}>TRUE</option>
-                                        <option value="FALSE" ${data.myBetStance === 'FALSE' ? 'selected' : ''}>FALSE</option>
-                                    </select>
-                                </div>
-                                ${cancelBtnHtml}
+                                ${inputRowHtml}
                             </div>
                         </div>
                     `;
                 });
             }
 
-            const submitBtn = document.getElementById('submit-btn');
-            submitBtn.innerText = hasExistingBets ? "Update All Bets" : "Submit All Bets";
+            if (isLocked) {
+                document.getElementById('submit-btn').style.display = 'none';
+                const proposeSect = document.getElementById('new-custom-bet-section');
+                if (proposeSect) proposeSect.style.display = 'none';
+                document.getElementById('race-betting-header').innerText = "Race Results & Payouts";
+            } else {
+                const submitBtn = document.getElementById('submit-btn');
+                submitBtn.innerText = hasExistingBets ? "Update All Bets" : "Submit All Bets";
+            }
 
             updateLiveValues();
 
@@ -1058,6 +1187,8 @@
     }
 
     function updateLiveValues() {
+        if (isLocked) return;
+
         const sprintSelected = document.querySelector('input[name="sprint-driver"]:checked');
         const featureSelected = document.querySelector('input[name="feature-driver"]:checked');
 
