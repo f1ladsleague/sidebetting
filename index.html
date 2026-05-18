@@ -636,11 +636,8 @@
                 window.currentWildcardUrl = "";
 
                 if (!isNaN(roundNum)) {
-                    if (roundNum % 2 !== 0) {
-                        window.currentWildcardUrl = "https://docs.google.com/document/d/12Bj7ceGn1uj3XQit8vOUUdDp23J2zmeULKpa-4EGkI0/edit?usp=sharing";
-                    } else {
-                        window.currentWildcardUrl = "https://docs.google.com/document/d/1W9aMxoiOvGMOXHmDKnWMpE9Kh7fKKpuV8-HWw61111o/edit?usp=drive_link";
-                    }
+                    // Update: Point all wildcard requests to the new standalone page
+                    window.currentWildcardUrl = "https://f1lads.com/wildcards";
                     wildcardLinkContainer.style.display = "block";
                 }
                 
