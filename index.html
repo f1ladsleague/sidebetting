@@ -1187,7 +1187,26 @@
     }
 
     function updateLiveValues() {
-        if (isLocked) return;
+        // If the session is locked, we only want to display the finalized static totals
+        if (isLocked) {
+            // 1. Set the finalized Live Pots
+            document.getElementById('sprint-pot-total').innerText = `$${baseSprintPot.toFixed(2)}`;
+            document.getElementById('feature-pot-total').innerText = `$${baseFeaturePot.toFixed(2)}`;
+
+            // 2. Set the finalized Net W/L balance
+            const netDisplay = document.getElementById('net-win-loss-display');
+            if (baseSideBetNet > 0) {
+                netDisplay.innerText = `+$${baseSideBetNet.toFixed(2)}`;
+                netDisplay.style.color = "#00ff00";
+            } else if (baseSideBetNet < 0) {
+                netDisplay.innerText = `-$${Math.abs(baseSideBetNet).toFixed(2)}`;
+                netDisplay.style.color = "#ff3333";
+            } else {
+                netDisplay.innerText = `$0.00`;
+                netDisplay.style.color = "#888";
+            }
+            return; // Abort here so users can't manipulate the math via disabled inputs
+        }
 
         const sprintSelected = document.querySelector('input[name="sprint-driver"]:checked');
         const featureSelected = document.querySelector('input[name="feature-driver"]:checked');
@@ -1210,6 +1229,7 @@
         const newProposalAmt = parseFloat(document.getElementById('new-custom-amount').value) || 0;
         newCustomBetsTotal += newProposalAmt;
 
+        // Calculate dynamic projection based on active inputs vs existing bets
         const dynamicNet = baseSideBetNet + myExistingSprintBet + myExistingFeatureBet + myExistingCustomBetsTotal - newSprintAmount - newFeatureAmount - newCustomBetsTotal;
 
         const netDisplay = document.getElementById('net-win-loss-display');
