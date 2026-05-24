@@ -266,7 +266,7 @@
     <div class="dashboard-metrics">
         <div class="metric-row" id="metric-starting-cap">
             <div class="metric-title">Starting Cap</div>
-            <div class="metric-value" style="color: #ccc;">$500.00</div>
+            <div class="metric-value" style="color: #ccc;" id="starting-cap-display">$500.00</div>
         </div>
         <div class="metric-row" id="metric-driver-slfs">
             <div class="metric-title">Driver SLFs</div>
@@ -286,7 +286,7 @@
         </div>
         <div class="divider" id="metric-divider"></div>
         <div class="metric-row">
-            <div class="metric-title" style="color: #888;">Net W/L (Includes Custom Bets)</div>
+            <div class="metric-title" style="color: #888;">Net Side Bets (W/L)</div>
             <div class="metric-value" id="net-win-loss-display" style="color: #888;">$0.00</div>
         </div>
     </div>
@@ -552,12 +552,35 @@
         return themeColor;
     }
 
+    // ==============================================================
+    // ROBUST CSV PARSER (Fixes the $1.00 bug by handling commas within quotes)
+    // ==============================================================
     async function fetchCSV(url) {
         const cacheBusterUrl = url + (url.includes('?') ? '&' : '?') + "nocache=" + new Date().getTime();
         const response = await fetch(cacheBusterUrl, { cache: "no-store" });
         const text = await response.text();
         const cleanText = text.replace(/\r/g, ''); 
-        return cleanText.split('\n').map(row => row.split(',').map(item => item.trim())).slice(1);
+        
+        const lines = cleanText.split('\n');
+        const rows = [];
+        
+        lines.forEach(line => {
+            if (!line.trim()) return; // Skip empty rows
+            const arr = [];
+            let quote = false;
+            let cell = '';
+            for (let i = 0; i < line.length; i++) {
+                let cc = line[i], nc = line[i+1];
+                if (cc === '"' && quote && nc === '"') { cell += cc; i++; continue; }
+                if (cc === '"') { quote = !quote; continue; }
+                if (cc === ',' && !quote) { arr.push(cell.trim()); cell = ''; continue; }
+                cell += cc;
+            }
+            arr.push(cell.trim());
+            rows.push(arr);
+        });
+        
+        return rows.slice(1);
     }
 
     function parseDateString(dateStr) {
@@ -636,7 +659,6 @@
                 window.currentWildcardUrl = "";
 
                 if (!isNaN(roundNum)) {
-                    // Update: Point all wildcard requests to the new standalone page
                     window.currentWildcardUrl = "https://f1lads.com/wildcards";
                     wildcardLinkContainer.style.display = "block";
                 }
@@ -689,11 +711,15 @@
                     publicAffiliateSelect.innerHTML += `<option value="${teamName}">${teamName}</option>`;
                     
                     const teamColor = getTeamColor(teamName);
+                    
+                    // Matching array indices directly to your new Constructors tab layout
                     const slfsPaid = parseSheetNumber(c[3]);
                     const netBets = parseSheetNumber(c[4]);
                     const raceFees = parseSheetNumber(c[5]);
                     const budgetCap = parseSheetNumber(c[6]);
-                    const sideBetWinnings = parseSheetNumber(c[7]);
+                    
+                    // Total Side Bet Winnings (Affiliate + Constructor Winnings)
+                    const sideBetWinnings = parseSheetNumber(c[7]) + parseSheetNumber(c[8]);
 
                     const feesColor = raceFees > 0 ? '#00ff00' : '#fff';
                     const netColor = netBets > 0 ? '#00ff00' : (netBets < 0 ? '#ff3333' : '#888');
@@ -710,7 +736,7 @@
                             <div class="metric-row"><span class="metric-title">Side Bet Winnings</span><span class="metric-value">+$${sideBetWinnings.toFixed(2)}</span></div>
                             <div class="metric-row cap-row"><span class="metric-title">Budget Cap</span><span class="metric-value">$${budgetCap.toFixed(2)}</span></div>
                             <div class="divider"></div>
-                            <div class="metric-row"><span class="metric-title" style="color:#888;">Net Side Bets</span><span class="metric-value" style="color:${netColor}">${netText}</span></div>
+                            <div class="metric-row"><span class="metric-title" style="color:#888;">Net Side Bets (W/L)</span><span class="metric-value" style="color:${netColor}">${netText}</span></div>
                         </div>`;
                 }
             });
@@ -755,7 +781,6 @@
                 const badge = count > 0 ? `<div class="notification-badge">${count}</div>` : "";
                 const avatarUrl = driverImages[driverName] || "data:image/gif;base64,R0lGODlhAQABAIAAAAAAAP///yH5BAEAAAAALAAAAAABAAEAAAIBRAA7";
                 
-                // Used for updating later in populateExistingBets
                 sprintDiv.innerHTML += `
                     <label class="driver-option" id="sprint-option-${driverName.replace(/\s+/g, '')}">
                         <div class="avatar-container">
@@ -838,12 +863,14 @@
                 if (logoUrl) { logoImg.src = logoUrl; logoImg.style.display = "block"; } 
                 else { logoImg.style.display = "none"; }
                 
+                const startingCap = parseSheetNumber(team[2]);
                 const slfsPaid = parseSheetNumber(team[3]);
                 baseSideBetNet = parseSheetNumber(team[4]); 
                 const raceFees = parseSheetNumber(team[5]);
                 const budgetCap = parseSheetNumber(team[6]);
-                const sideBetWinnings = parseSheetNumber(team[7]); 
+                const sideBetWinnings = parseSheetNumber(team[7]) + parseSheetNumber(team[8]); 
 
+                document.getElementById('starting-cap-display').innerText = `$${startingCap.toFixed(2)}`;
                 document.getElementById('driver-slfs-display').innerText = `-$${slfsPaid.toFixed(2)}`;
                 document.getElementById('side-bet-winnings-display').innerText = `+$${sideBetWinnings.toFixed(2)}`;
                 document.getElementById('budget-cap-display').innerText = `$${budgetCap.toFixed(2)}`;
@@ -1184,13 +1211,10 @@
     }
 
     function updateLiveValues() {
-        // If the session is locked, we only want to display the finalized static totals
         if (isLocked) {
-            // 1. Set the finalized Live Pots
             document.getElementById('sprint-pot-total').innerText = `$${baseSprintPot.toFixed(2)}`;
             document.getElementById('feature-pot-total').innerText = `$${baseFeaturePot.toFixed(2)}`;
 
-            // 2. Set the finalized Net W/L balance
             const netDisplay = document.getElementById('net-win-loss-display');
             if (baseSideBetNet > 0) {
                 netDisplay.innerText = `+$${baseSideBetNet.toFixed(2)}`;
@@ -1202,7 +1226,7 @@
                 netDisplay.innerText = `$0.00`;
                 netDisplay.style.color = "#888";
             }
-            return; // Abort here so users can't manipulate the math via disabled inputs
+            return; 
         }
 
         const sprintSelected = document.querySelector('input[name="sprint-driver"]:checked');
@@ -1226,7 +1250,6 @@
         const newProposalAmt = parseFloat(document.getElementById('new-custom-amount').value) || 0;
         newCustomBetsTotal += newProposalAmt;
 
-        // Calculate dynamic projection based on active inputs vs existing bets
         const dynamicNet = baseSideBetNet + myExistingSprintBet + myExistingFeatureBet + myExistingCustomBetsTotal - newSprintAmount - newFeatureAmount - newCustomBetsTotal;
 
         const netDisplay = document.getElementById('net-win-loss-display');
