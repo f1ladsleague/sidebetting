@@ -750,29 +750,48 @@
             });
             
             try {
+                // 1. Fetch Official Winners from Google Sheets (Formulas)
                 const allBetsData = await fetchCSV(BETS_CSV_URL);
-                const currentBets = allBetsData.filter(b => b[1] && String(b[1]).trim() === currentRound);
+                const currentSheetBets = allBetsData.filter(b => b[1] && String(b[1]).trim() === currentRound);
                 
+                sprintWinner = "";
+                featureWinner = "";
+                
+                currentSheetBets.forEach(bet => {
+                    const raceType = String(bet[3]).trim().toLowerCase();
+                    const winnerRaw = String(bet[6] || "").trim(); // Column G Formula
+                    if (raceType === 'sprint' && winnerRaw !== "") sprintWinner = winnerRaw;
+                    if (raceType === 'feature' && winnerRaw !== "") featureWinner = winnerRaw;
+                });
+
+                // 2. Fetch Live Bets and Pots directly from Supabase
+                const { data: supaBets, error: supaError } = await supabaseClient
+                    .from('bets_ledger')
+                    .select('*')
+                    .eq('round', currentRound)
+                    .neq('action', 'delete'); // Ignore cancelled bets
+
+                if (supaError) console.error("Supabase Error:", supaError);
+
                 sprintBetCounts = {};
                 featureBetCounts = {};
-                
-                currentBets.forEach(bet => {
-                    const raceType = String(bet[3]).trim().toLowerCase();
-                    const driver = String(bet[4]).trim();
-                    const amount = parseFloat(bet[5] || 0);
-                    const winnerRaw = String(bet[6] || "").trim();
 
-                    if(raceType === 'sprint') {
+                (supaBets || []).forEach(bet => {
+                    const raceType = String(bet.race_type).trim().toLowerCase();
+                    const driver = String(bet.driver_or_statement).trim();
+                    const amount = parseFloat(bet.amount || 0);
+
+                    if (raceType === 'sprint') {
                         baseSprintPot += amount;
                         sprintBetCounts[driver] = (sprintBetCounts[driver] || 0) + 1;
-                        if (winnerRaw !== "") sprintWinner = winnerRaw;
-                    } else if(raceType === 'feature') {
+                    } else if (raceType === 'feature') {
                         baseFeaturePot += amount;
                         featureBetCounts[driver] = (featureBetCounts[driver] || 0) + 1;
-                        if (winnerRaw !== "") featureWinner = winnerRaw;
                     }
                 });
-            } catch(e) {}
+            } catch(e) {
+                console.error("Could not fetch active bets:", e);
+            }
 
             let driversData = await fetchCSV(DRIVERS_CSV_URL);
             driversData = driversData.filter(d => d[0]); 
@@ -945,8 +964,26 @@
 
     async function populateExistingBets() {
         try {
+            // 1. Fetch live bets from Supabase for instant dashboard updates
+            const { data: supaBets, error: supaError } = await supabaseClient
+                .from('bets_ledger')
+                .select('*')
+                .eq('round', currentRound)
+                .neq('action', 'delete');
+            
+            if (supaError) console.error("Supabase Error:", supaError);
+
+            const mySupaBets = (supaBets || []).filter(b => {
+                const matchesName = String(b.constructor).trim() === currentConstructor;
+                const rowUserType = String(b.user_type).trim();
+                const rowEmail = String(b.email || "").trim();
+                if (currentUserType === 'Constructor') return matchesName && rowUserType !== 'Public';
+                else return matchesName && rowUserType === 'Public' && rowEmail === currentEmail;
+            });
+
+            // 2. Fetch the Sheet data purely to extract the formula-calculated Winnings
             const betsData = await fetchCSV(BETS_CSV_URL);
-            const myBets = betsData.filter(b => {
+            const mySheetBets = betsData.filter(b => {
                 const isCurrentRound = b[1] && String(b[1]).trim() === currentRound;
                 const matchesName = b[2] && String(b[2]).trim() === currentConstructor;
                 const rowUserType = String(b[8]).trim();
@@ -954,26 +991,49 @@
                 if (currentUserType === 'Constructor') return isCurrentRound && matchesName && rowUserType !== 'Public';
                 else return isCurrentRound && matchesName && rowUserType === 'Public' && rowEmail === currentEmail;
             });
-            
+
             myExistingSprintBet = 0;
             myExistingFeatureBet = 0;
+            myExistingSprintWinnings = 0;
+            myExistingFeatureWinnings = 0;
 
-            myBets.forEach(bet => {
-                const raceType = String(bet[3]).trim().toLowerCase();
-                const driver = String(bet[4]).trim();   
-                const amt = parseFloat(bet[5] || 0);
-                const winnings = parseFloat(bet[7] || 0);
+            // Helper to match a Supabase bet to its Google Sheet counterpart to grab the Winnings formula
+            const getWinningsForDriver = (raceType, driver) => {
+                const sheetMatch = mySheetBets.find(b => String(b[3]).trim().toLowerCase() === raceType && String(b[4]).trim() === driver);
+                return sheetMatch ? parseFloat(sheetMatch[7] || 0) : 0;
+            };
+
+            mySupaBets.forEach(bet => {
+                const raceType = String(bet.race_type).trim().toLowerCase();
+                const driver = String(bet.driver_or_statement).trim();
+                const amt = parseFloat(bet.amount || 0);
+                const winnings = getWinningsForDriver(raceType, driver);
+
                 if (raceType === 'sprint') {
                     const radio = document.querySelector(`input[name="sprint-driver"][value="${driver}"]`);
-                    if (radio) { radio.checked = true; radio.dataset.wasChecked = "true"; myExistingSprintBet = amt; myExistingSprintBetDriver = driver; myExistingSprintWinnings = winnings; }
+                    if (radio) { 
+                        radio.checked = true; 
+                        radio.dataset.wasChecked = "true"; 
+                        myExistingSprintBet = amt; 
+                        myExistingSprintBetDriver = driver; 
+                        myExistingSprintWinnings = winnings; 
+                    }
                 } else if (raceType === 'feature') {
                     const radio = document.querySelector(`input[name="feature-driver"][value="${driver}"]`);
-                    if (radio) { radio.checked = true; radio.dataset.wasChecked = "true"; myExistingFeatureBet = amt; myExistingFeatureBetDriver = driver; myExistingFeatureWinnings = winnings;}
+                    if (radio) { 
+                        radio.checked = true; 
+                        radio.dataset.wasChecked = "true"; 
+                        myExistingFeatureBet = amt; 
+                        myExistingFeatureBetDriver = driver; 
+                        myExistingFeatureWinnings = winnings; 
+                    }
                 }
             });
-            hasExistingBets = myBets.length > 0;
+
+            hasExistingBets = mySupaBets.length > 0;
 
             if (isLocked) {
+
                 // SPRINT LOCK
                 document.querySelectorAll('input[name="sprint-driver"]').forEach(radio => {
                     const dName = radio.value;
