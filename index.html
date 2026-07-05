@@ -386,7 +386,10 @@
     // =========================================
     const SUPABASE_URL = 'https://gojfdzbssgqmbndtcqvk.supabase.co';
     const SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImdvamZkemJzc2dxbWJuZHRjcXZrIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODMyNTIwMDAsImV4cCI6MjA5ODgyODAwMH0.MXyB72yQCSCD2FAvaAfCHo7Xxx9b7yJVFPHSsF3MSrM';
-    const supabase = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
+    
+    // CHANGED: Renamed to supabaseClient to prevent collision with CDN variable
+    const supabaseClient = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
+    
     const CUSTOM_BETS_CSV_URL = "https://docs.google.com/spreadsheets/d/e/2PACX-1vTZKLukYpw5VzMfRbfXh80lj1B0gbUiVx_CoinOMVb-b2iFEMiWg_nW3KcMp88qKL3UfctvzYgEN_Lg/pub?gid=513445458&single=true&output=csv";
     const GOOGLE_SCRIPT_WEB_APP_URL = "https://script.google.com/macros/s/AKfycbxsODSLMhqBV_fejrImXKMKydjs7dwQ4tgBv9wiyVWAO8BJb3OV0ojK-BSwSaXKiJf9DA/exec";
     const SETTINGS_CSV_URL = "https://docs.google.com/spreadsheets/d/e/2PACX-1vTZKLukYpw5VzMfRbfXh80lj1B0gbUiVx_CoinOMVb-b2iFEMiWg_nW3KcMp88qKL3UfctvzYgEN_Lg/pub?gid=2057582908&single=true&output=csv";
@@ -560,7 +563,7 @@
     }
 
     // ==============================================================
-    // ROBUST CSV PARSER (Fixes the $1.00 bug by handling commas within quotes)
+    // ROBUST CSV PARSER
     // ==============================================================
     async function fetchCSV(url) {
         const cacheBusterUrl = url + (url.includes('?') ? '&' : '?') + "nocache=" + new Date().getTime();
@@ -719,13 +722,11 @@
                     
                     const teamColor = getTeamColor(teamName);
                     
-                    // Matching array indices directly to your new Constructors tab layout
                     const slfsPaid = parseSheetNumber(c[3]);
                     const netBets = parseSheetNumber(c[4]);
                     const raceFees = parseSheetNumber(c[5]);
                     const budgetCap = parseSheetNumber(c[6]);
                     
-                    // Total Side Bet Winnings (Affiliate + Constructor Winnings)
                     const sideBetWinnings = parseSheetNumber(c[7]) + parseSheetNumber(c[8]);
 
                     const feesColor = raceFees > 0 ? '#00ff00' : '#fff';
@@ -781,7 +782,6 @@
             const sprintDiv = document.getElementById('sprint-drivers');
             const featureDiv = document.getElementById('feature-drivers');
 
-            // Render Sprint Drivers
             sprintSorted.forEach(d => {
                 const driverName = String(d[0]).trim();
                 const count = sprintBetCounts[driverName] || 0;
@@ -801,7 +801,6 @@
                     </label>`;
             });
 
-            // Render Feature Drivers
             featureSorted.forEach(d => {
                 const driverName = String(d[0]).trim();
                 const count = featureBetCounts[driverName] || 0;
@@ -974,13 +973,12 @@
             });
             hasExistingBets = myBets.length > 0;
 
-            // Update UI for Locked Sprint & Feature 
             if (isLocked) {
                 // SPRINT LOCK
                 document.querySelectorAll('input[name="sprint-driver"]').forEach(radio => {
                     const dName = radio.value;
-                    const optionLabel = document.getElementById(`sprint-option-${dName.replace(/\s+/g, '')}`);
-                    const statusDiv = document.getElementById(`sprint-lock-status-${dName.replace(/\s+/g, '')}`);
+                    const optionLabel = document.getElementById(`sprint-option-${dName.replace(/\\s+/g, '')}`);
+                    const statusDiv = document.getElementById(`sprint-lock-status-${dName.replace(/\\s+/g, '')}`);
                     radio.disabled = true;
                     optionLabel.style.cursor = "default";
 
@@ -1012,8 +1010,8 @@
                 // FEATURE LOCK
                 document.querySelectorAll('input[name="feature-driver"]').forEach(radio => {
                     const dName = radio.value;
-                    const optionLabel = document.getElementById(`feature-option-${dName.replace(/\s+/g, '')}`);
-                    const statusDiv = document.getElementById(`feature-lock-status-${dName.replace(/\s+/g, '')}`);
+                    const optionLabel = document.getElementById(`feature-option-${dName.replace(/\\s+/g, '')}`);
+                    const statusDiv = document.getElementById(`feature-lock-status-${dName.replace(/\\s+/g, '')}`);
                     radio.disabled = true;
                     optionLabel.style.cursor = "default";
 
@@ -1043,8 +1041,6 @@
                 });
             }
 
-
-            // Populate CUSTOM bets
             customStatementsObj = {};
             myExistingCustomBetsTotal = 0;
             
@@ -1322,8 +1318,8 @@
             action: isDelete ? 'delete' : 'insert'
         };
 
-        // Insert directly into Supabase
-        const { data, error } = await supabase
+        // CHANGED: Use supabaseClient here
+        const { data, error } = await supabaseClient
             .from('bets_ledger')
             .insert([payload]);
 
