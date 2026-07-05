@@ -6,6 +6,7 @@
     <title>F1 Lads League | Side Bets</title>
     <link rel="icon" type="image/png" href="https://raw.githubusercontent.com/f1ladsleague/sidebetting/6f14ca658f9c288fd8ca8a79df5c658c97c8ac92/favicon.png">
     <link href="https://fonts.googleapis.com/css2?family=Titillium+Web:wght@400;600;700&display=swap" rel="stylesheet">
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
     <style>
         :root { --theme-color: #00D7B6; --f1-dark: #15151e; --f1-card: #1f1f27; --f1-hover: #2a2a35; }
         
@@ -380,6 +381,12 @@
 </div>
 
 <script>
+    // =========================================
+    // SUPABASE INITIALIZATION
+    // =========================================
+    const SUPABASE_URL = 'https://gojfdzbssgqmbndtcqvk.supabase.co';
+    const SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImdvamZkemJzc2dxbWJuZHRjcXZrIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODMyNTIwMDAsImV4cCI6MjA5ODgyODAwMH0.MXyB72yQCSCD2FAvaAfCHo7Xxx9b7yJVFPHSsF3MSrM';
+    const supabase = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
     const CUSTOM_BETS_CSV_URL = "https://docs.google.com/spreadsheets/d/e/2PACX-1vTZKLukYpw5VzMfRbfXh80lj1B0gbUiVx_CoinOMVb-b2iFEMiWg_nW3KcMp88qKL3UfctvzYgEN_Lg/pub?gid=513445458&single=true&output=csv";
     const GOOGLE_SCRIPT_WEB_APP_URL = "https://script.google.com/macros/s/AKfycbxsODSLMhqBV_fejrImXKMKydjs7dwQ4tgBv9wiyVWAO8BJb3OV0ojK-BSwSaXKiJf9DA/exec";
     const SETTINGS_CSV_URL = "https://docs.google.com/spreadsheets/d/e/2PACX-1vTZKLukYpw5VzMfRbfXh80lj1B0gbUiVx_CoinOMVb-b2iFEMiWg_nW3KcMp88qKL3UfctvzYgEN_Lg/pub?gid=2057582908&single=true&output=csv";
@@ -1296,33 +1303,41 @@
         }
     };
 
+    // =========================================
+    // NEW SUPABASE DATABASE CONNECTOR
+    // =========================================
     const sendBet = async (type, driverOrStatement, amount, stance, isDelete = false, signal) => {
-        const formData = new URLSearchParams();
-        formData.append('round', currentRound);
-        formData.append('constructor', currentConstructor);
-        formData.append('raceType', type);
-        formData.append('userType', currentUserType);
-        formData.append('email', currentEmail); 
-        formData.append('ipAddress', userIP);
+        // Construct the payload matching our Supabase table
+        const payload = {
+            round: currentRound,
+            constructor: currentConstructor,
+            race_type: type,
+            user_type: currentUserType,
+            email: currentEmail || null,
+            ip_address: userIP,
+            affiliated_team: currentAffiliatedTeam || null,
+            driver_or_statement: driverOrStatement || null,
+            amount: amount || 0,
+            stance: stance || null,
+            action: isDelete ? 'delete' : 'insert'
+        };
 
-        if (currentUserType === 'Public' && currentAffiliatedTeam) {
-            formData.append('affiliatedTeam', currentAffiliatedTeam);
+        // Insert directly into Supabase
+        const { data, error } = await supabase
+            .from('bets_ledger')
+            .insert([payload]);
+
+        if (error) {
+            console.error("Supabase Error:", error);
+            throw new Error("Failed to save bet to database.");
         }
-
-        if (driverOrStatement) {
-            formData.append('driver', driverOrStatement);
-        }
-
-        if (isDelete) {
-            formData.append('action', 'delete');
-        } else {
-            formData.append('amount', amount);
-            if (type === 'Custom') formData.append('stance', stance);
-        }
-
-        return fetch(GOOGLE_SCRIPT_WEB_APP_URL, { method: 'POST', body: formData, signal: signal });
+        
+        return data;
     };
 
+    // =========================================
+    // UPDATED FORM SUBMISSION LOGIC
+    // =========================================
     document.getElementById('bet-form').addEventListener('submit', async function(e) {
         e.preventDefault();
         const submitBtn = document.getElementById('submit-btn');
@@ -1357,22 +1372,27 @@
         try {
             const promises = [];
             
+            // Push Sprint Bets
             if (sprintSelected) promises.push(sendBet('Sprint', sprintSelected.value, sprintSelected.getAttribute('data-amount'), null, false, controller.signal));
             else if (myExistingSprintBet > 0) promises.push(sendBet('Sprint', null, 0, null, true, controller.signal));
 
+            // Push Feature Bets
             if (featureSelected) promises.push(sendBet('Feature', featureSelected.value, featureSelected.getAttribute('data-amount'), null, false, controller.signal));
             else if (myExistingFeatureBet > 0) promises.push(sendBet('Feature', null, 0, null, true, controller.signal));
 
+            // Push Updates/Cancellations to Active Custom Bets
             customBetsToProcess.forEach(bet => {
                 const oldData = customStatementsObj[bet.statement];
                 if (bet.amount > 0) promises.push(sendBet('Custom', bet.statement, bet.amount, bet.stance, false, controller.signal));
                 else if (oldData && oldData.myBetAmount > 0) promises.push(sendBet('Custom', bet.statement, 0, null, true, controller.signal));
             });
 
+            // Push New Custom Bet Proposals
             if (newStatement && newAmt > 0) {
                 promises.push(sendBet('Custom', newStatement, newAmt, newStance, false, controller.signal));
             }
 
+            // Await all Supabase insertions simultaneously 
             await Promise.all(promises);
             clearTimeout(timeoutId);
             
