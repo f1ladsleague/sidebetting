@@ -764,29 +764,55 @@
                     if (raceType === 'feature' && winnerRaw !== "") featureWinner = winnerRaw;
                 });
 
-                // 2. Fetch Live Bets and Pots directly from Supabase
-                const { data: supaBets, error: supaError } = await supabaseClient
+               // 2. Fetch Live Bets and Pots directly from Supabase (Deduplicated)
+                const { data: supaBetsRaw, error: supaError } = await supabaseClient
                     .from('bets_ledger')
                     .select('*')
                     .eq('round', currentRound)
-                    .neq('action', 'delete'); // Ignore cancelled bets
+                    .order('created_at', { ascending: true }); // Must process oldest to newest
 
                 if (supaError) console.error("Supabase Error:", supaError);
 
+                // DEDUPLICATE LEDGER: Keep only the latest entry per user/race combination
+                const latestBetsMap = new Map();
+                (supaBetsRaw || []).forEach(bet => {
+                    const rType = String(bet.race_type).trim();
+                    const uType = String(bet.user_type).trim();
+                    const cName = String(bet.constructor).trim();
+                    const email = String(bet.email || "").trim();
+                    
+                    let uniqueKey = `${rType}_${uType}_${cName}_${email}`;
+                    if (rType === 'Custom') {
+                        uniqueKey += `_${String(bet.driver_or_statement).trim()}`;
+                    }
+
+                    if (bet.action === 'delete') {
+                        latestBetsMap.delete(uniqueKey);
+                    } else {
+                        latestBetsMap.set(uniqueKey, bet);
+                    }
+                });
+
+                const supaBets = Array.from(latestBetsMap.values());
+
                 sprintBetCounts = {};
                 featureBetCounts = {};
+                baseSprintPot = 0; 
+                baseFeaturePot = 0;
 
-                (supaBets || []).forEach(bet => {
+                supaBets.forEach(bet => {
                     const raceType = String(bet.race_type).trim().toLowerCase();
                     const driver = String(bet.driver_or_statement).trim();
                     const amount = parseFloat(bet.amount || 0);
 
-                    if (raceType === 'sprint') {
-                        baseSprintPot += amount;
-                        sprintBetCounts[driver] = (sprintBetCounts[driver] || 0) + 1;
-                    } else if (raceType === 'feature') {
-                        baseFeaturePot += amount;
-                        featureBetCounts[driver] = (featureBetCounts[driver] || 0) + 1;
+                    if (amount > 0) {
+                        if (raceType === 'sprint') {
+                            baseSprintPot += amount;
+                            sprintBetCounts[driver] = (sprintBetCounts[driver] || 0) + 1;
+                        } else if (raceType === 'feature') {
+                            baseFeaturePot += amount;
+                            featureBetCounts[driver] = (featureBetCounts[driver] || 0) + 1;
+                        }
                     }
                 });
             } catch(e) {
@@ -1127,37 +1153,59 @@
             myExistingCustomBetsTotal = 0;
             
             if (CUSTOM_BETS_CSV_URL) {
+                // Fetch the CSV ONLY to grab the Official Results and Winnings formulas
                 const customBetsData = await fetchCSV(CUSTOM_BETS_CSV_URL);
-                const currentCustomBets = customBetsData.filter(b => b[1] && String(b[1]).trim() === currentRound);
-                
-                currentCustomBets.forEach(bet => {
-                    const bUser = String(bet[2]).trim();
-                    const bUserType = String(bet[3]).trim();
-                    const bEmail = String(bet[4]).trim();
-                    const bStatement = String(bet[5]).trim();
-                    const bStance = String(bet[6]).trim().toUpperCase();
-                    const bAmount = parseFloat(bet[7] || 0);
-                    const bResult = String(bet[8]).trim().toUpperCase();
-                    const bWinnings = parseFloat(bet[9] || 0);
+                const currentCustomSheetBets = customBetsData.filter(b => b[1] && String(b[1]).trim() === currentRound);
+
+                // Helper: Reverses the array to find the most recently calculated result/winnings from the Sheet
+                const getCustomResult = (stmt) => {
+                    const match = [...currentCustomSheetBets].reverse().find(b => String(b[5]).trim() === stmt && String(b[8]).trim() !== "");
+                    return match ? String(match[8]).trim().toUpperCase() : "";
+                };
+
+                const getCustomWinnings = (stmt) => {
+                    const match = [...currentCustomSheetBets].reverse().find(b => {
+                        const bUser = String(b[2]).trim();
+                        const bUserType = String(b[3]).trim();
+                        const bEmail = String(b[4]).trim();
+                        const isMyRow = (currentUserType === 'Constructor' && bUserType !== 'Public' && bUser === currentConstructor) || 
+                                        (currentUserType === 'Public' && bUserType === 'Public' && bUser === currentConstructor && bEmail === currentEmail);
+                        return isMyRow && String(b[5]).trim() === stmt;
+                    });
+                    return match ? parseFloat(match[9] || 0) : 0;
+                };
+
+                // Build the live Custom Bets UI using the Instant, Deduplicated Supabase Data
+                supaBets.forEach(bet => {
+                    if (String(bet.race_type).trim() !== 'Custom') return;
+
+                    const bUser = String(bet.constructor).trim();
+                    const bUserType = String(bet.user_type).trim();
+                    const bEmail = String(bet.email || "").trim();
+                    const bStatement = String(bet.driver_or_statement).trim();
+                    const bStance = String(bet.stance).trim().toUpperCase();
+                    const bAmount = parseFloat(bet.amount || 0);
+
+                    if (bAmount <= 0) return; // Skip zeroed or cancelled bets
 
                     if (!customStatementsObj[bStatement]) {
                         customStatementsObj[bStatement] = { 
                             truePot: 0, falsePot: 0, myBetAmount: 0, myBetStance: "TRUE", myWinnings: 0,
                             proposer: bUser, proposerType: bUserType,
-                            trueBettors: [], falseBettors: [], officialResult: ""
+                            trueBettors: [], falseBettors: [], 
+                            officialResult: getCustomResult(bStatement)
                         };
                     }
+
                     if (bStance === 'TRUE') {
                         customStatementsObj[bStatement].truePot += bAmount;
                         customStatementsObj[bStatement].trueBettors.push({name: bUser, type: bUserType});
-                    }
-                    if (bStance === 'FALSE') {
+                    } else if (bStance === 'FALSE') {
                         customStatementsObj[bStatement].falsePot += bAmount;
                         customStatementsObj[bStatement].falseBettors.push({name: bUser, type: bUserType});
                     }
 
-                    if (bResult && bResult !== "") customStatementsObj[bStatement].officialResult = bResult;
-
+                    // Assign to current user if it matches
                     let isMyBet = false;
                     if (currentUserType === 'Constructor' && bUserType !== 'Public' && bUser === currentConstructor) isMyBet = true;
                     if (currentUserType === 'Public' && bUserType === 'Public' && bUser === currentConstructor && bEmail === currentEmail) isMyBet = true;
@@ -1165,7 +1213,7 @@
                     if (isMyBet) {
                         customStatementsObj[bStatement].myBetAmount = bAmount;
                         customStatementsObj[bStatement].myBetStance = bStance;
-                        customStatementsObj[bStatement].myWinnings = bWinnings;
+                        customStatementsObj[bStatement].myWinnings = getCustomWinnings(bStatement);
                         myExistingCustomBetsTotal += bAmount;
                         hasExistingBets = true;
                     }
