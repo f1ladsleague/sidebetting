@@ -965,15 +965,37 @@
     async function populateExistingBets() {
         try {
             // 1. Fetch live bets from Supabase for instant dashboard updates
-            const { data: supaBets, error: supaError } = await supabaseClient
+            const { data: supaBetsRaw, error: supaError } = await supabaseClient
                 .from('bets_ledger')
                 .select('*')
                 .eq('round', currentRound)
-                .neq('action', 'delete');
+                .order('created_at', { ascending: true }); // Oldest to newest
             
             if (supaError) console.error("Supabase Error:", supaError);
 
-            const mySupaBets = (supaBets || []).filter(b => {
+            // DEDUPLICATE LEDGER: Keep only the latest entry per user/race combination
+            const latestBetsMap = new Map();
+            (supaBetsRaw || []).forEach(bet => {
+                const rType = String(bet.race_type).trim();
+                const uType = String(bet.user_type).trim();
+                const cName = String(bet.constructor).trim();
+                const email = String(bet.email || "").trim();
+                
+                let uniqueKey = `${rType}_${uType}_${cName}_${email}`;
+                if (rType === 'Custom') {
+                    uniqueKey += `_${String(bet.driver_or_statement).trim()}`;
+                }
+
+                if (bet.action === 'delete') {
+                    latestBetsMap.delete(uniqueKey);
+                } else {
+                    latestBetsMap.set(uniqueKey, bet);
+                }
+            });
+
+            const supaBets = Array.from(latestBetsMap.values());
+
+            const mySupaBets = supaBets.filter(b => {
                 const matchesName = String(b.constructor).trim() === currentConstructor;
                 const rowUserType = String(b.user_type).trim();
                 const rowEmail = String(b.email || "").trim();
